@@ -21,6 +21,9 @@ _getVector4 m_getVector4FromDll;
 typedef void *(*_createModel)(); // Declare a method to store the DLL method createRegressionModel.
 _createModel m_createRegressionModelFromDLL;
 
+typedef void *(*_createModel)(); // Declare a method to store the DLL method createRegressionModel.
+_createModel m_createClassificationModelFromDLL;
+
 typedef const char* (*_getJSON)(void*); // Declare a method to store the DLL method createRegressionModel.
 _getJSON m_getJSONFromDLL;
 
@@ -47,6 +50,14 @@ bool UInteractML::importDLL(FString folder, FString name)
             FString procName = "createRegressionModel";    // Needs to be the exact name of the DLL method.
             m_createRegressionModelFromDLL = (_createModel)FPlatformProcess::GetDllExport(v_dllHandle, *procName);
             if (m_createRegressionModelFromDLL == NULL)
+            {
+                return false;
+            }
+            
+            m_createClassificationModelFromDLL = NULL;
+            procName = "createClassificationModel";    // Needs to be the exact name of the DLL method.
+            m_createClassificationModelFromDLL = (_createModel)FPlatformProcess::GetDllExport(v_dllHandle, *procName);
+            if (m_createClassificationModelFromDLL == NULL)
             {
                 return false;
             }
@@ -89,6 +100,17 @@ int64 UInteractML::createRegressionModel()
 }
 
 // Calls the method m_getVector4FromDll that was imported from the DLL.
+int64 UInteractML::createClassificationModel()
+{
+    if (m_createClassificationModelFromDLL != NULL)
+    {
+        void * v_classPtr = m_createClassificationModelFromDLL();
+        return (int64)v_classPtr;
+    }
+    return 0;
+}
+
+// Calls the method m_getVector4FromDll that was imported from the DLL.
 FString UInteractML::getJSON(int64 m)
 {
     if (m_getJSONFromDLL != NULL)
@@ -122,6 +144,7 @@ void UInteractML::freeDLL()
     if (v_dllHandle != NULL)
     {
         m_createRegressionModelFromDLL = NULL;
+        m_createClassificationModelFromDLL = NULL;
 
         FPlatformProcess::FreeDllHandle(v_dllHandle);
         v_dllHandle = NULL;

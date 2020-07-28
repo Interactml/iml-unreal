@@ -28,6 +28,9 @@ class INTERACTMLUE_API UMachineLearningModel : public UActorComponent
 
 	typedef void* (*_createModel)(); // Declare a method to store the DLL method createRegressionModel.
 	_createModel m_createRegressionModelFromDLL;
+	
+	typedef void* (*_createModel)(); // Declare a method to store the DLL method createRegressionModel.
+	_createModel m_createClassificationModelFromDLL;
 
 	typedef const char* (*_getJSON)(void*); // Declare a method to store the DLL method createRegressionModel.
 	_getJSON m_getJSONFromDLL;
@@ -43,6 +46,9 @@ class INTERACTMLUE_API UMachineLearningModel : public UActorComponent
 
 	typedef void (*_addTrainingExample)(void*, double *inputs, int numInputs, double * outputs, int numOutputs);
 	_addTrainingExample m_addTrainingExampleFromDLL;
+
+	typedef bool (*_trainRegression) (void*, void*);
+	_trainRegression m_trainRegressionFromDLL;
 
 	typedef bool (*_trainClassification) (void*, void*);
 	_trainClassification m_trainClassificationFromDLL;
@@ -87,6 +93,9 @@ public:
 	bool addTrainingData(TArray<float> input, TArray<float> output);
 	
 
+	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
+	bool trainRegressor();
+	
 	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
 	bool trainClassifier();
 

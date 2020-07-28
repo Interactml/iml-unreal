@@ -40,6 +40,15 @@ bool UMachineLearningModel::importDLL(FString folder, FString name)
                 return false;
             }
 
+            m_createClassificationModelFromDLL = NULL;
+            procName = "createClassificationModel";    // Needs to be the exact name of the DLL method.
+            m_createClassificationModelFromDLL = (_createModel)FPlatformProcess::GetDllExport(v_dllHandle, *procName);
+            if (m_createClassificationModelFromDLL == NULL)
+            {
+                //GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "failed to load function");
+                return false;
+            }
+
             m_getJSONFromDLL = NULL;
             procName = "getJSON";    // Needs to be the exact name of the DLL method.
             m_getJSONFromDLL = (_getJSON)FPlatformProcess::GetDllExport(v_dllHandle, *procName);
@@ -87,6 +96,15 @@ bool UMachineLearningModel::importDLL(FString folder, FString name)
                 return false;
             }
 
+            m_trainRegressionFromDLL = NULL;
+            procName = "trainRegression";    // Needs to be the exact name of the DLL method.
+            m_trainRegressionFromDLL = (_trainRegression)FPlatformProcess::GetDllExport(v_dllHandle, *procName);
+            if (m_trainRegressionFromDLL == NULL)
+            {
+                //GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "failed to load function");
+                return false;
+            }
+            
             m_trainClassificationFromDLL = NULL;
             procName = "trainClassification";    // Needs to be the exact name of the DLL method.
             m_trainClassificationFromDLL = (_trainClassification)FPlatformProcess::GetDllExport(v_dllHandle, *procName);
@@ -142,6 +160,7 @@ void UMachineLearningModel::freeDLL()
     if (v_dllHandle != NULL)
     {
         m_createRegressionModelFromDLL = NULL;
+        m_createClassificationModelFromDLL = NULL;
 
         FPlatformProcess::FreeDllHandle(v_dllHandle);
         v_dllHandle = NULL;
@@ -184,7 +203,7 @@ bool  UMachineLearningModel::IsModelInitialised()
     return (m_modelPtr != NULL);
 }
 
-bool UMachineLearningModel::trainClassifier() {
+bool UMachineLearningModel::trainRegressor() {
 
     if(m_modelPtr == NULL)
     {
@@ -220,10 +239,53 @@ bool UMachineLearningModel::trainClassifier() {
         m_addTrainingExampleFromDLL(trainingSet, in, d.inputs.Num(), out, d.outputs.Num());
     }
 
-    bool result = m_trainClassificationFromDLL(m_modelPtr, trainingSet);
+    bool result = m_trainRegressionFromDLL(m_modelPtr, trainingSet);
 
     m_destroyTrainingSetFromDLL(trainingSet);
     
+    return result;
+}
+
+bool UMachineLearningModel::trainClassifier() {
+
+    if (m_modelPtr == NULL)
+    {
+        if (m_createClassificationModelFromDLL != NULL)
+        {
+            m_modelPtr = m_createClassificationModelFromDLL();
+            if (m_modelPtr == NULL) {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+    }
+
+    void* trainingSet = m_createTrainingSetFromDLL();
+
+    for (int32 i = 0; i < m_dataset.Num(); i++) {
+        FDataInstance d = m_dataset[i];
+
+        // copy data into plain c arrays
+        int j;
+        double* in = new double[d.inputs.Num()];
+        for (j = 0; j < d.inputs.Num(); j++) {
+            in[j] = d.inputs[j];
+        }
+        double* out = new double[d.outputs.Num()];
+        for (j = 0; j < d.outputs.Num(); j++) {
+            out[j] = d.outputs[j];
+        }
+
+        // use these to add to the training data
+        m_addTrainingExampleFromDLL(trainingSet, in, d.inputs.Num(), out, d.outputs.Num());
+    }
+
+    bool result = m_trainClassificationFromDLL(m_modelPtr, trainingSet);
+
+    m_destroyTrainingSetFromDLL(trainingSet);
+
     return result;
 }
 

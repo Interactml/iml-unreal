@@ -21,6 +21,9 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "My DLL Library")
         static int64 createRegressionModel();
+    
+    UFUNCTION(BlueprintCallable, Category = "My DLL Library")
+        static int64 createClassificationModel();
 
     UFUNCTION(BlueprintCallable, Category = "My DLL Library")
         static FString getJSON(int64 m);
