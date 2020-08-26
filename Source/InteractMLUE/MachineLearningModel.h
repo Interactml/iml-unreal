@@ -3,8 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "JsonObjectConverter.h"
 #include "Components/ActorComponent.h"
+#include "DataSerialization.h"
 #include "MachineLearningModel.generated.h"
+
 
 USTRUCT(BlueprintType)
 struct INTERACTMLUE_API FDataInstance
@@ -68,14 +71,20 @@ public:
 	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Machine Learning")
 	void *m_modelPtr = NULL;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Machine Learning")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Machine Learning")
 	TArray<FDataInstance> m_dataset;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Machine Learning")
 	FString m_dllFolder = "RapidLib";
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Machine Learning")
-		FString m_dllName = "RapidLibPlugin.dll";
+	FString m_dllName = "RapidLibPlugin.dll";
+
+	UPROPERTY(VisibleAnywhere, Category = "Machine Learning")
+	FString m_TrainingExamplesFolder = "Data";
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Machine Learning")
+	FString filepath = *FPaths::ProjectContentDir() + m_TrainingExamplesFolder + "/";
 
 
 
@@ -104,7 +113,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
 	TArray<float> Run(TArray<float> input);
-
+	
+	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
+	bool SetUpInputsOutputs(FDataInstance example);
 
 	// Sets default values for this component's properties
 	UMachineLearningModel();

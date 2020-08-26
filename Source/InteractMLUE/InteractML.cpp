@@ -30,6 +30,8 @@ _getJSON m_getJSONFromDLL;
 typedef void (*_destroyModel)(void *); // Declare a method to store the DLL method createRegressionModel.
 _destroyModel m_destroyModelFromDLL;
 
+int64 modelAddress; 
+
 
 void* v_dllHandle;
 

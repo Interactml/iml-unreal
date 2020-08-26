@@ -198,6 +198,16 @@ bool UMachineLearningModel::addTrainingData(TArray<float> input, TArray<float> o
     return true;
 }
 
+bool UMachineLearningModel::SetUpInputsOutputs(FDataInstance example) {
+    bool setInputsOutputs = false;
+    m_numInputs = example.inputs.Num();
+    m_numOutputs = example.outputs.Num();
+    if (m_numInputs > 0 && m_numOutputs > 0) {
+        setInputsOutputs = true;
+    }
+    return setInputsOutputs;
+}
+
 bool  UMachineLearningModel::IsModelInitialised()
 {
     return (m_modelPtr != NULL);
@@ -313,6 +323,7 @@ TArray<float> UMachineLearningModel::Run(TArray<float> input)
     return result;
 }
 
+
 #pragma endregion Machine Learning
 
 
@@ -325,7 +336,6 @@ void UMachineLearningModel::BeginPlay()
 //#if UE_BUILD_DEBUG
     GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "beginning play");
 //#endif
-
     if (!importDLL(m_dllFolder, m_dllName))
     {
         freeDLL(); // if the import has failed, clean up
