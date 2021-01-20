@@ -41,7 +41,7 @@ void* v_dllHandle;
 // Method to import a DLL.
 bool UInteractML::importDLL(FString folder, FString name)
 {
-    FString filePath = *FPaths::GamePluginsDir() + folder + "/" + name;
+    FString filePath = *FPaths::GameDevelopersDir() + folder + "/" + name;
 
     if (FPaths::FileExists(filePath))
     {

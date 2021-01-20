@@ -21,8 +21,9 @@ UMachineLearningModel::UMachineLearningModel()
 // Method to import a DLL.
 bool UMachineLearningModel::importDLL(FString folder, FString name)
 {
-    FString filePath = *FPaths::GamePluginsDir() + folder + "/" + name;
-
+    //FString filePath = *FPaths::GamePluginsDir() + folder + "/" + name;
+    FString filePath = *FPaths::GameDevelopersDir() + folder + "/" + name;
+    
     GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "loading dll");
 
 
