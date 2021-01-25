@@ -1,6 +1,5 @@
 Binaries
 DerivedDataCache
-Intermediate
 Saved
 .vscode
 .vs
@@ -12,3 +11,6 @@ Saved
 *.suo
 *.xcodeproj
 *.xcworkspace
+
+# Compiled source files for the engine to use
+Intermediate/*
