@@ -23,6 +23,10 @@
 			"Name": "KantanAutoJson",
 			"Enabled": true,
 			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/66071cf119624ffba186046d817a4075"
+		},
+		{
+			"Name": "BlueprintFileUtils",
+			"Enabled": true
 		}
 	]
 }

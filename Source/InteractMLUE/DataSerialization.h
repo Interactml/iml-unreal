@@ -16,4 +16,5 @@ public:
 	static void ParseIMLFeatureToJSON();
 	static void SaveModelToDisk(FString filename, int64 modelAddress);
 	static FString ReadFile(FString Directory, FString FileName);
+	static void DeleteFile(FString Directory, FString FileName);
 };

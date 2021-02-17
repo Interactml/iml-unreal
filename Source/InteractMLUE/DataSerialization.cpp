@@ -37,6 +37,16 @@ FString DataSerialization::ReadFile(FString Directory, FString FileName)
 
     return JsonString;
 }
+
+void DataSerialization::DeleteFile(FString Directory, FString FileName)
+{
+    const FString JsonFilePath = *FPaths::ProjectContentDir() + Directory + "/" + FileName;
+
+    if (!FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*JsonFilePath))
+    {
+        return;
+    }
+}
 void SaveModelToDisk(FString fileName, int64 modelAddress) {
     
     //FString m_ModelJSONString = RapidlibLinkerDLL.GetJSON(m_ModelAddress);
