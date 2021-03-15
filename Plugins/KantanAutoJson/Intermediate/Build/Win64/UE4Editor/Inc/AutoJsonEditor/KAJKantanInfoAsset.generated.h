@@ -1,0 +1,243 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+/*===========================================================================
+	Generated code exported from UnrealHeaderTool.
+	DO NOT modify this manually! Edit the corresponding .h files instead!
+===========================================================================*/
+
+#include "UObject/ObjectMacros.h"
+#include "UObject/ScriptMacros.h"
+
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
+#ifdef AUTOJSONEDITOR_KAJKantanInfoAsset_generated_h
+#error "KAJKantanInfoAsset.generated.h already included, missing '#pragma once' in KAJKantanInfoAsset.h"
+#endif
+#define AUTOJSONEDITOR_KAJKantanInfoAsset_generated_h
+
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_14_SPARSE_DATA
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_14_RPC_WRAPPERS
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_14_RPC_WRAPPERS_NO_PURE_DECLS
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_14_INCLASS_NO_PURE_DECLS \
+private: \
+	static void StaticRegisterNativesUKAJKantanInfoAssetBase(); \
+	friend struct Z_Construct_UClass_UKAJKantanInfoAssetBase_Statics; \
+public: \
+	DECLARE_CLASS(UKAJKantanInfoAssetBase, UObject, COMPILED_IN_FLAGS(CLASS_Abstract), CASTCLASS_None, TEXT("/Script/AutoJsonEditor"), NO_API) \
+	DECLARE_SERIALIZER(UKAJKantanInfoAssetBase)
+
+
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_14_INCLASS \
+private: \
+	static void StaticRegisterNativesUKAJKantanInfoAssetBase(); \
+	friend struct Z_Construct_UClass_UKAJKantanInfoAssetBase_Statics; \
+public: \
+	DECLARE_CLASS(UKAJKantanInfoAssetBase, UObject, COMPILED_IN_FLAGS(CLASS_Abstract), CASTCLASS_None, TEXT("/Script/AutoJsonEditor"), NO_API) \
+	DECLARE_SERIALIZER(UKAJKantanInfoAssetBase)
+
+
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_14_STANDARD_CONSTRUCTORS \
+	/** Standard constructor, called after all reflected properties have been initialized */ \
+	NO_API UKAJKantanInfoAssetBase(const FObjectInitializer& ObjectInitializer); \
+	DEFINE_DEFAULT_OBJECT_INITIALIZER_CONSTRUCTOR_CALL(UKAJKantanInfoAssetBase) \
+	DECLARE_VTABLE_PTR_HELPER_CTOR(NO_API, UKAJKantanInfoAssetBase); \
+DEFINE_VTABLE_PTR_HELPER_CTOR_CALLER(UKAJKantanInfoAssetBase); \
+private: \
+	/** Private move- and copy-constructors, should never be used */ \
+	NO_API UKAJKantanInfoAssetBase(UKAJKantanInfoAssetBase&&); \
+	NO_API UKAJKantanInfoAssetBase(const UKAJKantanInfoAssetBase&); \
+public:
+
+
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_14_ENHANCED_CONSTRUCTORS \
+private: \
+	/** Private move- and copy-constructors, should never be used */ \
+	NO_API UKAJKantanInfoAssetBase(UKAJKantanInfoAssetBase&&); \
+	NO_API UKAJKantanInfoAssetBase(const UKAJKantanInfoAssetBase&); \
+public: \
+	DECLARE_VTABLE_PTR_HELPER_CTOR(NO_API, UKAJKantanInfoAssetBase); \
+DEFINE_VTABLE_PTR_HELPER_CTOR_CALLER(UKAJKantanInfoAssetBase); \
+	DEFINE_DEFAULT_CONSTRUCTOR_CALL(UKAJKantanInfoAssetBase)
+
+
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_14_PRIVATE_PROPERTY_OFFSET
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_11_PROLOG
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_14_GENERATED_BODY_LEGACY \
+PRAGMA_DISABLE_DEPRECATION_WARNINGS \
+public: \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_14_PRIVATE_PROPERTY_OFFSET \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_14_SPARSE_DATA \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_14_RPC_WRAPPERS \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_14_INCLASS \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_14_STANDARD_CONSTRUCTORS \
+public: \
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
+
+
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_14_GENERATED_BODY \
+PRAGMA_DISABLE_DEPRECATION_WARNINGS \
+public: \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_14_PRIVATE_PROPERTY_OFFSET \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_14_SPARSE_DATA \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_14_RPC_WRAPPERS_NO_PURE_DECLS \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_14_INCLASS_NO_PURE_DECLS \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_14_ENHANCED_CONSTRUCTORS \
+private: \
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
+
+
+template<> AUTOJSONEDITOR_API UClass* StaticClass<class UKAJKantanInfoAssetBase>();
+
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_32_SPARSE_DATA
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_32_RPC_WRAPPERS
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_32_RPC_WRAPPERS_NO_PURE_DECLS
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_32_INCLASS_NO_PURE_DECLS \
+private: \
+	static void StaticRegisterNativesUKAJKantanInfoAsset(); \
+	friend struct Z_Construct_UClass_UKAJKantanInfoAsset_Statics; \
+public: \
+	DECLARE_CLASS(UKAJKantanInfoAsset, UKAJKantanInfoAssetBase, COMPILED_IN_FLAGS(0), CASTCLASS_None, TEXT("/Script/AutoJsonEditor"), NO_API) \
+	DECLARE_SERIALIZER(UKAJKantanInfoAsset)
+
+
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_32_INCLASS \
+private: \
+	static void StaticRegisterNativesUKAJKantanInfoAsset(); \
+	friend struct Z_Construct_UClass_UKAJKantanInfoAsset_Statics; \
+public: \
+	DECLARE_CLASS(UKAJKantanInfoAsset, UKAJKantanInfoAssetBase, COMPILED_IN_FLAGS(0), CASTCLASS_None, TEXT("/Script/AutoJsonEditor"), NO_API) \
+	DECLARE_SERIALIZER(UKAJKantanInfoAsset)
+
+
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_32_STANDARD_CONSTRUCTORS \
+	/** Standard constructor, called after all reflected properties have been initialized */ \
+	NO_API UKAJKantanInfoAsset(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get()); \
+	DEFINE_DEFAULT_OBJECT_INITIALIZER_CONSTRUCTOR_CALL(UKAJKantanInfoAsset) \
+	DECLARE_VTABLE_PTR_HELPER_CTOR(NO_API, UKAJKantanInfoAsset); \
+DEFINE_VTABLE_PTR_HELPER_CTOR_CALLER(UKAJKantanInfoAsset); \
+private: \
+	/** Private move- and copy-constructors, should never be used */ \
+	NO_API UKAJKantanInfoAsset(UKAJKantanInfoAsset&&); \
+	NO_API UKAJKantanInfoAsset(const UKAJKantanInfoAsset&); \
+public:
+
+
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_32_ENHANCED_CONSTRUCTORS \
+	/** Standard constructor, called after all reflected properties have been initialized */ \
+	NO_API UKAJKantanInfoAsset() { }; \
+private: \
+	/** Private move- and copy-constructors, should never be used */ \
+	NO_API UKAJKantanInfoAsset(UKAJKantanInfoAsset&&); \
+	NO_API UKAJKantanInfoAsset(const UKAJKantanInfoAsset&); \
+public: \
+	DECLARE_VTABLE_PTR_HELPER_CTOR(NO_API, UKAJKantanInfoAsset); \
+DEFINE_VTABLE_PTR_HELPER_CTOR_CALLER(UKAJKantanInfoAsset); \
+	DEFINE_DEFAULT_CONSTRUCTOR_CALL(UKAJKantanInfoAsset)
+
+
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_32_PRIVATE_PROPERTY_OFFSET
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_29_PROLOG
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_32_GENERATED_BODY_LEGACY \
+PRAGMA_DISABLE_DEPRECATION_WARNINGS \
+public: \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_32_PRIVATE_PROPERTY_OFFSET \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_32_SPARSE_DATA \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_32_RPC_WRAPPERS \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_32_INCLASS \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_32_STANDARD_CONSTRUCTORS \
+public: \
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
+
+
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_32_GENERATED_BODY \
+PRAGMA_DISABLE_DEPRECATION_WARNINGS \
+public: \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_32_PRIVATE_PROPERTY_OFFSET \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_32_SPARSE_DATA \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_32_RPC_WRAPPERS_NO_PURE_DECLS \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_32_INCLASS_NO_PURE_DECLS \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_32_ENHANCED_CONSTRUCTORS \
+private: \
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
+
+
+template<> AUTOJSONEDITOR_API UClass* StaticClass<class UKAJKantanInfoAsset>();
+
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_38_SPARSE_DATA
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_38_RPC_WRAPPERS
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_38_RPC_WRAPPERS_NO_PURE_DECLS
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_38_INCLASS_NO_PURE_DECLS \
+private: \
+	static void StaticRegisterNativesUKAJKantanDocsAsset(); \
+	friend struct Z_Construct_UClass_UKAJKantanDocsAsset_Statics; \
+public: \
+	DECLARE_CLASS(UKAJKantanDocsAsset, UKAJKantanInfoAssetBase, COMPILED_IN_FLAGS(0), CASTCLASS_None, TEXT("/Script/AutoJsonEditor"), NO_API) \
+	DECLARE_SERIALIZER(UKAJKantanDocsAsset)
+
+
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_38_INCLASS \
+private: \
+	static void StaticRegisterNativesUKAJKantanDocsAsset(); \
+	friend struct Z_Construct_UClass_UKAJKantanDocsAsset_Statics; \
+public: \
+	DECLARE_CLASS(UKAJKantanDocsAsset, UKAJKantanInfoAssetBase, COMPILED_IN_FLAGS(0), CASTCLASS_None, TEXT("/Script/AutoJsonEditor"), NO_API) \
+	DECLARE_SERIALIZER(UKAJKantanDocsAsset)
+
+
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_38_STANDARD_CONSTRUCTORS \
+	/** Standard constructor, called after all reflected properties have been initialized */ \
+	NO_API UKAJKantanDocsAsset(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get()); \
+	DEFINE_DEFAULT_OBJECT_INITIALIZER_CONSTRUCTOR_CALL(UKAJKantanDocsAsset) \
+	DECLARE_VTABLE_PTR_HELPER_CTOR(NO_API, UKAJKantanDocsAsset); \
+DEFINE_VTABLE_PTR_HELPER_CTOR_CALLER(UKAJKantanDocsAsset); \
+private: \
+	/** Private move- and copy-constructors, should never be used */ \
+	NO_API UKAJKantanDocsAsset(UKAJKantanDocsAsset&&); \
+	NO_API UKAJKantanDocsAsset(const UKAJKantanDocsAsset&); \
+public:
+
+
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_38_ENHANCED_CONSTRUCTORS \
+	/** Standard constructor, called after all reflected properties have been initialized */ \
+	NO_API UKAJKantanDocsAsset() { }; \
+private: \
+	/** Private move- and copy-constructors, should never be used */ \
+	NO_API UKAJKantanDocsAsset(UKAJKantanDocsAsset&&); \
+	NO_API UKAJKantanDocsAsset(const UKAJKantanDocsAsset&); \
+public: \
+	DECLARE_VTABLE_PTR_HELPER_CTOR(NO_API, UKAJKantanDocsAsset); \
+DEFINE_VTABLE_PTR_HELPER_CTOR_CALLER(UKAJKantanDocsAsset); \
+	DEFINE_DEFAULT_CONSTRUCTOR_CALL(UKAJKantanDocsAsset)
+
+
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_38_PRIVATE_PROPERTY_OFFSET
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_35_PROLOG
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_38_GENERATED_BODY_LEGACY \
+PRAGMA_DISABLE_DEPRECATION_WARNINGS \
+public: \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_38_PRIVATE_PROPERTY_OFFSET \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_38_SPARSE_DATA \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_38_RPC_WRAPPERS \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_38_INCLASS \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_38_STANDARD_CONSTRUCTORS \
+public: \
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
+
+
+#define InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_38_GENERATED_BODY \
+PRAGMA_DISABLE_DEPRECATION_WARNINGS \
+public: \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_38_PRIVATE_PROPERTY_OFFSET \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_38_SPARSE_DATA \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_38_RPC_WRAPPERS_NO_PURE_DECLS \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_38_INCLASS_NO_PURE_DECLS \
+	InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h_38_ENHANCED_CONSTRUCTORS \
+private: \
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
+
+
+template<> AUTOJSONEDITOR_API UClass* StaticClass<class UKAJKantanDocsAsset>();
+
+#undef CURRENT_FILE_ID
+#define CURRENT_FILE_ID InteractMLUE_BrunoBranch_Plugins_KantanAutoJson_Source_AutoJsonEditor_Imported_KantanInstallation_InfoAsset_KAJKantanInfoAsset_h
+
+
+PRAGMA_ENABLE_DEPRECATION_WARNINGS

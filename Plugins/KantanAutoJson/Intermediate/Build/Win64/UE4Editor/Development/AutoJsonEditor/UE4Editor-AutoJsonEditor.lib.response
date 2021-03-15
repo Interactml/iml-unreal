@@ -1,0 +1,14 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UE4Editor-AutoJsonEditor.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Intermediate\Build\Win64\InteractMLUEEditor\Development\UnrealEd\SharedPCH.UnrealEd.h.obj"
+"D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Intermediate\Build\Win64\UE4Editor\Development\AutoJsonEditor\Module.AutoJsonEditor.cpp.obj"
+"D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Intermediate\Build\Win64\UE4Editor\Development\AutoJsonEditor\Module.AutoJsonEditor.gen.cpp.obj"
+"D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Intermediate\Build\Win64\UE4Editor\Development\AutoJsonEditor\Default.rc2.res"
+/OUT:"D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Intermediate\Build\Win64\UE4Editor\Development\AutoJsonEditor\UE4Editor-AutoJsonEditor.lib"
+/INCLUDE:IMPLEMENT_MODULE_AutoJsonEditor

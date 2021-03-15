@@ -1,0 +1,8 @@
+{
+	"OutputFiles": [
+		"Module.AutoJson.cppa7.o",
+		"Module.AutoJson.cppa8.o",
+		"Module.AutoJson.gen.cppa7.o",
+		"Module.AutoJson.gen.cppa8.o"
+	]
+}

@@ -1,0 +1,90 @@
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Intermediate\Build\Win64\UE4Editor\Development\AutoJson\Definitions.AutoJson.h
+D:/Documents/2021/Unreal/InteractMLUE-BrunoBranch/Plugins/KantanAutoJson/Source/AutoJson/Private/AJ_ConversionHelpers.cpp
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\AJ_ConversionHelpers.h
+d:\documents\2021\unreal\interactmlue-brunobranch\plugins\kantanautojson\source\autojson\public\AJ_ReturnValues.h
+d:\documents\2021\unreal\interactmlue-brunobranch\plugins\kantanautojson\source\autojson\public\k_json.h
+d:\documents\2021\unreal\interactmlue-brunobranch\plugins\kantanautojson\source\autojson\public\k_json_gnu_stl_workaround.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\ThirdParty\nlohmann\include\nlohmann/json.hpp
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\algorithm
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\xmemory
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\xmemory0
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\cstdint
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\limits
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\ymath.h
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\cfloat
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\cmath
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\xtgmath.h
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\functional
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\tuple
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\xstring
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\iterator
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\istream
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\ostream
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\ios
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\xlocnum
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\streambuf
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\xiosbase
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\xlocale
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\stdexcept
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\xlocinfo
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\xlocinfo.h
+C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\ucrt\locale.h
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\memory
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\xfacet
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\system_error
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\cerrno
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\xcall_once.h
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\xerrc.h
+C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\ucrt\share.h
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\numeric
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\string
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\xstring_insert.h
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\vector
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\array
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\forward_list
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\map
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\xtree
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\unordered_map
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\xhash
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\list
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\valarray
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\cassert
+C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\ucrt\assert.h
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\clocale
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\INCLUDE\cctype
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\IAutoJsonSerializer.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\JsonUtilities\Public\JsonObjectConverter.h
+c:\program files\epic games\ue_4.26\engine\source\runtime\jsonutilities\public\JsonObjectWrapper.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\JsonUtilities\JsonObjectWrapper.generated.h
+D:/Documents/2021/Unreal/InteractMLUE-BrunoBranch/Plugins/KantanAutoJson/Source/AutoJson/Private/AutoJsonInternalBFL.cpp
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\PluginPrivate\AutoJsonInternalBFL.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\UObjectSerializers/AutoJsonUObjectSerializer.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Intermediate\Build\Win64\UE4Editor\Inc\AutoJson\AutoJsonUObjectSerializer.generated.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Intermediate\Build\Win64\UE4Editor\Inc\AutoJson\AutoJsonInternalBFL.generated.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\IAutoJsonModule.h
+D:/Documents/2021/Unreal/InteractMLUE-BrunoBranch/Plugins/KantanAutoJson/Source/AutoJson/Private/AutoJsonModuleImpl.cpp
+d:\documents\2021\unreal\interactmlue-brunobranch\plugins\kantanautojson\source\autojson\private\AutoJsonModuleImpl.h
+d:\documents\2021\unreal\interactmlue-brunobranch\plugins\kantanautojson\source\autojson\private\AutoJsonLog.h
+D:/Documents/2021/Unreal/InteractMLUE-BrunoBranch/Plugins/KantanAutoJson/Source/AutoJson/Private/SerializationBackend/AJ_GenericSerializerImpl.cpp
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\SerializationBackend/AJ_GenericSerializerImpl.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\SerializationBackend/AJ_PropertyFiltering.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\SerializationBackend/AJ_FieldNameConversion.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\SerializationBackend/AJ_SerializationContext.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\SerializationBackend/AJ_ContextHandling.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\SerializationBackend/AJ_RecursionContext.h
+D:/Documents/2021/Unreal/InteractMLUE-BrunoBranch/Plugins/KantanAutoJson/Source/AutoJson/Private/SerializationBackend/Default/AJ_DefaultFieldNameConverters.cpp
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\SerializationBackend/Default/AJ_DefaultFieldNameConverters.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Engine\Classes\Engine/UserDefinedStruct.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\UserDefinedStruct.generated.h
+D:/Documents/2021/Unreal/InteractMLUE-BrunoBranch/Plugins/KantanAutoJson/Source/AutoJson/Private/SerializationBackend/Default/AJ_DefaultSerializers.cpp
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\SerializationBackend/Default/AJ_DefaultSerializers.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\SerializationBackend/AJ_BackendSerializerFwd.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\SerializationBackend/Default/AJ_DefaultPropertyFilters.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\SerializationBackend/Default/AJ_DefaultContextHandlers.h
+D:/Documents/2021/Unreal/InteractMLUE-BrunoBranch/Plugins/KantanAutoJson/Source/AutoJson/Private/SerializationBackend/Default/AJ_DefautContextHandlers.cpp
+D:/Documents/2021/Unreal/InteractMLUE-BrunoBranch/Plugins/KantanAutoJson/Source/AutoJson/Private/UObjectSerializers/AutoJsonDefaultSerializer.cpp
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\UObjectSerializers/AutoJsonDefaultSerializer.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Intermediate\Build\Win64\UE4Editor\Inc\AutoJson\AutoJsonDefaultSerializer.generated.h
+D:/Documents/2021/Unreal/InteractMLUE-BrunoBranch/Plugins/KantanAutoJson/Source/AutoJson/Private/UObjectSerializers/AutoJsonSaveGameSerializer.cpp
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\UObjectSerializers/AutoJsonSaveGameSerializer.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Intermediate\Build\Win64\UE4Editor\Inc\AutoJson\AutoJsonSaveGameSerializer.generated.h

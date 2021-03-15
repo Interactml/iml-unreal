@@ -1,0 +1,18 @@
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Intermediate\Build\Win64\UE4Editor\Development\AutoJson\Definitions.AutoJson.h
+D:/Documents/2021/Unreal/InteractMLUE-BrunoBranch/Plugins/KantanAutoJson/Intermediate/Build/Win64/UE4Editor/Inc/AutoJson/AutoJson.init.gen.cpp
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\CoreUObject\Public\UObject/GeneratedCppIncludes.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\CoreUObject\Public\UObject/MetaData.h
+D:/Documents/2021/Unreal/InteractMLUE-BrunoBranch/Plugins/KantanAutoJson/Intermediate/Build/Win64/UE4Editor/Inc/AutoJson/AutoJsonDefaultSerializer.gen.cpp
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson/Public/UObjectSerializers/AutoJsonDefaultSerializer.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\UObjectSerializers/AutoJsonUObjectSerializer.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\IAutoJsonSerializer.h
+d:\documents\2021\unreal\interactmlue-brunobranch\plugins\kantanautojson\intermediate\build\win64\ue4editor\inc\autojson\AutoJsonUObjectSerializer.generated.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\SerializationBackend/AJ_BackendSerializerFwd.h
+d:\documents\2021\unreal\interactmlue-brunobranch\plugins\kantanautojson\intermediate\build\win64\ue4editor\inc\autojson\AutoJsonDefaultSerializer.generated.h
+D:/Documents/2021/Unreal/InteractMLUE-BrunoBranch/Plugins/KantanAutoJson/Intermediate/Build/Win64/UE4Editor/Inc/AutoJson/AutoJsonInternalBFL.gen.cpp
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson/PluginPrivate/AutoJsonInternalBFL.h
+d:\documents\2021\unreal\interactmlue-brunobranch\plugins\kantanautojson\intermediate\build\win64\ue4editor\inc\autojson\AutoJsonInternalBFL.generated.h
+D:/Documents/2021/Unreal/InteractMLUE-BrunoBranch/Plugins/KantanAutoJson/Intermediate/Build/Win64/UE4Editor/Inc/AutoJson/AutoJsonSaveGameSerializer.gen.cpp
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson/Public/UObjectSerializers/AutoJsonSaveGameSerializer.h
+d:\documents\2021\unreal\interactmlue-brunobranch\plugins\kantanautojson\intermediate\build\win64\ue4editor\inc\autojson\AutoJsonSaveGameSerializer.generated.h
+D:/Documents/2021/Unreal/InteractMLUE-BrunoBranch/Plugins/KantanAutoJson/Intermediate/Build/Win64/UE4Editor/Inc/AutoJson/AutoJsonUObjectSerializer.gen.cpp

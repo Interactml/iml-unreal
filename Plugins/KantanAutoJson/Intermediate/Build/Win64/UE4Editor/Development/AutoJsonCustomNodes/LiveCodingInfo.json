@@ -1,0 +1,17 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.AutoJsonCustomNodes.cpp.obj": [
+			"AutoJsonCustomNodesModuleImpl.cpp.obj",
+			"BPNode_AutoJsonBase.cpp.obj",
+			"BPNode_AutoJsonDeserialize.cpp.obj",
+			"BPNode_AutoJsonSerialize.cpp.obj"
+		],
+		"Module.AutoJsonCustomNodes.gen.cpp.obj": [
+			"AutoJsonCustomNodes.init.gen.cpp.obj",
+			"BPNode_AutoJsonBase.gen.cpp.obj",
+			"BPNode_AutoJsonDeserialize.gen.cpp.obj",
+			"BPNode_AutoJsonSerialize.gen.cpp.obj"
+		]
+	}
+}

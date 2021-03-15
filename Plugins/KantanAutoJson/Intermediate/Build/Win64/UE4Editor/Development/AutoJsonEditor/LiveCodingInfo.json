@@ -1,0 +1,16 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.AutoJsonEditor.cpp.obj": [
+			"KAJKantanInfoAsset.cpp.obj",
+			"KAJKantanChangelist.cpp.obj",
+			"KAJKantanPluginInstallation.cpp.obj",
+			"KAJKantanInstallationStyleSet.cpp.obj",
+			"AutoJsonEditorModuleImpl.cpp.obj"
+		],
+		"Module.AutoJsonEditor.gen.cpp.obj": [
+			"AutoJsonEditor.init.gen.cpp.obj",
+			"KAJKantanInfoAsset.gen.cpp.obj"
+		]
+	}
+}

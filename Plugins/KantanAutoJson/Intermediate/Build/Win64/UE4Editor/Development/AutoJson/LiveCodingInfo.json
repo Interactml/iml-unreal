@@ -1,0 +1,23 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.AutoJson.cpp.obj": [
+			"AJ_ConversionHelpers.cpp.obj",
+			"AutoJsonInternalBFL.cpp.obj",
+			"AutoJsonModuleImpl.cpp.obj",
+			"AJ_GenericSerializerImpl.cpp.obj",
+			"AJ_DefaultFieldNameConverters.cpp.obj",
+			"AJ_DefaultSerializers.cpp.obj",
+			"AJ_DefautContextHandlers.cpp.obj",
+			"AutoJsonDefaultSerializer.cpp.obj",
+			"AutoJsonSaveGameSerializer.cpp.obj"
+		],
+		"Module.AutoJson.gen.cpp.obj": [
+			"AutoJson.init.gen.cpp.obj",
+			"AutoJsonDefaultSerializer.gen.cpp.obj",
+			"AutoJsonInternalBFL.gen.cpp.obj",
+			"AutoJsonSaveGameSerializer.gen.cpp.obj",
+			"AutoJsonUObjectSerializer.gen.cpp.obj"
+		]
+	}
+}

@@ -1,0 +1,47 @@
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Intermediate\Build\Win64\UE4Editor\Development\AutoJsonCustomNodes\Definitions.AutoJsonCustomNodes.h
+D:/Documents/2021/Unreal/InteractMLUE-BrunoBranch/Plugins/KantanAutoJson/Source/AutoJsonCustomNodes/Private/AutoJsonCustomNodesModuleImpl.cpp
+d:\documents\2021\unreal\interactmlue-brunobranch\plugins\kantanautojson\source\autojsoncustomnodes\private\AutoJsonCustomNodesModuleImpl.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJsonCustomNodes\Public\IAutoJsonCustomNodesModule.h
+D:/Documents/2021/Unreal/InteractMLUE-BrunoBranch/Plugins/KantanAutoJson/Source/AutoJsonCustomNodes/Private/BPNode_AutoJsonBase.cpp
+d:\documents\2021\unreal\interactmlue-brunobranch\plugins\kantanautojson\source\autojsoncustomnodes\private\BPNode_AutoJsonBase.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Intermediate\Build\Win64\UE4Editor\Inc\AutoJsonCustomNodes\BPNode_AutoJsonBase.generated.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\UObjectSerializers/AutoJsonUObjectSerializer.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\IAutoJsonSerializer.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Intermediate\Build\Win64\UE4Editor\Inc\AutoJson\AutoJsonUObjectSerializer.generated.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\UObjectSerializers/AutoJsonDefaultSerializer.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\Public\SerializationBackend/AJ_BackendSerializerFwd.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Intermediate\Build\Win64\UE4Editor\Inc\AutoJson\AutoJsonDefaultSerializer.generated.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJson\PluginPrivate\AutoJsonInternalBFL.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Intermediate\Build\Win64\UE4Editor\Inc\AutoJson\AutoJsonInternalBFL.generated.h
+d:\documents\2021\unreal\interactmlue-brunobranch\plugins\kantanautojson\source\autojsoncustomnodes\private\InternalBFL_Helpers.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Engine\Classes\Engine/MemberReference.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\MemberReference.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Editor\BlueprintGraph\Public\BlueprintNodeSpawner.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Editor\BlueprintGraph\Classes\BlueprintNodeBinder.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\CoreUObject\Public\UObject/WeakFieldPtr.h
+c:\program files\epic games\ue_4.26\engine\source\editor\blueprintgraph\public\BlueprintActionFilter.h
+c:\program files\epic games\ue_4.26\engine\source\editor\blueprintgraph\public\BlueprintGraphModule.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\BlueprintGraph\BlueprintNodeSpawner.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Editor\BlueprintGraph\Public\BlueprintActionDatabaseRegistrar.h
+c:\program files\epic games\ue_4.26\engine\source\editor\blueprintgraph\public\BlueprintActionDatabase.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Editor\KismetCompiler\Public\KismetCompiler.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Editor\BlueprintGraph\Classes\K2Node_Event.h
+c:\program files\epic games\ue_4.26\engine\source\editor\blueprintgraph\classes\K2Node_EventNodeInterface.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\BlueprintGraph\K2Node_EventNodeInterface.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\BlueprintGraph\K2Node_Event.generated.h
+c:\program files\epic games\ue_4.26\engine\source\editor\kismetcompiler\public\BPTerminal.h
+c:\program files\epic games\ue_4.26\engine\source\editor\kismetcompiler\public\KismetCompilerMisc.h
+c:\program files\epic games\ue_4.26\engine\source\editor\kismetcompiler\public\BlueprintCompiledStatement.h
+c:\program files\epic games\ue_4.26\engine\source\editor\kismetcompiler\public\EdGraphCompilerUtilities.h
+c:\program files\epic games\ue_4.26\engine\source\editor\kismetcompiler\public\KismetCompiledFunctionContext.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Editor\UnrealEd\Public\Kismet2/CompilerResultsLog.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\Core\Public\Logging/TokenizedMessage.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Editor\UnrealEd\Public\EdGraphToken.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Editor\BlueprintGraph\Classes\K2Node_CallFunction.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\BlueprintGraph\K2Node_CallFunction.generated.h
+D:/Documents/2021/Unreal/InteractMLUE-BrunoBranch/Plugins/KantanAutoJson/Source/AutoJsonCustomNodes/Private/BPNode_AutoJsonDeserialize.cpp
+d:\documents\2021\unreal\interactmlue-brunobranch\plugins\kantanautojson\source\autojsoncustomnodes\private\BPNode_AutoJsonDeserialize.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Intermediate\Build\Win64\UE4Editor\Inc\AutoJsonCustomNodes\BPNode_AutoJsonDeserialize.generated.h
+D:/Documents/2021/Unreal/InteractMLUE-BrunoBranch/Plugins/KantanAutoJson/Source/AutoJsonCustomNodes/Private/BPNode_AutoJsonSerialize.cpp
+d:\documents\2021\unreal\interactmlue-brunobranch\plugins\kantanautojson\source\autojsoncustomnodes\private\BPNode_AutoJsonSerialize.h
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Intermediate\Build\Win64\UE4Editor\Inc\AutoJsonCustomNodes\BPNode_AutoJsonSerialize.generated.h

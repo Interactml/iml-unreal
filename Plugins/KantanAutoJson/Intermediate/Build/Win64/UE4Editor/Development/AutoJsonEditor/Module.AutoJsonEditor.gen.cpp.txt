@@ -1,0 +1,22 @@
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Intermediate\Build\Win64\UE4Editor\Development\AutoJsonEditor\Definitions.AutoJsonEditor.h
+D:/Documents/2021/Unreal/InteractMLUE-BrunoBranch/Plugins/KantanAutoJson/Intermediate/Build/Win64/UE4Editor/Inc/AutoJsonEditor/AutoJsonEditor.init.gen.cpp
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\CoreUObject\Public\UObject/GeneratedCppIncludes.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Runtime\CoreUObject\Public\UObject/MetaData.h
+D:/Documents/2021/Unreal/InteractMLUE-BrunoBranch/Plugins/KantanAutoJson/Intermediate/Build/Win64/UE4Editor/Inc/AutoJsonEditor/KAJKantanInfoAsset.gen.cpp
+D:\Documents\2021\Unreal\InteractMLUE-BrunoBranch\Plugins\KantanAutoJson\Source\AutoJsonEditor/Imported/KantanInstallation/InfoAsset/KAJKantanInfoAsset.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Developer\AssetTools\Public\AssetTypeActions_Base.h
+c:\program files\epic games\ue_4.26\engine\source\developer\assettools\public\IAssetTools.h
+c:\program files\epic games\ue_4.26\engine\source\developer\assettools\public\AssetTypeCategories.h
+c:\program files\epic games\ue_4.26\engine\source\developer\assettools\public\IAssetTypeActions.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Developer/Merge/Public/Merge.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Editor\UnrealEd\Classes\ThumbnailRendering/ThumbnailManager.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Editor\UnrealEd\Classes\ThumbnailRendering/ThumbnailRenderer.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\UnrealEd\ThumbnailRenderer.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\UnrealEd\ThumbnailManager.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Editor\UnrealEd\Public\AutomatedAssetImportData.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\UnrealEd\AutomatedAssetImportData.generated.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\AssetTools\IAssetTools.generated.h
+c:\program files\epic games\ue_4.26\engine\source\developer\assettools\public\AssetToolsModule.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Editor\UnrealEd\Public\Toolkits/AssetEditorManager.h
+C:\Program Files\Epic Games\UE_4.26\Engine\Source\Editor\UnrealEd\Public\Toolkits/SimpleAssetEditor.h
+d:\documents\2021\unreal\interactmlue-brunobranch\plugins\kantanautojson\intermediate\build\win64\ue4editor\inc\autojsoneditor\KAJKantanInfoAsset.generated.h
