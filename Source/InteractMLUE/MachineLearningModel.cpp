@@ -22,7 +22,7 @@ UMachineLearningModel::UMachineLearningModel()
 bool UMachineLearningModel::importDLL(FString folder, FString name)
 {
     //FString filePath = *FPaths::GamePluginsDir() + folder + "/" + name;
-    FString filePath = *FPaths::GameDevelopersDir() + folder + "/" + name;
+    FString filePath = *FPaths::ProjectPluginsDir() + folder + "/" + name;
     
     GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "loading dll");
 
