@@ -32,6 +32,7 @@ bool UMachineLearningModel::importDLL(FString folder, FString name)
         v_dllHandle = FPlatformProcess::GetDllHandle(*filePath); // Retrieve the DLL.
         if (v_dllHandle != NULL)
         {
+            GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "loaded dll");
             m_createRegressionModelFromDLL = NULL;
             FString procName = "createRegressionModel";    // Needs to be the exact name of the DLL method.
             m_createRegressionModelFromDLL = (_createModel)FPlatformProcess::GetDllExport(v_dllHandle, *procName);
@@ -339,6 +340,7 @@ void UMachineLearningModel::BeginPlay()
 //#endif
     if (!importDLL(m_dllFolder, m_dllName))
     {
+        GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "free dll");
         freeDLL(); // if the import has failed, clean up
     }
 	
