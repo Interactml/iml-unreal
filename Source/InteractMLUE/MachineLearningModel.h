@@ -23,6 +23,31 @@ public:
 
 };
 
+USTRUCT(BlueprintType)
+struct INTERACTMLUE_API FDataInstanceSeriesMember
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+	TArray<float> inputSeries;
+
+};
+
+USTRUCT(BlueprintType)
+struct INTERACTMLUE_API FDataInstanceSeries
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+
+	UPROPERTY()
+	TArray<FDataInstanceSeriesMember> inputSeries;
+	UPROPERTY()
+	FString label;
+
+};
+
+
 
 UCLASS(Blueprintable, ClassGroup=(InteractML), meta=(BlueprintSpawnableComponent) )
 class INTERACTMLUE_API UMachineLearningModel : public UActorComponent
@@ -58,6 +83,24 @@ class INTERACTMLUE_API UMachineLearningModel : public UActorComponent
 
 	typedef int (*_run)(void*, double* inputs, int numInputs, double* outputs, int numOutputs);
 	_run m_runFromDLL;
+	
+	typedef void* (*_createSeriesClassificationModel)(); // Declare a method to store the DLL method createRegressionModel.
+	_createSeriesClassificationModel m_createDTWModelFromDLL;
+
+	typedef bool (*_trainSeriesClassification) (void*, void*);// train DTW
+	_trainSeriesClassification m_trainDTWFromDLL;
+
+	typedef bool (*_resetSeriesClassification) (void*); // reset dtw model
+	_resetSeriesClassification m_resetDTW;
+
+	typedef void (*_destroySeriesClassificationModel)(void*); // destroy dtw model
+	_destroySeriesClassificationModel m_destroyDTW;
+
+	typedef void* (*_runSeriesClassification)(void*, void*); // run dtw model
+	_runSeriesClassification m_runDTW;
+
+	typedef int* (*_getSeriesClassificationCosts)(void*, double* output, int numOutputs); // calculate costs of dtw model
+	_getSeriesClassificationCosts m_dtwCost;
 	
 
 	void* v_dllHandle;
@@ -107,6 +150,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
 	bool trainClassifier();
+	
+	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
+	bool trainDTW();
 
 	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
 	bool IsModelInitialised();

@@ -1,0 +1,13 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UE4Editor-InteractML-0061.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"C:\Users\Clarice\Documents\InteractMLUE\Intermediate\Build\Win64\InteractMLUEEditor\Development\Engine\SharedPCH.Engine.h.obj"
+"C:\Users\Clarice\Documents\InteractMLUE\Plugins\InteractML\Intermediate\Build\Win64\UE4Editor\Development\InteractML\InteractML.cpp.obj"
+"C:\Users\Clarice\Documents\InteractMLUE\Plugins\InteractML\Intermediate\Build\Win64\UE4Editor\Development\InteractML\Default.rc2.res"
+/OUT:"C:\Users\Clarice\Documents\InteractMLUE\Plugins\InteractML\Intermediate\Build\Win64\UE4Editor\Development\InteractML\UE4Editor-InteractML-0061.lib"
+/INCLUDE:IMPLEMENT_MODULE_InteractML
