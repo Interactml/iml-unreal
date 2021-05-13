@@ -125,6 +125,61 @@ bool UMachineLearningModel::importDLL(FString folder, FString name)
                 return false;
             }
 
+            //load classification functions from dll
+            m_trainDTWFromDLL = NULL;
+            procName = "trainSeriesClassification";    // Needs to be the exact name of the DLL method.
+            m_trainDTWFromDLL = (_trainSeriesClassification)FPlatformProcess::GetDllExport(v_dllHandle, *procName);
+            if (m_trainDTWFromDLL == NULL)
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "failed to load dtw train");
+                return false;
+            }
+
+            m_createDTWModelFromDLL = NULL;
+            procName = "createSeriesClassificationModel";    // Needs to be the exact name of the DLL method.
+            m_createDTWModelFromDLL = (_createSeriesClassificationModel)FPlatformProcess::GetDllExport(v_dllHandle, *procName);
+            if (m_createDTWModelFromDLL == NULL)
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "failed to load dtw model function");
+                return false;
+            }
+            
+            m_resetDTW = NULL;
+            procName = "resetSeriesClassification";    // Needs to be the exact name of the DLL method.
+            m_resetDTW = (_resetSeriesClassification)FPlatformProcess::GetDllExport(v_dllHandle, *procName);
+            if (m_resetDTW == NULL)
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "failed to reset dtw model function");
+                return false;
+            }
+            
+            m_destroyDTW = NULL;
+            procName = "destroySeriesClassificationModel";    // Needs to be the exact name of the DLL method.
+            m_destroyDTW = (_destroySeriesClassificationModel)FPlatformProcess::GetDllExport(v_dllHandle, *procName);
+            if (m_destroyDTW == NULL)
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "failed to destroy dtw model function");
+                return false;
+            }
+            
+            m_runDTW = NULL;
+            procName = "runSeriesClassification";    // Needs to be the exact name of the DLL method.
+            m_runDTW = (_runSeriesClassification)FPlatformProcess::GetDllExport(v_dllHandle, *procName);
+            if (m_runDTW == NULL)
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "failed to load dtw run function");
+                return false;
+            }
+            
+            m_dtwCost = NULL;
+            procName = "getSeriesClassificationCosts";    // Needs to be the exact name of the DLL method.
+            m_dtwCost = (_getSeriesClassificationCosts)FPlatformProcess::GetDllExport(v_dllHandle, *procName);
+            if (m_dtwCost == NULL)
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "failed to load dtw cost function");
+                return false;
+            }
+
             //std::stringstream ss;
             //ss << v_dllHandle;
 
@@ -299,6 +354,14 @@ bool UMachineLearningModel::trainClassifier() {
     m_destroyTrainingSetFromDLL(trainingSet);
 
     return result;
+}
+
+/// <summary>
+/// trains dynamic time warping
+/// </summary>
+/// <returns></returns>
+bool UMachineLearningModel::trainDTW() {
+    return true;
 }
 
 TArray<float> UMachineLearningModel::Run(TArray<float> input)
