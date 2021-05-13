@@ -7,9 +7,9 @@ public class InteractMLUE : ModuleRules
 {
 	public InteractMLUE(ReadOnlyTargetRules Target) : base(Target)
 	{
-		string CurDirectory = Path.Combine(Directory.GetCurrentDirectory(), "../");
+		string CurDirectory = Path.GetFullPath( Path.Combine(ModuleDirectory, "..", ".." ) );
 
-		string RapDirectory = Path.Combine(CurDirectory, "/Plugins/");
+		string RapDirectory = Path.Combine(CurDirectory, "Plugins", "RapidLib");
 
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
