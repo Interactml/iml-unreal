@@ -19,7 +19,7 @@ public class InteractMLUE : ModuleRules
 
 		PublicDelayLoadDLLs.Add("RapidLibPlugin.dll");
 
-		PublicAdditionalLibraries.Add(Path.Combine(RapDirectory, "RapidLibPlugin.lib"));
+		//PublicAdditionalLibraries.Add(Path.Combine(RapDirectory, "RapidLibPlugin.lib"));
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
