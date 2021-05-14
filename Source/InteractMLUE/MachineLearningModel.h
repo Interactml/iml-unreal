@@ -2,13 +2,17 @@
 
 #pragma once
 
+//rapidlib
+#include "trainingExample.h"
+#include "regression.h"
+#include "classification.h"
+
+//unreal
 #include "CoreMinimal.h"
 #include "JsonObjectConverter.h"
 #include "Components/ActorComponent.h"
 #include "DataSerialization.h"
 #include "MachineLearningModel.generated.h"
-
-
 
 USTRUCT(BlueprintType)
 struct INTERACTMLUE_API FDataInstance
@@ -47,7 +51,7 @@ UCLASS(Blueprintable, ClassGroup=(InteractML), meta=(BlueprintSpawnableComponent
 class INTERACTMLUE_API UMachineLearningModel : public UActorComponent
 {
 	GENERATED_BODY()
-
+#if 0
 	typedef void* (*_createModel)(); // Declare a method to store the DLL method createRegressionModel.
 	_createModel m_createRegressionModelFromDLL;
 	
@@ -98,26 +102,20 @@ class INTERACTMLUE_API UMachineLearningModel : public UActorComponent
 	
 
 	void* v_dllHandle;
-
+#endif
 	int m_numInputs = -1;
 	int m_numOutputs = -1;
 
 public:	
 
-
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Machine Learning")
-	void *m_modelPtr = NULL;
+	//models
+	regression *m_regressionModel = nullptr;
+	classification *m_classificationModel = nullptr;
 
 
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Machine Learning")
 	TArray<FDataInstance> m_dataset;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Machine Learning")
-	FString m_dllFolder = "RapidLib";
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Machine Learning")
-	FString m_dllName = "RapidLibPlugin.dll";
 
 	UPROPERTY(VisibleAnywhere, Category = "Machine Learning")
 	FString m_TrainingExamplesFolder = "Data";
@@ -126,20 +124,12 @@ public:
 	FString filepath = *FPaths::ProjectContentDir() + m_TrainingExamplesFolder + "/";
 
 
-
-
 	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
-	bool importDLL(FString folder, FString name);
-
-	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
-	void freeDLL();
-
-	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
-	bool IsDLLLoaded();
+	bool SetUpInputsOutputs(FDataInstance example);
 
 	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
 	bool addTrainingData(TArray<float> input, TArray<float> output);
-	
+
 
 	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
 	bool trainRegressor();
@@ -151,13 +141,9 @@ public:
 	bool trainDTW();
 
 	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
-	bool IsModelInitialised();
-
-	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
 	TArray<float> Run(TArray<float> input);
 	
-	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
-	bool SetUpInputsOutputs(FDataInstance example);
+
 
 	// Sets default values for this component's properties
 	UMachineLearningModel();
@@ -180,5 +166,7 @@ protected:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
+private:
+
+	
 };

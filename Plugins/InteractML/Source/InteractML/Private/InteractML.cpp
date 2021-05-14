@@ -11,7 +11,6 @@
 
 //module
 
-
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "FInteractMLModule"
 DEFINE_LOG_CATEGORY(LogInteractML);

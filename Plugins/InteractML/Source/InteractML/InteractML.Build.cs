@@ -4,12 +4,13 @@
 
 using UnrealBuildTool;
 using System.IO;
+using System.Diagnostics;
 
 public class InteractML : ModuleRules
 {
 	public InteractML(ReadOnlyTargetRules Target) : base(Target)
 	{
-		//RapidLib
+		//TEMP: needed direct access during conversion
 		AddRapidLibLibrary( Target );
 
 		//normal
@@ -66,7 +67,7 @@ public class InteractML : ModuleRules
 		if((Target.Platform==UnrealTargetPlatform.Win64))// || (Target.Platform==UnrealTargetPlatform.Win32))
 		{
 			//platform variants
-			string platform_string = "x64";
+			string platform_string = "x64"; 	//NOTE: unlike x64, the Win32 platform is called "Win32"
 
 			//configuration
 			string config_string; //shipping/test has none
@@ -93,7 +94,9 @@ public class InteractML : ModuleRules
 
 		if(is_lib_supported)
 		{
-			PublicAdditionalLibraries.Add( Path.Combine( lib_dir, "RapidLib.lib" ) );
+			string lib_path = Path.Combine( lib_dir, "RapidLib.lib" );
+
+			PublicAdditionalLibraries.Add( lib_path );
 			PublicIncludePaths.Add( include_dir );
 		}
 	}
