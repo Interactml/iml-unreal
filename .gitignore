@@ -1,18 +1,26 @@
+# Unreal transient folders
 Binaries
 DerivedDataCache
 Saved
+Intermediate
+
+# Common file types
 .vscode
 .vs
 *.VC.db
 *.opensdf
 *.opendb
 *.sdf
-*.sln
 *.suo
 *.xcodeproj
 *.xcworkspace
+*.vcxproj.user
+*.pdb
 
 # Compiled source files for the engine to use
-Intermediate/*
-Plugins/KantanAutoJson/
-Plugins/InteractML/Intermediate/
+#Intermediate/*
+#Plugins/InteractML/Intermediate/
+#Plugins/InteractML/Source/3rdParty/RapidLib/vs2019/intermediate/
+
+# Generated solution project files
+InteractMLUE.sln
