@@ -1,0 +1,153 @@
+/**
+ * @file neuralNetwork.h
+ *  RapidLib
+ *
+ * @date 05 Sep 2016
+ * @copyright Copyright © 2016 Goldsmiths. All rights reserved.
+ */
+
+#ifndef neuralNetwork_h
+#define neuralNetwork_h
+#include <vector>
+#include "baseModel.h"
+
+#ifndef EMSCRIPTEN
+#include "../dependencies/json/json.h"
+#endif
+
+#define LEARNING_RATE 0.3
+#define MOMENTUM 0.2
+#define NUM_EPOCHS 500
+
+/*! Class for implementing a Neural Network.
+ *
+ * This class includes both running and training, and constructors for reading trained models from JSON.
+ */
+template<typename T>
+class neuralNetwork final : public baseModel<T> {
+    
+public:
+    /** This is the constructor for building a trained model from JSON. */
+    neuralNetwork(const int &num_inputs,
+                  const std::vector<int> &which_inputs,
+                  const int &num_hidden_layers,
+                  const int &num_hidden_nodes,
+                  const std::vector<T> &weights,
+                  const std::vector<T> &wHiddenOutput,
+                  const std::vector<T> &inRanges,
+                  const std::vector<T> &inBases,
+                  const T &outRange,
+                  const T &outBase);
+    
+    /** This constructor creates a neural network that needs to be trained.
+     *
+     * @param num_inputs is the number of inputs the network will process
+     * @param which_inputs is an vector of which values in the input vector are being fed to the network. ex: {0,2,4}
+     * @param num_hidden_layer is the number of hidden layers in the network. Must be at least 1.
+     * @param num_hidden_nodes is the number of hidden nodes in each hidden layer. Often, this is the same as num_inputs
+     *
+     * @return A neuralNetwork instance with randomized weights and no normalization values. These will be set or adjusted during training.
+     */
+    neuralNetwork(const int &num_inputs,
+                  const std::vector<int> &which_inputs,
+                  const int &num_hidden_layer,
+                  const int &num_hidden_nodes);
+    
+    /** destructor */
+    ~neuralNetwork();
+    
+    /** Generate an output value from a single input vector.
+     * @param A standard vector of type T that feed-forward regression will run on.
+     * @return A single value, which is the result of the feed-forward operation
+     */
+    T run(const std::vector<T> &inputVector) override;
+    
+    void reset() override;
+    
+    int getNumInputs() const override;
+    std::vector<int> getWhichInputs() const override;
+    
+    int getNumHiddenLayers() const;
+    void setNumHiddenLayers(int num_hidden_layers);
+    
+    int getNumHiddenNodes() const;
+    void setNumHiddenNodes(int num_hidden_nodes);
+    
+    int getEpochs() const;
+    void setEpochs(const int &epochs);
+    
+    std::vector<T> getWeights() const;
+    std::vector<T> getWHiddenOutput() const;
+    
+    std::vector<T> getInRanges() const;
+    std::vector<T> getInBases() const;
+    T getOutRange() const;
+    T getOutBase() const;
+    
+#ifndef EMSCRIPTEN
+    void getJSONDescription(Json::Value &currentModel) override;
+#endif
+    
+    
+private:
+    /** Parameters that describe the topography of the model */
+    int numInputs;
+    std::vector<int> whichInputs;
+    int numHiddenLayers;
+    int numHiddenNodes;
+    
+    /** Neurons: state is updated on each process(). */
+    std::vector<T> inputNeurons;
+    std::vector<std::vector<T> > hiddenNeurons;
+    T outputNeuron;
+    
+    /** Weights between layers and nodes are kept here. */
+    std::vector<std::vector<std::vector<T> > > weights;
+    std::vector<T> wHiddenOutput;
+    
+    /** Normalization parameters */
+    std::vector<T> inRanges;
+    std::vector<T> inBases;
+    T outRange;
+    T outBase;
+    
+    /** Sigmoid function for activating hidden nodes. */
+    inline T activationFunction(T);
+    
+    ////////////////////////////////////////////////////////////////////////////
+    /// These pertain to the training, and aren't need to run a trained model //
+    
+public:
+    /** Train a model using backpropagation.
+     *
+     * @param The training set is a vector of training examples that contain both a vector of input values and a value specifying desired output.
+     *
+     */
+    void train(const std::vector<trainingExampleTemplate<T> > &trainingSet) override;
+    
+private:
+    /** Parameters that influence learning */
+    T learningRate;
+    T momentum;
+    int numEpochs;
+    
+    /** These deltas are applied to the weights in the network */
+    std::vector<std::vector< std::vector<T> > > deltaWeights;
+    std::vector<T> deltaHiddenOutput;
+    
+    /** Parameters and functions for calculating amount of change for each weight */
+    T outputErrorGradient;
+    inline T getHiddenErrorGradient(int layer, int neuron);
+    
+    void initTrainer();
+    
+    /** Propagate output error back through the network.
+     * @param The desired output of the network is fed into the function, and compared with the actual output
+     */
+    void backpropagate(const T &desiredOutput);
+    
+    /** Apply corrections to network weights, based on output error */
+    void updateWeights();
+};
+
+#endif

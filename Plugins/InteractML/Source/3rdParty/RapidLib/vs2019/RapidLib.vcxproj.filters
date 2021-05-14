@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{b21ec847-ffc2-4a5c-9bea-91951bb8bbb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dependencies">
+      <UniqueIdentifier>{90d28974-ceb8-4fd9-8f71-cb19ac371e9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dependencies\bayesfilter">
+      <UniqueIdentifier>{8a169a16-bb15-45e9-98dd-1dde56a1b949}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dependencies\json">
+      <UniqueIdentifier>{2f0fa82a-00c8-408f-98b0-84c86bda47a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dependencies\libsvm">
+      <UniqueIdentifier>{22acf0a9-9ab8-4cbd-b7a1-53e9d11d9f99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dependencies\bayesfilter\src">
+      <UniqueIdentifier>{6d38bb04-0b0f-432b-a498-baddcaf39e76}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\baseModel.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\classification.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\dtw.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\fastDTW.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\knnClassification.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\modelSet.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\neuralNetwork.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\rapidStream.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\regression.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\searchWindow.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\seriesClassification.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\svmClassification.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\trainingExample.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\warpPath.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\bayesfilter\src\BayesianFilter.h">
+      <Filter>dependencies\bayesfilter\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\bayesfilter\src\filter_utilities.h">
+      <Filter>dependencies\bayesfilter\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\json\json.h">
+      <Filter>dependencies\json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\json\json-forwards.h">
+      <Filter>dependencies\json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dependencies\libsvm\libsvm.h">
+      <Filter>dependencies\libsvm</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\classification.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dtw.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\fastDTW.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\knnClassification.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\modelSet.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\neuralNetwork.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\rapidStream.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\regression.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\searchWindow.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\seriesClassification.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\svmClassification.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\warpPath.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dependencies\bayesfilter\src\BayesianFilter.cpp">
+      <Filter>dependencies\bayesfilter\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dependencies\bayesfilter\src\filter_utilities.cpp">
+      <Filter>dependencies\bayesfilter\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dependencies\libsvm\libsvm.cpp">
+      <Filter>dependencies\libsvm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dependencies\jsoncpp.cpp">
+      <Filter>dependencies</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
