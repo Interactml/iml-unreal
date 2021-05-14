@@ -9,12 +9,11 @@
 #include "MachineLearningModel.generated.h"
 
 
+
 USTRUCT(BlueprintType)
 struct INTERACTMLUE_API FDataInstance
 {
 	GENERATED_USTRUCT_BODY()
-
-public:
 
 	UPROPERTY()
 	TArray<float> inputs;
@@ -28,9 +27,7 @@ struct INTERACTMLUE_API FDataInstanceSeriesMember
 {
 	GENERATED_USTRUCT_BODY()
 
-public:
 	TArray<float> inputSeries;
-
 };
 
 USTRUCT(BlueprintType)
@@ -38,13 +35,10 @@ struct INTERACTMLUE_API FDataInstanceSeries
 {
 	GENERATED_USTRUCT_BODY()
 
-public:
-
 	UPROPERTY()
 	TArray<FDataInstanceSeriesMember> inputSeries;
 	UPROPERTY()
 	FString label;
-
 };
 
 
@@ -114,6 +108,8 @@ public:
 	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Machine Learning")
 	void *m_modelPtr = NULL;
 
+
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Machine Learning")
 	TArray<FDataInstance> m_dataset;
 
@@ -165,6 +161,13 @@ public:
 
 	// Sets default values for this component's properties
 	UMachineLearningModel();
+
+
+	//temp JSON handling
+	UFUNCTION( BlueprintCallable, Category = "Machine Learning" )
+	void SaveDatasetAsJson( FString file_path, bool& success );
+	UFUNCTION( BlueprintCallable, Category = "Machine Learning" )
+	void LoadDatasetFromJson( FString file_path, bool& success );
 
 protected:
 	// Called when the game starts

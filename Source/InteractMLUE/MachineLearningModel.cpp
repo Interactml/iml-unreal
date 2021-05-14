@@ -431,4 +431,90 @@ void UMachineLearningModel::TickComponent(float DeltaTime, ELevelTick TickType, 
 }
 
 
+// read text from a file on disk into a string
+//
+FString LoadString( FString file_path, bool& success )
+{
+    IPlatformFile& file_api = FPlatformFileManager::Get().GetPlatformFile();
+    if(file_api.FileExists( *file_path ))
+    {
+        FString string;
+        if(FFileHelper::LoadFileToString( string, *file_path ))
+        {
+            success = true;
+            return string;
+        }
+    }
+
+    success = false;
+    return "";
+}
+
+// save a string out to a file on disk
+//
+void SaveString( FString file_path, FString string, bool& success )
+{
+    FStringView whole_string( string );
+    if(FFileHelper::SaveStringToFile( whole_string, *file_path ))
+    {
+        success = true;
+        return;
+    }
+
+    success = false;
+    return;
+}
+
+
+// save the dataset as JSON string to a file
+//
+void UMachineLearningModel::SaveDatasetAsJson( FString file_path, bool& success )
+{  
+    //convert object to json
+    FString json_string;
+
+    //have to manually convert array to json string
+    TArray<TSharedPtr<FJsonValue>> data_values;
+    for(const FDataInstance& data_inst : m_dataset)
+    {
+        TSharedPtr<FJsonObject> data_inst_object = FJsonObjectConverter::UStructToJsonObject( data_inst );
+        if(data_inst_object.IsValid())
+        {
+            data_values.Add( MakeShared<FJsonValueObject>( data_inst_object ) );
+        }
+    }
+    TSharedRef<FJsonValueArray> ValuesArrayValue = MakeShared<FJsonValueArray>( data_values );
+    TSharedRef<TJsonWriter<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>> JsonWriter = TJsonWriterFactory<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>::Create( &json_string );
+    FJsonSerializer::Serialize( ValuesArrayValue, FString(), JsonWriter );
+
+    //save
+    success = false;
+    SaveString( file_path, json_string, success );
+}
+
+// load the dataset from a JSON file
+//
+void UMachineLearningModel::LoadDatasetFromJson( FString file_path, bool& success )
+{
+    //clear existing (even if failed)
+    m_dataset.Empty();
+
+    //load
+    success = false;
+    FString json_string = LoadString( file_path, success );
+    if(success)
+    {
+        //wrapped
+        if(FJsonObjectConverter::JsonArrayStringToUStruct( json_string, &m_dataset, 0, 0 ))
+        {
+            success = true;
+        }
+    }
+
+    //init in/out counts
+    if(m_dataset.Num() > 0)
+    {
+        SetUpInputsOutputs( m_dataset[0] );
+    }
+}
 
