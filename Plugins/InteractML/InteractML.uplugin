@@ -23,6 +23,12 @@
 			"WhitelistPlatforms": "Win64"
 		},
 		{
+			"Name": "InteractMLScripting",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": "Win64"
+		},
+		{
 			"Name": "InteractMLEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default",

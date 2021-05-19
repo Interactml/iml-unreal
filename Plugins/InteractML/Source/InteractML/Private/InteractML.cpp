@@ -12,7 +12,7 @@
 //module
 
 // PROLOGUE
-#define LOCTEXT_NAMESPACE "FInteractMLModule"
+#define LOCTEXT_NAMESPACE "InteractML"
 DEFINE_LOG_CATEGORY(LogInteractML);
 
 // CONSTANTS & MACROS

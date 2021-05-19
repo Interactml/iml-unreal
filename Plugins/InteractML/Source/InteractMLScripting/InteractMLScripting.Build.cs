@@ -4,10 +4,11 @@
 
 using UnrealBuildTool;
 using System.IO;
+using System.Diagnostics;
 
-public class InteractMLEditor : ModuleRules
+public class InteractMLScripting : ModuleRules
 {
-	public InteractMLEditor(ReadOnlyTargetRules Target) : base(Target)
+	public InteractMLScripting(ReadOnlyTargetRules Target) : base(Target)
 	{
 		//normal
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
@@ -17,38 +18,30 @@ public class InteractMLEditor : ModuleRules
 			{
 			}
 			);			
-		
+
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
+				//higher level engine modules
 				"Core",
 				"Projects",
-				"UnrealEd",
-				"Engine",
-				"AssetTools",
-				"EditorStyle",
-				"Kismet",	//for SContentReference
-				
+
 				// ... add other public dependencies that you statically link with here ...
-				"InteractML",
-				"InteractMLScripting"
+				"InteractML"
 			}
 			);		
 		
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
-			{
+			{			
+				//fundamental unreal modules
 				"CoreUObject",
+				"Engine",
 				"Slate",
 				"SlateCore",
-				"PropertyEditor",
-				"EditorWidgets",
-				"InputCore",
-				"BlueprintGraph",	//UK2Node
-				"KismetCompiler",	//FKismetCompilerContext
-				}
-			);
-
+			}
+			);		
+		
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{

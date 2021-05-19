@@ -2,7 +2,7 @@
 // InteractML - University Of Arts London
 //----
 
-#include "InteractMLEditor.h"
+#include "InteractMLScripting.h"
 
 //unreal
 #include "Modules/ModuleManager.h"
@@ -27,9 +27,9 @@ DEFINE_LOG_CATEGORY(LogInteractML);
 //
 // This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
 //
-void FInteractMLEditorModule::StartupModule()
+void FInteractMLScriptingModule::StartupModule()
 {
-	UE_LOG( LogInteractML, Display, TEXT( "Starting InteractML Plugin - Editor Module" ) );
+	UE_LOG( LogInteractML, Display, TEXT( "Starting InteractML Plugin - Scripting Module" ) );
 
 }
 
@@ -39,13 +39,13 @@ void FInteractMLEditorModule::StartupModule()
 // This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 // we call this function before unloading the module.
 //
-void FInteractMLEditorModule::ShutdownModule()
+void FInteractMLScriptingModule::ShutdownModule()
 {
-	UE_LOG( LogInteractML, Display, TEXT( "Stopping InteractML Plugin - Editor Module" ) );
+	UE_LOG( LogInteractML, Display, TEXT( "Stopping InteractML Plugin - Scripting Module" ) );
 
 }
 
 // EPILOGUE
 #undef LOCTEXT_NAMESPACE
-IMPLEMENT_MODULE(FInteractMLEditorModule, InteractMLEditor)
+IMPLEMENT_MODULE(FInteractMLScriptingModule, InteractMLScripting)
 

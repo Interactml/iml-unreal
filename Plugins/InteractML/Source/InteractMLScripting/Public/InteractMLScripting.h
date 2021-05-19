@@ -16,9 +16,9 @@
 DECLARE_LOG_CATEGORY_EXTERN(LogInteractML, Log, All);
 
 
-// InteractML editor only module
+// InteractML scripting support module
 //
-class INTERACTMLEDITOR_API FInteractMLEditorModule 
+class INTERACTMLSCRIPTING_API FInteractMLScriptingModule 
 	: public IModuleInterface
 {
 
