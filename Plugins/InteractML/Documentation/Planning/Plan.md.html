@@ -1,0 +1,117 @@
+<meta charset="utf-8" emacsmode="-*- markdown -*-"> <link rel="stylesheet" href="https://casual-effects.com/markdeep/latest/journal.css?">
+                        **IML-UE4 Plan 1**
+				13/5/2021 - Sam, Clarice, Carlos
+
+Notes from discussing the thoughts/feedback/goals documents.
+
+### InteractML Wrapper
+* The use of `double` vs `float` datatypes
+	* Not sure of precident, need to check with Michael
+	* May not be of concern as we aren't talking about huge amounts of data/rates
+	* Blueprints don't support doubles so will need to convert anyway
+<font color="silver">
+
+* It's worth removing the interop layer between plugin and InteractML
+	* Simplifies codebase
+	* Less conversion, fewer places for things to go wrong
+	* Static link of DLL or even better, direct link of code reduces complexity of final plugin
+	* Note though that some error handling and data valication needed (that the wrapper does), but this a is pretty standard requirement
+</font>
+
+### Node Graphs / Blueprints
+* We can leverage the huge amount of existing BP functions (e.g. input processing, output handling)
+* We want multiple pins for IO where more than on value is provided to an algorithm
+* We expect new node types to support new algorithms as they are added in future
+* Unity implementation notes:
+	* Graph is a unity asset (Scriptable Object) in project
+	* Requires a scene component to link scene objects to asset (mapping layer)
+	* Visualisation state stored in nodes too
+	* At runtime the graph just has/uses: model/examples, logic
+	* The 'number on title' of the nodes in Unity is temp for identifying model (VR UI)
+* It's going to be worth preparing a few mockups of how the UI/UX will work for the blueprint and editor workflow
+	* How input values will be sourced
+	* How inputs are added and removed
+	* How training data will be constructed
+	* How training is performed
+	* How models are associated with their file data
+	* How values are visualised
+	* How models are run
+	* How output values will be applied
+### Training / Model Data
+* We need it stored/accessible externally
+	* Partly for processing/generation by external tools
+	* Allows for adding of data/models at runtime with a standalone app
+* There is potential to expose data internally as assets too
+	* Helps management (conforms to Unreal methodology)
+	* Allows references, drag/drop, etc.
+	* However, the need to support runtime use of new data causes issues
+* More thought needed.
+	* Review implications, e.g. switching data dynamically
+	* Support for importing at runtime
+	* Assets provide vastly improved UX over loose files (which will require some management UI)
+	* Maybe two paths, direct to/from files at runtime (since it's an advanced use case?)
+
+### Performance
+* We should adopt an event-based approach in blueprint implementation from the start, that-is:
+	* Node to start training/model after inputs processed
+	* Event fires when complete for result handling
+* We can provide a 'Wait' node to simplify graphs where you don't care about pausing
+* This preparation means it's a well scoped piece of work later to upgrade to threaded/jobs-based operation
+* It was noted that some model execution can be quite slow and so needs this feature eventually for smooth application operation
+* Also that training can take a *really* long time (minutes)
+	* This has UI implications, we will need to convey this to the user
+	* Ideally we should investigate 'progress' and 'cancel' support eventually
+
+### Blueprints
+* Need to investigate running scripts in editor (edit mode)
+	* This would help match the Unity experience and be a better UX
+	* Clues to followup: "editor events", "blutility" scripts
+* If not possible then training and running will only be possible in Sim/Play mode
+* For most training/operation it only makes sense to have the full input/visualisation running anyway (e.g. Controller inputs, and VR headset)
+
+## Action Points
+* Ask Michael about use of doubles in ML and RapidLib --> **Who?**
+* Branch structure and use
+	* Recommendation on repo branch/naming/use conventions --> **Sam**
+	* (See below)
+* Prepare some mockups of the main UI/UX aspects of a blueprint implementation for review --> **Sam**
+* Investigate blueprint execution in editor mode --> **Sam**
+* First tasks to tackle are:
+	* Branching/setup --> **Sam, Clarice**
+	* Remove dependency on JSON plugins (this week) --> **Sam**
+	* Start on Unreal Plugin structure (maybe this week) --> **Sam**
+* Some thought needed on training/model Data storage and use of Assets
+	* Further investigation of the codebase and existing plugin --> **Sam**
+	* Introduction to some of the plugin use cases --> **Sam**
+		* Intro to their projects with with **Bruno & Ruth** (2:30pm)
+	* Either:
+		1. Formulate some recommendations on how to proceed now (speculative) --> **Sam**
+		2. Assume external files for now and see how it goes (more information needed)
+
+## Repo setup suggestion
+How does this look for a repo setup?
+
+
+* `master` <font color=silver>(not an ideal name IMHO)</font>
+* `feature` -- feature development, main tasks, client requests
+	* `feature/JSON-refactor` <font color=silver>(example)</font>
+	* `feature/...`
+* `bugfix` -- investigation/repro/fixing of issues
+	* `bugfix/shutdown-crash` <font color=silver>(example)</font>
+	* `bugfix/...`
+* `research` -- learning, trying things out, e.g. client support
+	* `research/trying-VR` <font color=silver>(example)</font>
+	* `research/...`
+
+Maybe `experimental` or `client` groupings would be useful/preferable?
+
+
+
+
+
+
+
+
+
+<style class="fallback">body{visibility:hidden}</style><script>markdeepOptions={tocStyle:'long'};</script>
+<!-- Markdeep: --><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js?" charset="utf-8"></script>
