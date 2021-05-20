@@ -179,6 +179,70 @@ bool UMachineLearningModel::importDLL(FString folder, FString name)
                 GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "failed to load dtw cost function");
                 return false;
             }
+            
+            m_dtwTrainingSeriesCollection = NULL;
+            procName = "createTrainingSeriesCollection";    // Needs to be the exact name of the DLL method.
+            m_dtwTrainingSeriesCollection = (_createTrainingSeriesCollection)FPlatformProcess::GetDllExport(v_dllHandle, *procName);
+            if (m_dtwTrainingSeriesCollection == NULL)
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "failed to load dtw training series function");
+                return false;
+            }
+            
+            m_addToSeries = NULL;
+            procName = "addInputsToSeries";    // Needs to be the exact name of the DLL method.
+            m_addToSeries = (_addInputsToSeries)FPlatformProcess::GetDllExport(v_dllHandle, *procName);
+            if (m_addToSeries == NULL)
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "failed to load dtw input to series");
+                return false;
+            }
+            
+            m_addLabelDTW = NULL;
+            procName = "addLabelToSeries";    // Needs to be the exact name of the DLL method.
+            m_addLabelDTW = (_addLabelToSeries)FPlatformProcess::GetDllExport(v_dllHandle, *procName);
+            if (m_addLabelDTW == NULL)
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "failed to load dtw label to series");
+                return false;
+            }
+            
+            m_dtwTrainingSeries = NULL;
+            procName = "createTrainingSeries";    // Needs to be the exact name of the DLL method.
+            m_dtwTrainingSeries = (_createTrainingSeries)FPlatformProcess::GetDllExport(v_dllHandle, *procName);
+            if (m_dtwTrainingSeries == NULL)
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "failed to load dtw create series");
+                return false;
+            }
+            
+            m_addSeriesToDTWCollection = NULL;
+            procName = "addSeriesToSeriesCollection";    // Needs to be the exact name of the DLL method.
+            m_addSeriesToDTWCollection = (_addSeriesToSeriesCollection)FPlatformProcess::GetDllExport(v_dllHandle, *procName);
+            if (m_addSeriesToDTWCollection == NULL)
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "failed to load dtw create series");
+                return false;
+            }
+            
+            m_trainDTWFromDLL = NULL;
+            procName = "trainSeriesClassification";    // Needs to be the exact name of the DLL method.
+            m_trainDTWFromDLL = (_trainSeriesClassification)FPlatformProcess::GetDllExport(v_dllHandle, *procName);
+            if (m_trainDTWFromDLL == NULL)
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "failed to load dtw train series");
+                return false;
+            }
+            
+            
+            m_destroyDTWDLLTrainingSet = NULL;
+            procName = "destroyTrainingSeriesCollection";    // Needs to be the exact name of the DLL method.
+            m_destroyDTWDLLTrainingSet = (_destroyTrainingSeriesCollection)FPlatformProcess::GetDllExport(v_dllHandle, *procName);
+            if (m_destroyDTWDLLTrainingSet == NULL)
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "failed to load dtw destroy training set");
+                return false;
+            }
 
             //std::stringstream ss;
             //ss << v_dllHandle;
@@ -255,11 +319,68 @@ bool UMachineLearningModel::addTrainingData(TArray<float> input, TArray<float> o
     return true;
 }
 
+bool UMachineLearningModel::stopCollecting() {
+    if (collecting) {
+        collecting = false;
+        if (m_datasetSeriesSingle.inputSeries.Num() > 0 && !m_datasetSeriesSingle.label.IsEmpty()) {
+            m_datasetSeries.Add(m_datasetSeriesSingle);
+            return true;
+        }
+    }
+    return collecting;
+}
+
+bool UMachineLearningModel::addTrainingDataSeries(FDataInstanceSeriesMember trainingSeriesMember, FString label) {
+    FDataInstanceSeriesMember data;
+    data = trainingSeriesMember;
+    // if this is the beginning of collecting data
+    if (!collecting) {
+        collecting = true;
+        // clear the previous dtw series 
+        m_datasetSeriesSingle.inputSeries.Empty();
+        // check if the label is empty 
+        if (!label.IsEmpty()) {
+            m_datasetSeriesSingle.label = label;
+        }
+        else {
+            GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "no label");
+            return false;
+        }
+            
+        
+            
+    }
+    if (data.inputData.Num() == m_numInputs) {
+        m_datasetSeriesSingle.inputSeries.Add(data);
+        return true;
+    }
+    else {
+        GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::FromInt(m_numInputs));
+    }
+    return false;
+}
+
 bool UMachineLearningModel::SetUpInputsOutputs(FDataInstance example) {
     bool setInputsOutputs = false;
     m_numInputs = example.inputs.Num();
     m_numOutputs = example.outputs.Num();
     if (m_numInputs > 0 && m_numOutputs > 0) {
+        setInputsOutputs = true;
+    }
+    return setInputsOutputs;
+}
+
+FDataInstanceSeriesMember UMachineLearningModel::SetUpSeriesStruct(TArray<float> inputs) {
+    m_datasetSeriesSingleMember.inputData = inputs;
+     
+    return m_datasetSeriesSingleMember;
+}
+
+bool UMachineLearningModel::SetUpInputsOutputsSerie(FDataInstanceSeriesMember example, FString label) {
+    bool setInputsOutputs = false;
+
+    m_numInputs = example.inputData.Num();
+    if (m_numInputs > 0) {
         setInputsOutputs = true;
     }
     return setInputsOutputs;
@@ -349,8 +470,10 @@ bool UMachineLearningModel::trainClassifier() {
         m_addTrainingExampleFromDLL(trainingSet, in, d.inputs.Num(), out, d.outputs.Num());
     }
 
+    // train DTW 
     bool result = m_trainClassificationFromDLL(m_modelPtr, trainingSet);
 
+    // destroy training set
     m_destroyTrainingSetFromDLL(trainingSet);
 
     return result;
@@ -361,7 +484,61 @@ bool UMachineLearningModel::trainClassifier() {
 /// </summary>
 /// <returns></returns>
 bool UMachineLearningModel::trainDTW() {
-    return true;
+    // check if there is training data
+    if (m_datasetSeries.Num() == 0) {
+
+        GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "no training data for dtw");
+        return false;
+    }
+
+    // check is model is null
+    if (m_modelPtr == NULL)
+    {
+        // check if method from dll is null 
+        if (m_createDTWModelFromDLL != NULL)
+        {
+            m_modelPtr = m_createDTWModelFromDLL();
+            if (m_modelPtr == NULL) {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+    }
+    // reset model
+    m_resetDTW(m_modelPtr);
+
+    // create dtw training set
+    void* trainingSeriesCollectionTemp = m_dtwTrainingSeriesCollection();
+
+    
+    for(FDataInstanceSeries dtwExample : m_datasetSeries) {
+        void* trainingSeriesTemp = m_dtwTrainingSeries();
+
+        for (FDataInstanceSeriesMember seriesItem : dtwExample.inputSeries) {
+            // copy data into plain c arrays
+            int j;
+            double* in = new double[seriesItem.inputData.Num()];
+            for (j = 0; j < seriesItem.inputData.Num(); j++) {
+                in[j] = seriesItem.inputData[j];
+            }
+            m_addToSeries(trainingSeriesTemp, in, seriesItem.inputData.Num());
+        }
+
+        // label the series
+        m_addLabelDTW(trainingSeriesTemp, *dtwExample.label);
+
+        // add series to collection 
+        m_addSeriesToDTWCollection(trainingSeriesCollectionTemp, trainingSeriesTemp);
+    }
+    // train ghe model 
+    bool result = m_trainDTWFromDLL(m_modelPtr, trainingSeriesCollectionTemp);
+    
+    //bool result = m_trainClassificationFromDLL(m_modelPtr, trainingSet);
+
+    //m_destroyTrainingSetFromDLL(trainingSet);
+    return result;
 }
 
 TArray<float> UMachineLearningModel::Run(TArray<float> input)

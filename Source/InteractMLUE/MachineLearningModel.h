@@ -29,7 +29,16 @@ struct INTERACTMLUE_API FDataInstanceSeriesMember
 	GENERATED_USTRUCT_BODY()
 
 public:
-	TArray<float> inputSeries;
+	TArray<float> inputData;
+
+	FDataInstanceSeriesMember() {
+
+	}
+
+
+	FDataInstanceSeriesMember(TArray<float> inputArray) {
+		inputData = inputArray;
+	}
 
 };
 
@@ -72,7 +81,7 @@ class INTERACTMLUE_API UMachineLearningModel : public UActorComponent
 	typedef void (*_destroyTrainingSet)(void*);
 	_destroyTrainingSet m_destroyTrainingSetFromDLL;
 
-	typedef void (*_addTrainingExample)(void*, double *inputs, int numInputs, double * outputs, int numOutputs);
+	typedef void (*_addTrainingExample)(void*, double *inputs, int numInputs, double *outputs, int numOutputs);
 	_addTrainingExample m_addTrainingExampleFromDLL;
 
 	typedef bool (*_trainRegression) (void*, void*);
@@ -81,7 +90,7 @@ class INTERACTMLUE_API UMachineLearningModel : public UActorComponent
 	typedef bool (*_trainClassification) (void*, void*);
 	_trainClassification m_trainClassificationFromDLL;
 
-	typedef int (*_run)(void*, double* inputs, int numInputs, double* outputs, int numOutputs);
+	typedef int (*_run)(void*, double *inputs, int numInputs, double *outputs, int numOutputs);
 	_run m_runFromDLL;
 	
 	typedef void* (*_createSeriesClassificationModel)(); // Declare a method to store the DLL method createRegressionModel.
@@ -99,23 +108,65 @@ class INTERACTMLUE_API UMachineLearningModel : public UActorComponent
 	typedef void* (*_runSeriesClassification)(void*, void*); // run dtw model
 	_runSeriesClassification m_runDTW;
 
-	typedef int* (*_getSeriesClassificationCosts)(void*, double* output, int numOutputs); // calculate costs of dtw model
+	typedef int* (*_getSeriesClassificationCosts)(void*, double *output, int numOutputs); // calculate costs of dtw model
 	_getSeriesClassificationCosts m_dtwCost;
+	
+	typedef int* (*_createTrainingSeriesCollection)(); // create training series collection
+	_createTrainingSeriesCollection m_dtwTrainingSeriesCollection;
+	
+	typedef int* (*_createTrainingSeries)(); // create training series example
+	_createTrainingSeries m_dtwTrainingSeries;
+	
+	//add example to the dtw series collection param 1 address to add to param 2 address to add
+	typedef void* (*_addSeriesToSeriesCollection)(void*, void*); 
+	_addSeriesToSeriesCollection m_addSeriesToDTWCollection;
+	
+	// destroy series training set 
+	typedef void* (*_destroyTrainingSeriesCollection)(void*);
+	_destroyTrainingSeriesCollection m_destroyDTWDLLTrainingSet;
+	
+	typedef void* (*_addInputsToSeries)(void*, double *inputs, int numInputs); // create training series 
+	_addInputsToSeries m_addToSeries;
+	
+	typedef void* (*_addLabelToSeries)(void*, const TCHAR* label); // create training series 
+	_addLabelToSeries m_addLabelDTW;
 	
 
 	void* v_dllHandle;
 
 	int m_numInputs = -1;
 	int m_numOutputs = -1;
+	
+	bool collecting = false; 
 
 public:	
 
 
 	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Machine Learning")
 	void *m_modelPtr = NULL;
-
+	/// <summary>
+	/// Array of training examples for regression/ classification
+	/// </summary>
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Machine Learning")
 	TArray<FDataInstance> m_dataset;
+
+	/// <summary>
+	/// Array of training example series for DTW
+	/// </summary>
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Machine Learning")
+	TArray<FDataInstanceSeries> m_datasetSeries;
+
+	/// <summary>
+	/// Single series for holding current DTW training recording 
+	/// </summary>
+	UPROPERTY(BlueprintReadWrite, Category = "Machine Learning")
+	FDataInstanceSeries m_datasetSeriesSingle;
+	
+	/// <summary>
+	/// Single series for hold the current frame of dtw
+	/// </summary>
+	UPROPERTY(BlueprintReadWrite, Category = "Machine Learning")
+	FDataInstanceSeriesMember m_datasetSeriesSingleMember;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Machine Learning")
 	FString m_dllFolder = "RapidLib";
@@ -130,8 +181,6 @@ public:
 	FString filepath = *FPaths::ProjectContentDir() + m_TrainingExamplesFolder + "/";
 
 
-
-
 	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
 	bool importDLL(FString folder, FString name);
 
@@ -144,6 +193,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
 	bool addTrainingData(TArray<float> input, TArray<float> output);
 	
+	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
+	bool addTrainingDataSeries(FDataInstanceSeriesMember trainingSeriesMember, FString label);
+	
+	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
+	bool stopCollecting();
 
 	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
 	bool trainRegressor();
@@ -162,6 +216,12 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
 	bool SetUpInputsOutputs(FDataInstance example);
+	
+	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
+	bool SetUpInputsOutputsSerie(FDataInstanceSeriesMember example, FString label);
+	
+	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
+	FDataInstanceSeriesMember SetUpSeriesStruct(TArray<float> inputs);
 
 	// Sets default values for this component's properties
 	UMachineLearningModel();
