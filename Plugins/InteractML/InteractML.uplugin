@@ -3,22 +3,38 @@
 	"Version": 1,
 	"VersionName": "1.0",
 	"FriendlyName": "InteractML",
-	"Description": "",
-	"Category": "Other",
-	"CreatedBy": "",
-	"CreatedByURL": "",
+	"Description": "Visual Machine Learning Scripting",
+	"Category": "Machine Learning",
+	"CreatedBy": "University Of Arts London",
+	"CreatedByURL": "https://interactml.com/",
 	"DocsURL": "",
 	"MarketplaceURL": "",
 	"SupportURL": "",
+	"EngineVersion" : "4.26.0",
 	"CanContainContent": true,
-	"IsBetaVersion": false,
-	"IsExperimentalVersion": false,
+	"IsBetaVersion": true,
+	"IsExperimentalVersion": true,
 	"Installed": false,
 	"Modules": [
 		{
 			"Name": "InteractML",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": "Win64"
+		},
+		{
+			"Name": "InteractMLScripting",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": "Win64"
+		},
+		{
+			"Name": "InteractMLEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": "Win64"
 		}
+	],
+    "Plugins":[
 	]
 }

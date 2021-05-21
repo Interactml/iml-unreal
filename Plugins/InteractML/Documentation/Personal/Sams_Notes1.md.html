@@ -1,0 +1,143 @@
+<meta charset="utf-8" emacsmode="-*- markdown -*-"> <link rel="stylesheet" href="https://casual-effects.com/markdeep/latest/journal.css?">
+                        **IML-UE4 Thoughts**                           
+				Sam Swain - 15/5/2021
+
+Initial notes, impressions, and thoughts on the Unreal version of InteractML
+
+## RapidLib API
+
+* [Main Library](http://doc.gold.ac.uk/eavi/rapidmix/docs_cpp/index.html)
+* [API Diagram](http://doc.gold.ac.uk/eavi/rapidmix/docs_cpp/base_model_8h.html)
+* [API Docs](http://doc.gold.ac.uk/eavi/rapidmix/docs_cpp/annotated.html)
+* [Original Github repo](https://github.com/mzed/RapidLib)
+### Thoughts
+* Uses JSON as storage and state persistence format
+### Wrapper
+* [Wrapper around RapidLib](https://github.com/carlotes247/Rapidlib-dll)
+* Includes copy/fork of RapidLib repo
+* Why are doubles used? RapidLib is type agnostic (templated)
+* I though floats/half were fine for ML?
+* What does wrapper add?
+	* interop layer for Unity/C#
+	* fixes, error handling, and bug isolation
+* better to integrate directly into Unreal?
+	* No need for JSON at all (i.e. just passthrough the text to UE asset)
+	* Direct data passing, float/double collections, etc.
+
+---
+
+## InteractML Nodes doc
+
+* [Node reference](https://docs.google.com/presentation/d/10tGQ9feqE5WIueDOkvZ2yNKMegDcaF0VTwe1A6Z_8rg/edit#slide=id.p)
+### Thoughts
+* Game object
+	* Position/etc - transform only in Unity
+	* Not needed with BPs
+* Distance to first input node
+	* Naming issue - verbose, obfuscates.  Suggest just "Distance" or "Distance Between"
+	* Need to disinguish between this and *difference*?
+	* Not needed with BPs
+* Teach The Machine Single Training
+	* What's the number at end of title for?
+	* Typo in desc "trainging"
+	* Multiple pins for Live Data and Labels
+	* Locked once recording happened
+
+### Questions / Thoughts
+* What about other properties than just object transform? (BP would allow any)
+* What about more types (e.g. colour, string)
+* Is it known that Quaternion as source has any advantages over Euler for ML?
+	* Maybe due to better suitability for interpolation (SLERP)?
+	* Need both? Maybe for custom filtering/preprocessing?
+* Training data
+	* Def needs to be an asset
+	* It needs to be easy to switch between example sets (same for trained models)
+	* e.g. switching player control profiles
+	* Allows re-use and multiple instances of same system
+	* Training can happen in a different context to running the model
+	* Thinking more general, allows for all sorts of set-ups
+	* Enables organisation and management of data in project, not embedded in a single object
+	* Defaults and in-node tools can help with setting up the simpler use cases
+	* Data seems very 'transient' i.e. delete/retrain easy to do and all kept 'in the node'
+	* Navigation of training data structure to allow better management would be really helpful, this is where separate asset would help, i.e. custom view/window/tools for it
+	* Could then include visualisations (graphs/plots) in sub-window on asset
+* Why single node with two modes, why not separate for Classification vs Regression?
+	* May not be possible to know the downstream MLS node (e.g. could have switching logic that selects the training data)
+* It's a little unfortunate that the ML term "Examples" is required as seeing this on things triggers the expectation that this is *an example of how to do something in the editor* and not training data.
+* Node state can't be saved in a standalone build (immutable cooked scene data), this applies to Unity/scene-objects and UE4/level-actors (assets too).
+	* Is it a requirement that users can build standalone apps that support persistent example recording or training?
+* Performance
+	* Some relatively simple operations already stall Unity (e.g. DTW of a few paths)
+	* Most interactive applications only have ~30ms (30Hz) or ~16ms (60Hz) to get *everything* on the main game thread done.
+	* For VR this is even shorter (~10ms?) and even small stalls are really problematic.
+	* This implies that running the models (and perhaps training too) need to be asynchronously executed (off the main thread), and then the results sync'd back with the main thread.  This also implies an event based BP model is needed, not the normal flow graph.
+	* Performance of JSON as an intermediate format will need profiling, although this is potentially only an issue at model loading time and only be a problem if models are being switched dynamically.
+
+
+### Unreal implementation questions/thoughts
+	* Visualise dynamic data values?
+		* Can we have custom UI on nodes? - perhaps details panel only
+		* Or maybe some visualisation nodes - add so values appear on screen
+		* Debug/train mode to show them?
+	* Can we run train/test in editor mode?
+		* May have to be in Simulate mode perhaps?
+	* Data management
+		* Can certainly provide buttons on nodes (or details panel), e.g. for delete of data
+
+---
+
+## iml-ue4 repo
+
+* [Kanban](https://github.com/Interactml/iml-ue4/projects/1)
+### Thoughts
+* JSON
+	* JSON is supported in Unreal natively, shouldn't need BP support (plugins)
+	* User shouldn't see any JSON related stuff
+	* It's using two plugins for JSON:
+		1. Blueprint Json - free
+		2. Kantan Auto Json - paid
+* Plugin structure
+	* Not set up as a full Unreal Plugin (is in game-code)
+* DLL handling
+	* Dynamic load/unload - not needed, could possibly even link it in
+	* Is there a reason not to set up once at startup?
+	* Passing lots of JSON around is nasty, investigate API for better alternatives
+* Blueprint use
+	* A lot of setup/checks should be part of plugin init
+	* UX should just have equivalents to Unity
+* Persistent data
+	* Training data and Model data should be assets
+	* Makes referencing them easier too
+
+### MLTest Blueprint
+Looking at what's going on in the test ML Blueprint
+
+* Begin Play
+	* Set Fullpath = filepath + filename
+* Tick
+	* 0 - top
+		* DLL load
+		* Read JSON
+		* Set up dataset (inputs/outputs)
+		* Switch on algorithm
+		* Train
+		* failed = needs retraining
+	* 0 - middle
+		* run model
+		* feed in live input
+	* 0 - lower
+		* add live data (record)
+		* write to file (JSON)
+	* 1+ - feed VR mode state
+		* Do Collect Data
+		* Do Run
+		* My Output Value
+		* Delete Data
+			* Delete file
+
+
+-----
+
+[MarkDeep Reference](https://casual-effects.com/markdeep/features.md.html)
+<style class="fallback">body{visibility:hidden}</style><script>markdeepOptions={tocStyle:'long'};</script>
+<!-- Markdeep: --><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js?" charset="utf-8"></script>
