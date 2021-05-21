@@ -24,3 +24,6 @@ Intermediate
 
 # Generated solution project files
 InteractMLUE.sln
+
+#3rd party plugins
+**/BlockoutToolsPlugin
