@@ -1,20 +1,20 @@
 <meta charset="utf-8" emacsmode="-*- markdown -*-"> <link rel="stylesheet" href="https://casual-effects.com/markdeep/latest/journal.css?">
-                        **IML-UE4 Plan 1**
-				13/5/2021 - Sam, Clarice, Carlos
-
-Notes from discussing the thoughts/feedback/goals documents.
+                        **IML-UE4 Plan**
+				13/5/2021 - Original meeting (Sam, Clarice, Carlos)
+				21/5/2021 - Status update (Sam)
 
 ### InteractML Wrapper
 * The use of `double` vs `float` datatypes
 	* Not sure of precident, need to check with Michael
 	* May not be of concern as we aren't talking about huge amounts of data/rates
 	* Blueprints don't support doubles so will need to convert anyway
+
 <font color="silver">
 
-* It's worth removing the interop layer between plugin and InteractML
+[x] It's worth removing the interop layer between plugin and InteractML
 	* Simplifies codebase
 	* Less conversion, fewer places for things to go wrong
-	* Static link of DLL or even better, direct link of code reduces complexity of final plugin
+	* <strike>Static link of DLL or even better,</strike> direct link of code reduces complexity of final plugin
 	* Note though that some error handling and data valication needed (that the wrapper does), but this a is pretty standard requirement
 </font>
 
@@ -37,6 +37,7 @@ Notes from discussing the thoughts/feedback/goals documents.
 	* How values are visualised
 	* How models are run
 	* How output values will be applied
+
 ### Training / Model Data
 * We need it stored/accessible externally
 	* Partly for processing/generation by external tools
@@ -50,6 +51,7 @@ Notes from discussing the thoughts/feedback/goals documents.
 	* Support for importing at runtime
 	* Assets provide vastly improved UX over loose files (which will require some management UI)
 	* Maybe two paths, direct to/from files at runtime (since it's an advanced use case?)
+	* Implications for re-use
 
 ### Performance
 * We should adopt an event-based approach in blueprint implementation from the start, that-is:
@@ -70,23 +72,26 @@ Notes from discussing the thoughts/feedback/goals documents.
 * For most training/operation it only makes sense to have the full input/visualisation running anyway (e.g. Controller inputs, and VR headset)
 
 ## Action Points
-* Ask Michael about use of doubles in ML and RapidLib --> **Who?**
-* Branch structure and use
-	* Recommendation on repo branch/naming/use conventions --> **Sam**
-	* (See below)
-* Prepare some mockups of the main UI/UX aspects of a blueprint implementation for review --> **Sam**
-* Investigate blueprint execution in editor mode --> **Sam**
-* First tasks to tackle are:
-	* Branching/setup --> **Sam, Clarice**
-	* Remove dependency on JSON plugins (this week) --> **Sam**
-	* Start on Unreal Plugin structure (maybe this week) --> **Sam**
-* Some thought needed on training/model Data storage and use of Assets
-	* Further investigation of the codebase and existing plugin --> **Sam**
-	* Introduction to some of the plugin use cases --> **Sam**
-		* Intro to their projects with with **Bruno & Ruth** (2:30pm)
-	* Either:
+[ ] Ask Michael about use of doubles in ML and RapidLib --> **Who?**
+[x] Branch structure and use
+	[x] Recommendation on repo branch/naming/use conventions --> **Sam**
+	[x] (See below)
+[x] Prepare some mockups of the main UI/UX aspects of a blueprint implementation for review --> **Sam**
+	[x] See [blueprint mockups doc](https://docs.google.com/document/d/1X3iPo-pokY6ueL8ffgX8R4Q_4x9aiyw8PF1IUgatoMY/edit#heading=h.qfgkk8hykrms)
+[x] Investigate blueprint execution in editor mode --> **Sam**
+	[x] Yes, this is possible if needed
+[x]  First tasks to tackle are:
+	[x] Branching/setup --> **Sam, Clarice**
+	[x] Remove dependency on JSON plugins (this week) --> **Sam**
+	[x] Start on Unreal Plugin structure (maybe this week) --> **Sam**
+[x]  Some thought needed on training/model Data storage and use of Assets
+	[x]  Further investigation of the codebase and existing plugin --> **Sam**
+	[x]  Introduction to some of the plugin use cases --> **Sam**
+		[x]  Intro to their projects with with **Bruno & Ruth** (2:30pm)
+	[x]  Either:
 		1. Formulate some recommendations on how to proceed now (speculative) --> **Sam**
 		2. Assume external files for now and see how it goes (more information needed)
+		[x] Both are needed to get going.
 
 ## Repo setup suggestion
 How does this look for a repo setup?
@@ -103,7 +108,6 @@ How does this look for a repo setup?
 	* `research/trying-VR` <font color=silver>(example)</font>
 	* `research/...`
 
-Maybe `experimental` or `client` groupings would be useful/preferable?
 
 
 
