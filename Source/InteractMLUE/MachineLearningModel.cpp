@@ -209,6 +209,7 @@ bool UMachineLearningModel::trainDTW(TArray<FDataInstanceSeries> trainingDataSer
             double* in = new double[seriesItem.inputData.Num()];
             
             // Add external feature to it
+            tempFeatureVector.clear();
             for (int i = 0; i < seriesItem.inputData.Num(); i++) {
                 tempFeatureVector.push_back(seriesItem.inputData[i]);
             }
@@ -308,11 +309,11 @@ FString UMachineLearningModel::StopPopulatingDTW(){
             series->input.push_back(m_populatingSet[i]);
         }
         // code causing crash 
-        /*std::string predOutput = m_dtwModel->run(series->input);
+        std::string predOutput = m_dtwModel->run(series->input);
         delete series;
         m_populatingSet.clear();
         FString output = predOutput.c_str();
-        return output;*/
+        return output;
     }
     m_populatingSet.clear();
     return "empty";
