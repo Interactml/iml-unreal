@@ -65,6 +65,7 @@ bool UMachineLearningModel::stopCollecting() {
 bool UMachineLearningModel::addTrainingDataSeries(FDataInstanceSeriesMember trainingSeriesMember, FString label) {
     FDataInstanceSeriesMember data;
     data = trainingSeriesMember;
+
     // if this is the beginning of collecting data
     if (!collecting) {
         collecting = true;
@@ -78,9 +79,7 @@ bool UMachineLearningModel::addTrainingDataSeries(FDataInstanceSeriesMember trai
             GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "no label");
             return false;
         }
-            
-        
-            
+             
     }
     if (data.inputData.Num() == m_numInputs) {
         m_datasetSeriesSingle.inputSeries.Add(data);
@@ -104,7 +103,6 @@ bool UMachineLearningModel::SetUpInputsOutputs(FDataInstance example) {
 
 FDataInstanceSeriesMember UMachineLearningModel::SetUpSeriesStruct(TArray<float> inputs) {
     m_datasetSeriesSingleMember.inputData = inputs;
-     
     return m_datasetSeriesSingleMember;
 }
 
@@ -181,7 +179,7 @@ bool UMachineLearningModel::trainClassifier()
 /// trains dynamic time warping
 /// </summary>
 /// <returns></returns>
-bool UMachineLearningModel::trainDTW() {
+bool UMachineLearningModel::trainDTW(TArray<FDataInstanceSeries> trainingDataSeries) {
     // check if there is training data
     if (m_datasetSeries.Num() == 0) {
 
@@ -259,6 +257,67 @@ TArray<float> UMachineLearningModel::Run(TArray<float> input)
 	}
 	return results;
 }
+
+
+bool UMachineLearningModel::PopulatingLogic(TArray<float> input){
+    
+    TArray<float> inputData = input;
+
+    if (m_dtwModel == NULL)
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "model null");
+        return false;
+    } 
+
+    if (!running)
+    {
+        running = true;
+        return true;
+    } 
+
+    GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "populate");
+
+    if (running) {
+        if (m_numInputs == input.Num()) {
+            std::vector<double> tempExamp;
+            for (int i = 0; i < input.Num(); i++) {
+                tempExamp.push_back(input[i]);
+                GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::SanitizeFloat(input[i]));
+            }
+            m_populatingSet.push_back(tempExamp);
+            return true;
+        }
+    }
+    
+    return false;
+
+    
+}
+/// <summary>
+/// Stop dtw which runs dtw model on movement just performed
+/// </summary>
+/// <returns>output of the model or empty if did not work</returns>
+FString UMachineLearningModel::StopPopulatingDTW(){
+    // if dtwmodel is not null the populating set is not empty and the system was previously running
+    if (m_dtwModel != NULL && !m_populatingSet.empty() && running) {
+        // set running to false so it doesn't run again
+        running = false;
+        //create training set
+        trainingSeries *series = new trainingSeries();
+        for (int i = 0; i < m_populatingSet.size(); i++) {
+            series->input.push_back(m_populatingSet[i]);
+        }
+        // code causing crash 
+        /*std::string predOutput = m_dtwModel->run(series->input);
+        delete series;
+        m_populatingSet.clear();
+        FString output = predOutput.c_str();
+        return output;*/
+    }
+    m_populatingSet.clear();
+    return "empty";
+}
+
 
 
 #pragma endregion Machine Learning

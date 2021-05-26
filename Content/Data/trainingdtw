@@ -1,10 +1,58 @@
 [
 	{
-		"inputseries": [ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null ],
-		"label": "0.0"
-	},
-	{
-		"inputseries": [ null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null ],
-		"label": "2.0"
+		"inputseries": [
+			{
+				"inputdata": [ 80.3873291015625, 8.2049474716186523, 31.999908447265625 ]
+			},
+			{
+				"inputdata": [ 80.3873291015625, 8.2049474716186523, 31.999908447265625 ]
+			},
+			{
+				"inputdata": [ 80.3873291015625, 8.2049474716186523, 31.999908447265625 ]
+			},
+			{
+				"inputdata": [ 80.3873291015625, 8.2049474716186523, 31.999908447265625 ]
+			},
+			{
+				"inputdata": [ 80.3873291015625, 8.2049474716186523, 31.999908447265625 ]
+			},
+			{
+				"inputdata": [ 80.3873291015625, 8.2049474716186523, 31.999908447265625 ]
+			},
+			{
+				"inputdata": [ 80.3873291015625, 8.2049474716186523, 31.999908447265625 ]
+			},
+			{
+				"inputdata": [ 80.3873291015625, 8.2049474716186523, 31.999908447265625 ]
+			},
+			{
+				"inputdata": [ 80.3873291015625, 8.2049474716186523, 31.999908447265625 ]
+			},
+			{
+				"inputdata": [ 80.3873291015625, 8.2049474716186523, 31.999908447265625 ]
+			},
+			{
+				"inputdata": [ 80.3873291015625, 8.2049474716186523, 31.999908447265625 ]
+			},
+			{
+				"inputdata": [ 80.3873291015625, 8.2049474716186523, 31.999908447265625 ]
+			},
+			{
+				"inputdata": [ 80.3873291015625, 8.2049474716186523, 31.999908447265625 ]
+			},
+			{
+				"inputdata": [ 80.3873291015625, 8.2049474716186523, 31.999908447265625 ]
+			},
+			{
+				"inputdata": [ 80.3873291015625, 8.2049474716186523, 31.999908447265625 ]
+			},
+			{
+				"inputdata": [ 80.3873291015625, 8.2049474716186523, 31.999908447265625 ]
+			},
+			{
+				"inputdata": [ 80.3873291015625, 8.2049474716186523, 31.999908447265625 ]
+			}
+		],
+		"label": "1.0"
 	}
 ]
