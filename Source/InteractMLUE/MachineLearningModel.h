@@ -33,6 +33,7 @@ struct INTERACTMLUE_API FDataInstanceSeriesMember
 	GENERATED_USTRUCT_BODY()
 
 public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Machine Learning")
 	TArray<float> inputData;
 
 	FDataInstanceSeriesMember() {
@@ -51,9 +52,9 @@ struct INTERACTMLUE_API FDataInstanceSeries
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Machine Learning")
 	TArray<FDataInstanceSeriesMember> inputSeries;
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Machine Learning")
 	FString label;
 };
 
@@ -147,6 +148,9 @@ public:
 	classification *m_classificationModel = nullptr;
 	seriesClassification *m_dtwModel = nullptr;
 
+	// bool is the ML currently running
+	bool running;
+
 	//potentially delete
 	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Machine Learning")
 	void *m_modelPtr = NULL;
@@ -175,6 +179,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Machine Learning")
 	FDataInstanceSeriesMember m_datasetSeriesSingleMember;
 
+	std::vector<std::vector<double>> m_populatingSet;
+
+
 	UPROPERTY(VisibleAnywhere, Category = "Machine Learning")
 	FString m_TrainingExamplesFolder = "Data";
 
@@ -197,7 +204,7 @@ public:
 	bool trainClassifier();
 	
 	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
-	bool trainDTW();
+	bool trainDTW(TArray<FDataInstanceSeries> trainingDataSeries);
 
 	bool IsModelInitialised();
 
@@ -212,6 +219,18 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
 	FDataInstanceSeriesMember SetUpSeriesStruct(TArray<float> inputs);
+	
+	/// <summary>
+	/// Stops populating the series for dtw
+	/// </summary>
+	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
+	FString StopPopulatingDTW();
+	
+	/// <summary>
+	/// Logic for whilst populating is happening 
+	/// </summary>
+	UFUNCTION(BlueprintCallable, Category = "Machine Learning")
+	bool PopulatingLogic(TArray<float> input);
 
 	void BuildTrainingSetFromDataSet(TArray<FDataInstance>& dataset, std::vector<trainingExample>& training_set_out);
 
