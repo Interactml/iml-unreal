@@ -81,9 +81,15 @@ void UInteractMLStorage::FInteracMLModule_SetBaseFilePath( FString base_file_pat
 	}
 	else
 	{
-		//write out initial file
-		Save();
+		//initial file is only written on first save, this means empty/temp objects aren't persisted
 	}
+}
+
+// is the base path being used for storage?
+bool UInteractMLStorage::CheckBasePath(FString base_file_path) const
+{
+	base_file_path = SanitisePathAndName( base_file_path );
+	return BaseFilePath.Compare( base_file_path, ESearchCase::IgnoreCase ) == 0;
 }
 
 // build full directory to location of the data file

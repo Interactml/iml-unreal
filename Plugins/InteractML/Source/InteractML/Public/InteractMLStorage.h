@@ -29,14 +29,16 @@ class INTERACTML_API UInteractMLStorage
 	UPROPERTY()
 	FGuid FileID;
 
-	
 	//---- transient/cached state ----
-
+	
 	//actual root of file path, e.g. Examples/HandGestures, the rest comes from ID (if it has one) and actual type
 	FString BaseFilePath;
 	
+	//has unsaved state?
+	bool bIsDirty;
 	
 public:
+	
 	//---- constants ----
 
 	// json format file extension
@@ -52,7 +54,12 @@ public:
 
 	// request the full file path to the backing storage for this objects ML data
 	FString GetFilePath() const;      //e.g. D:/MLProject/Content/Examples/HandGestures.19D38579C13759B1.training.json, although pure file-based ones may not have an ID
+	
+	// request the full directory path the backing storage for this objects ML data file is located in
 	FString GetDirectoryPath() const; //e.g. D:/MLProject/Content/Examples/
+
+	// is the base path being used for storage?
+	bool CheckBasePath(FString base_file_path) const;
 
 	//---- persistence ----
 
@@ -63,6 +70,9 @@ public:
 	// persist current ML state to disk
 	virtual bool Save(); //override Save to completely control saving of Json file data
 	virtual bool SaveJson(/*todo*/) { check(false); return false; } //or just override SaveJson to just have to generate Json
+
+	// is there unsaved state in this object?
+	bool IsDirty() const { return bIsDirty; }
 
 	
 	//---- utility ----
