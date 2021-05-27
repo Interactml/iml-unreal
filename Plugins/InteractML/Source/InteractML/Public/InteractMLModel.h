@@ -22,10 +22,23 @@ class INTERACTML_API UInteractMLModel
 	: public UInteractMLStorage
 {
 	GENERATED_BODY()	
+		
+	//---- persistent state ----
+	
+	
+	//---- transient/cached state ----
+	
 	
 public:
-	//access
+		//---- constants ----
 	
+	// extension prefix for model data files
+	static FString cExtensionPrefix;
+	
+	//---- access ----
+	
+	//each type provides qualifying extension prefix
+	virtual FString GetExtensionPrefix() const { return cExtensionPrefix; }
 	
 	
 private:

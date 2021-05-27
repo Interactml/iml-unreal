@@ -13,6 +13,8 @@
 
 // CONSTANTS & MACROS
 
+// extension prefix for model data files
+FString UInteractMLModel::cExtensionPrefix(TEXT(".model"));
 
 // LOCAL CLASSES & TYPES
 

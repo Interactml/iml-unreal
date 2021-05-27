@@ -10,6 +10,9 @@
 #include "Misc/Paths.h"
 
 //module
+#include "InteractMLStorage.h"
+#include "InteractMLTrainingSet.h"
+#include "InteractMLModel.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
@@ -18,11 +21,14 @@ DEFINE_LOG_CATEGORY(LogInteractML);
 // CONSTANTS & MACROS
 
 // default location of ML data in a project, overridable in game ini files
-//
 const TCHAR* c_DefaultDataDirectoryName = TEXT("Data");
 
 
 // LOCAL CLASSES & TYPES
+
+//dev/unit testing (at end of file)
+extern void InteractMLTests_Run();
+
 
 // GLOBAL STATE
 FInteractMLModule* FInteractMLModule::s_pModule = nullptr;
@@ -39,8 +45,10 @@ void FInteractMLModule::StartupModule()
 	s_pModule = this;
 
 	InitPaths();
-}
 
+	//testing during development
+	//InteractMLTests_Run();
+}
 
 // Exit
 //
@@ -51,7 +59,8 @@ void FInteractMLModule::ShutdownModule()
 {
 	UE_LOG( LogInteractML, Display, TEXT( "Stopping InteractML Plugin" ) );
 	
-	
+	ShutdownCache();
+
 	s_pModule = nullptr;
 }
 
@@ -82,27 +91,136 @@ void FInteractMLModule::InitPaths()
 	}
 
 	//here, use this
-	m_DataRootPath = FPaths::Combine( FPaths::ProjectContentDir(), data_path );
-	UE_LOG( LogInteractML, Log, TEXT( "ML data file path set to: '%s'%s" ), *m_DataRootPath, is_overridden ? TEXT( "" ) : TEXT( " (default)" ) );
+	DataRootPath = FPaths::Combine( FPaths::ProjectContentDir(), data_path );
+	UE_LOG( LogInteractML, Log, TEXT( "ML data file path set to: '%s'%s" ), *DataRootPath, is_overridden ? TEXT( "" ) : TEXT( " (default)" ) );
 
 	//ensure exists
-	if (m_DataRootPath.Len() > 0)
+	if (DataRootPath.Len() > 0)
 	{
 		IPlatformFile& file_system = FPlatformFileManager::Get().GetPlatformFile();
-		if(!file_system.DirectoryExists( *m_DataRootPath ))
+		if(!file_system.DirectoryExists( *DataRootPath ))
 		{
-			file_system.CreateDirectoryTree( *m_DataRootPath );
+			file_system.CreateDirectoryTree( *DataRootPath );
 
 			//verify
-			if(!file_system.DirectoryExists( *m_DataRootPath ))
+			if(!file_system.DirectoryExists( *DataRootPath ))
 			{
-				UE_LOG( LogInteractML, Error, TEXT( "Unable to create data storage directory: '%s'. Please check configuration, access permissions, and system status." ), *m_DataRootPath );
-				m_DataRootPath = "";
+				UE_LOG( LogInteractML, Error, TEXT( "Unable to create data storage directory: '%s'. Please check configuration, access permissions, and system status." ), *DataRootPath );
+				DataRootPath = "";
 			}
 		}
 	}
 }
 
+// release any tracked objects
+//
+void FInteractMLModule::ShutdownCache()
+{
+	//clear object lookup cache
+	for (auto it = ObjectLookup.CreateIterator(); it; ++it)
+	{
+		UInteractMLStorage* pobj = it.Value();
+		//done owning it, release to GC
+		pobj->RemoveFromRoot();
+	}
+	ObjectLookup.Empty();
+}
+
+
+///////////////////////////////// ML OBJECT MANAGEMENT ////////////////////////////////////
+
+
+// ensure formatting is standardised and uniform
+// NOTE: also removes case sensitivity
+//
+FString MakeFilePathKey(FString path)
+{
+	path = path.Replace(TEXT("\\"), TEXT("/"));
+	path = path.ToUpper();
+	return path;
+}
+
+// ml objects : obtain path based ones here to track and synchronise globally
+//
+UInteractMLTrainingSet* FInteractMLModule::GetTrainingSet( FString path_and_name )
+{
+	//clean and make key
+	FString base_file_path = UInteractMLStorage::SanitisePathAndName( path_and_name );
+	FString file_key = MakeFilePathKey( base_file_path ) + UInteractMLTrainingSet::cExtensionPrefix;
+	
+	//locate
+	auto pentry = ObjectLookup.Find( file_key );
+	UInteractMLStorage* pobj = pentry?*pentry:nullptr;
+	
+	//create on demand
+	if(!pobj)
+	{
+		pobj = NewObject<UInteractMLTrainingSet>();
+
+		//owned by plugin
+		pobj->AddToRoot();
+		pobj->FInteracMLModule_SetBaseFilePath(base_file_path);	//will resolve/create/assign-id as needed
+
+		//store for lookup
+		ObjectLookup.Add( file_key, pobj);
+	}
+
+	//check right type
+	UInteractMLTrainingSet* ptraining_set = Cast<UInteractMLTrainingSet>(pobj);
+	if (!ptraining_set)
+	{
+		UE_LOG(LogInteractML, Error, TEXT("Path '%s' doesn't refer to a training set"), *path_and_name);
+	}
+
+	return ptraining_set;
+}
+
+UInteractMLModel* FInteractMLModule::GetModel(FString path_and_name)
+{
+	//clean and make key
+	FString base_file_path = UInteractMLStorage::SanitisePathAndName( path_and_name );
+	FString file_key = MakeFilePathKey(base_file_path) + UInteractMLModel::cExtensionPrefix;
+	
+	//locate
+	auto pentry = ObjectLookup.Find( file_key );
+	UInteractMLStorage* pobj = pentry?*pentry:nullptr;
+	
+	//create on demand
+	if(!pobj)
+	{
+		pobj = NewObject<UInteractMLModel>();
+		
+		//owned by plugin
+		pobj->AddToRoot();
+		pobj->FInteracMLModule_SetBaseFilePath(base_file_path);	//will resolve/create/assign-id as needed
+
+		//store for lookup
+		ObjectLookup.Add( file_key, pobj);
+	}
+	
+	//check right type
+	UInteractMLModel* pmodel = Cast<UInteractMLModel>(pobj);
+	if (!pmodel)
+	{
+		UE_LOG(LogInteractML, Error, TEXT("Path '%s' doesn't refer to a model"), *path_and_name);
+	}
+	
+	return pmodel;
+}
+
+
+
+// ml objects : inform of any obtained from direct asset references here as we need to synchronise with path based ones
+//
+void SetTrainingSet(UInteractMLTrainingSet* training_set)
+{
+	check(false);	//TODO: support direct asset ref ml objects
+}
+
+void SetModel(UInteractMLModel* model)
+{
+	check(false);	//TODO: support direct asset ref ml objects
+}
 
 
 

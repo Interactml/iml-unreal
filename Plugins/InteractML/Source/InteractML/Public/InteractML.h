@@ -25,17 +25,26 @@ class INTERACTML_API FInteractMLModule
 	static FInteractMLModule* s_pModule;
 
 	// root location of persisted/imported project ML data
-	FString m_DataRootPath;
+	FString DataRootPath;
 
+	// catalogue of IML objects in use
+	TMap<FString, class UInteractMLStorage*> ObjectLookup;
 
 public:
 	//systems
-	static FInteractMLModule* GetModule() { return s_pModule; }
+	static FInteractMLModule& Get() { return *s_pModule; }
 
 	//access
-	FString GetDataRoot() const { return m_DataRootPath; }
+	FString GetDataRoot() const { return DataRootPath; }
 
+	//ml objects : obtain path based ones here to track and synchronise globally
+	class UInteractMLTrainingSet* GetTrainingSet( FString path_and_name );	//note, just [Path/]Name
+	class UInteractMLModel* GetModel( FString path_and_name );				//note, just [Path/]Name
 
+	//ml objects : inform of any obtained from direct asset references here as we need to synchronise with path based ones
+	void SetTrainingSet( class UInteractMLTrainingSet* training_set );
+	void SetModel( class UInteractMLModel* model );
+	
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
@@ -45,4 +54,7 @@ private:
 	//setup
 	void InitPaths();
 
+	//shutdown
+	void ShutdownCache();
+	
 };

@@ -13,6 +13,8 @@
 
 // CONSTANTS & MACROS
 
+// extension prefix for example/training data files
+FString UInteractMLTrainingSet::cExtensionPrefix(TEXT(".training"));
 
 // LOCAL CLASSES & TYPES
 
