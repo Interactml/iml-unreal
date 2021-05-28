@@ -40,13 +40,24 @@ UInteractMLContext* UInteractMLBlueprintLibrary::GetMLContext(AActor* Actor)
 	return context;
 }
 
-
-void UInteractMLBlueprintLibrary::TestIML(AActor* Actor)
+// Parameter Collection custom node: call to obtain a parameter object to accumulate into
+//
+FInteractMLParametersPtr UInteractMLBlueprintLibrary::GetParameters(UInteractMLContext* Context, UInteractMLContext::TGraphNodeID NodeID)
 {
-	//TODO: call GetMLContext, then try the caching fns :)
+	TSharedPtr<FInteractMLParameters> parameters = Context->GetParameters(NodeID);
+	
+	//prep for (re)accumulation
+	parameters->Reset();
+
+	return FInteractMLParametersPtr(parameters);
 }
 
-
+// Parameter Collection custom node: call to add a parameter
+//
+void UInteractMLBlueprintLibrary::AddFloatParameter(FInteractMLParametersPtr Parameters, float Value)
+{
+	Parameters.Ptr->Add(Value);
+}
 
 // EPILOGUE
 #undef LOCTEXT_NAMESPACE

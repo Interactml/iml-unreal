@@ -29,7 +29,7 @@ class INTERACTML_API UInteractMLContext
 
 public:		
 	// whatever is used to uniquely identify each graph node
-	typedef int TGraphNodeID;
+	typedef FString TGraphNodeID;
 
 private:
 	
@@ -40,12 +40,12 @@ private:
 	TArray<UInteractMLModel*>          ModelCache;
 
 	//cache of raw object (non UObject)
-	TArray<FInteractMLParameters::Ref> ParametersCache;
+	TArray<TSharedPtr<FInteractMLParameters>> ParametersCache;
 	
 	//lookup accellerators
-	TMap<TGraphNodeID, UInteractMLTrainingSet*>    TrainingSetLookup;
-	TMap<TGraphNodeID, UInteractMLModel*>          ModelLookup;
-	TMap<TGraphNodeID, FInteractMLParameters::Ref> ParametersLookup;
+	TMap<TGraphNodeID, UInteractMLTrainingSet*>           TrainingSetLookup;
+	TMap<TGraphNodeID, UInteractMLModel*>                 ModelLookup;
+	TMap<TGraphNodeID, TSharedPtr<FInteractMLParameters>> ParametersLookup;
 	
 public:
 	
@@ -58,7 +58,7 @@ public:
 	UInteractMLModel* GetModel( TGraphNodeID node_id, FString data_path );
 
 	// fetch/re-fetch a parameter set for passing around the graph
-	FInteractMLParameters::Ref GetParameters( TGraphNodeID node_id );
+	TSharedPtr<FInteractMLParameters> GetParameters( TGraphNodeID node_id );
 	
 
 private:

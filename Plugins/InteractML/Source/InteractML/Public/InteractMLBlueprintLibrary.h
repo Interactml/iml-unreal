@@ -7,8 +7,10 @@
 
 //unreal
 #include "CoreMinimal.h"
+#include "SharedPointer.h"
 
 //module
+#include "InteractMLParameters.h"
 #include "InteractMLBlueprintLibrary.generated.h"
 
 //general declarations
@@ -27,12 +29,12 @@ public:
 	
 	// context access for blue graph running in any actor
 	UFUNCTION(BlueprintCallable, meta=(BlueprintInternalUseOnly="true"))
-	UInteractMLContext* GetMLContext(AActor* Actor);
+	static UInteractMLContext* GetMLContext(AActor* Actor);
 
-
-	// test
-	UFUNCTION(BlueprintCallable, Category="InteractML")
-	void TestIML(AActor* Actor);
-	
+	// parameter access
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static FInteractMLParametersPtr GetParameters( UInteractMLContext* Context, FString NodeID );	
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static void AddFloatParameter( FInteractMLParametersPtr Parameters, float Value );
 	
 };
