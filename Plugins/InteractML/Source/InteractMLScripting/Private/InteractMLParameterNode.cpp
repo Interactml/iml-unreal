@@ -17,6 +17,7 @@
 
 //module
 #include "InteractMLParameters.h"
+#include "InteractMLBlueprintLibrary.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
@@ -36,36 +37,34 @@ struct FInputParameterInfo
 	FName Type;
 	UScriptStruct* Struct;
 	int NumFloats;
+	FName ParamAddFunctionName;
 
-	FInputParameterInfo(FText name, FName type, int num_floats)
-		: DisplayName(name)
-		, Type(type)
-		, Struct(nullptr)
-		, NumFloats(num_floats)
-	{}
-	FInputParameterInfo(FText name, FName type, UScriptStruct* struct_type, int num_floats)
+	FInputParameterInfo(FText name, FName type, FName add_fn, UScriptStruct* struct_type, int num_floats)
 		: DisplayName(name)
 		, Type(type)
 		, Struct(struct_type)
 		, NumFloats(num_floats)
+		, ParamAddFunctionName(add_fn)
 	{}
+	static FInputParameterInfo None;
 };
 static TArray<FInputParameterInfo>& GetInputParameterInfoList()
 {
 	static TArray<FInputParameterInfo> list;
 	if(list.Num()==0)
 	{
-		list.Add(FInputParameterInfo(LOCTEXT("ParameterNodeTypeNameInt","Integer"), UEdGraphSchema_K2::PC_Int, 1));
-		list.Add(FInputParameterInfo(LOCTEXT("ParameterNodeTypeNameFloat","Float"), UEdGraphSchema_K2::PC_Float, 1));
-		list.Add(FInputParameterInfo(LOCTEXT("ParameterNodeTypeNameBool","Boolean"), UEdGraphSchema_K2::PC_Boolean, 1));
-		list.Add(FInputParameterInfo(LOCTEXT("ParameterNodeTypeNameVector2D","2D Vector"), UEdGraphSchema_K2::PC_Struct, TBaseStructure<FVector2D>::Get(), 2));
-		list.Add(FInputParameterInfo(LOCTEXT("ParameterNodeTypeNameVector","3D Vector"), UEdGraphSchema_K2::PC_Struct, TBaseStructure<FVector>::Get(), 3));
-		list.Add(FInputParameterInfo(LOCTEXT("ParameterNodeTypeNameQuat","Rotation"), UEdGraphSchema_K2::PC_Struct, TBaseStructure<FQuat>::Get(), 4));
-		list.Add(FInputParameterInfo(LOCTEXT("ParameterNodeTypeNameColor","Colour"), UEdGraphSchema_K2::PC_Struct, TBaseStructure<FColor>::Get(), 3));
-		list.Add(FInputParameterInfo(LOCTEXT("ParameterNodeTypeNameColor","Colour"), UEdGraphSchema_K2::PC_Struct, TBaseStructure<FLinearColor>::Get(), 3));
+		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameInt","Integer"),        UEdGraphSchema_K2::PC_Int,     GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddIntegerParameter),    nullptr,                             1));
+		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameFloat","Float"),        UEdGraphSchema_K2::PC_Float,   GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddFloatParameter),      nullptr,                             1));
+		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameBool","Boolean"),       UEdGraphSchema_K2::PC_Boolean, GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddBooleanParameter),    nullptr,                             1));
+		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameVector2D","2D Vector"), UEdGraphSchema_K2::PC_Struct,  GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddVector2Parameter),    TBaseStructure<FVector2D>::Get(),    2));
+		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameVector","3D Vector"),   UEdGraphSchema_K2::PC_Struct,  GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddVector3Parameter),    TBaseStructure<FVector>::Get(),      3));
+		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameQuat","Rotation"),      UEdGraphSchema_K2::PC_Struct,  GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddQuaternionParameter), TBaseStructure<FQuat>::Get(),        4));
+		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameColor","Colour"),       UEdGraphSchema_K2::PC_Struct,  GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddColourParameter),     TBaseStructure<FLinearColor>::Get(), 3));
 	};
 	return list;
 }
+FInputParameterInfo FInputParameterInfo::None( FText::FromString(TEXT("Unknown")), UEdGraphSchema_K2::PC_Wildcard, NAME_None, nullptr, 0 );
+
 
 // is this pin type supported for parameter collection?
 //
@@ -96,8 +95,7 @@ static FInputParameterInfo& GetInputParameterInfo(FEdGraphPinType type)
 			return list[i];
 		}
 	}
-	static FInputParameterInfo none(FText::FromString(TEXT("Unknown")),UEdGraphSchema_K2::PC_Wildcard, 0);
-	return none;
+	return FInputParameterInfo::None;
 }
 
 // display name of an input parameter type
@@ -147,6 +145,21 @@ namespace FInteractMLParameterNodePinNames
 	//out
 	static const FName ParametersOutputPinName("Parameters");
 }  	
+namespace FInteractMLParameterUtilityFunctionNames
+{
+	static const FName AccessParametersName(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, GetParameters));
+}
+namespace FParameterNodeParametersAccessPinNames
+{
+	static const FName ActorPinName("Actor");
+	static const FName GuidPinName("NodeID");
+}
+namespace FParameterNodeParameterAddPinNames
+{
+	static const FName ParametersPinName("Parameters");
+	static const FName ValuePinName("Value");
+}
+
 
 
 /////////////////////////////////// HELPERS /////////////////////////////////////
@@ -414,7 +427,8 @@ void UInteractMLParameterNode::AllocateDefaultPins()
 	//---- Inputs ----
 
 	// Target actor (needed for context)
-	CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Object, AActor::StaticClass(), FInteractMLParameterNodePinNames::ActorInputPinName);
+	UEdGraphPin* actor_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Object, AActor::StaticClass(), FInteractMLParameterNodePinNames::ActorInputPinName);
+	actor_pin->PinToolTip = LOCTEXT("ParameterNodeActorPinTooltip", "Interact ML nodes need an actor to provide context in which they operate.\nTypically this would be actor the graph is attached to (i.e. 'Self').").ToString();
 	
 	// Add known input pins
 	for(int i = 0; i < InputParameters.Num(); i++)
@@ -431,7 +445,7 @@ void UInteractMLParameterNode::AllocateDefaultPins()
 	//---- Outputs ----
 
 	// Resulting Parameter (ptr) struct
-	CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Struct, TBaseStructure<FInteractMLParametersPtr>::Get(), FInteractMLParameterNodePinNames::ParametersOutputPinName);
+	CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Struct, TBaseStructure<FInteractMLParameters>::Get(), FInteractMLParameterNodePinNames::ParametersOutputPinName);
 	
 	Super::AllocateDefaultPins();
 }
@@ -598,96 +612,123 @@ void UInteractMLParameterNode::ExpandNode(class FKismetCompilerContext& Compiler
 
 	//input pins : exec (execution triggered)
 	UEdGraphPin* MainExecPin = GetExecPin();
+	UEdGraphPin* MainActorPin = GetActorInputPin();
 	//input pins : parameter inputs
-//	TMap<int,UEdGraphPin*> param_pins;
-//	CollectParameterPins( param_pins );
+	TMap<UEdGraphPin*,FParameterSpec*> param_pins;
+	CollectParameterPins( param_pins );
 	//output pins : then (execution continues)
-	UEdGraphPin* MainThenPin = FindPin(UEdGraphSchema_K2::PN_Then);	
-	//output pins : output (parameter list struct)
-//	UEdGraphPin* MainOutputPin = GetOutputPin();
+	UEdGraphPin* MainThenPin = FindPin( UEdGraphSchema_K2::PN_Then );	
+	//output pins : output (parameter struct)
+	UEdGraphPin* MainOutputPin = GetParametersOutputPin();
 
-	MainThenPin->MakeLinkTo( MainExecPin );
-
-	//After we are done we break all links to this node (not the internally created one)
-	//leaving the newly created internal nodes left to do the work
-	BreakAllNodeLinks();
-
-#if 0
-	//internal parameter source
-	UFunction* ParamCreateFunction = FindParameterCreateFunction();
-	UK2Node_CallFunction* CallCreateFn = CompilerContext.SpawnIntermediateNode<UK2Node_CallFunction>(this, SourceGraph);
-	CallCreateFn->SetFromFunction(ParamCreateFunction);
-	CallCreateFn->AllocateDefaultPins();
-	CompilerContext.MessageLog.NotifyIntermediateObjectCreation(CallCreateFn, this);
+	//internal parameter collection source
+	UFunction* ParamAccessFn = FindParameterAccessFunction();
+	UK2Node_CallFunction* CallParamAccessFn = CompilerContext.SpawnIntermediateNode<UK2Node_CallFunction>(this, SourceGraph);
+	CallParamAccessFn->SetFromFunction( ParamAccessFn );
+	CallParamAccessFn->AllocateDefaultPins();
+	CompilerContext.MessageLog.NotifyIntermediateObjectCreation( CallParamAccessFn, this);
 	//setter fn pins
-	UEdGraphPin* CreateFnExecPin = CallCreateFn->GetExecPin();
-	UEdGraphPin* CreateFnThenPin = CallCreateFn->GetThenPin();
-	UEdGraphPin* CreateFnResultPin = CallCreateFn->GetReturnValuePin();
+	UEdGraphPin* ParamFnExecPin = CallParamAccessFn->GetExecPin();
+	UEdGraphPin* ParamFnThenPin = CallParamAccessFn->GetThenPin();
+	UEdGraphPin* ParamFnResultPin = CallParamAccessFn->GetReturnValuePin();
+	UEdGraphPin* ParamFnActorPin = CallParamAccessFn->FindPinChecked( FParameterNodeParametersAccessPinNames::ActorPinName );
+	UEdGraphPin* ParamFnGuidPin = CallParamAccessFn->FindPinChecked( FParameterNodeParametersAccessPinNames::GuidPinName );
 	//hook up create fn to exec first
-	CompilerContext.MovePinLinksToIntermediate( *MainExecPin, *CreateFnExecPin );
+	CompilerContext.MovePinLinksToIntermediate( *MainExecPin, *ParamFnExecPin );
+	//hook up other data parameter access needs
+	CompilerContext.MovePinLinksToIntermediate(*MainActorPin, *ParamFnActorPin);	//the actor/context
+	ParamFnGuidPin->DefaultValue = NodeGuid.ToString( EGuidFormats::Digits );	//node disambiguation/context
 	
-	//each parameter pin needs a function call node chained together to fully set up the parameter input of the entity
-	UEdGraphPin* CurrentThenPin = CreateFnThenPin;
-	for(TMap<int,UEdGraphPin*>::TIterator It(param_pins); It; ++It)	
+	//each parameter input pin needs a function call node chained together to fully set up the parameter collection
+	UEdGraphPin* CurrentThenPin = ParamFnThenPin;
+	for(TMap<UEdGraphPin*,FParameterSpec*>::TIterator It(param_pins); It; ++It)	
 	{
-		bool first_time = CurrentThenPin==nullptr;
+		UEdGraphPin* ParameterPin = It.Key();
+		FParameterSpec* param_spec = It.Value();
 
-		//id of param we are hooking up
-		Apparance::ValueID ParameterID = (Apparance::ValueID)It.Key();
-		UEdGraphPin* ParameterPin = It.Value();	
-
-		//ensure parameter type is correct
-		Apparance::Parameter::Type ParameterSpecType = spec->Inputs->FindType( ParameterID );
-		Apparance::Parameter::Type ParameterPinType = ApparanceTypeFromPinType( ParameterPin->PinType );
-		if(ParameterPinType!=ParameterSpecType)
+		//find a function to handle addung this parameter to the collection
+		UFunction* ParamAddFn = FindParameterAddFunctionByType( &ParameterPin->PinType );	
+		if (!ParamAddFn)
 		{
-			CompilerContext.MessageLog.Error( *FString::Format( *LOCTEXT("ParameterNodeTypeMismatch", "Type of input parameter {0} has changed to {1}, expected {2}.").ToString(), { (int)ParameterID, ParameterPinType, ParameterSpecType } ), this );
-			return;
-		}
-
-		//find a function to handle setting this parameter on the entity
-		UFunction* ParamSetFunction = FindParameterSetterFunctionByType( ParameterPinType );	
-		if (!ParamSetFunction)
-		{
-			CompilerContext.MessageLog.Error( *FString::Format( *LOCTEXT("ParameterNodeMissingParamSetter", "Failed to find function to set parameter list parameter of type {0}.").ToString(), { ParameterPinType } ), this );
+			CompilerContext.MessageLog.Error( *LOCTEXT("ParameterNodeMissingParamSetter", "Failed to find function to add parameter collection parameter of type {0}.").ToString(), *ParameterPin->PinType.PinCategory.ToString() );
 			return;
 		}
 
 		//create intermediate node to call the setter
-		UK2Node_CallFunction* CallSetterFn = CompilerContext.SpawnIntermediateNode<UK2Node_CallFunction>(this, SourceGraph);
-		CallSetterFn->SetFromFunction(ParamSetFunction);
-		CallSetterFn->AllocateDefaultPins();
-		CompilerContext.MessageLog.NotifyIntermediateObjectCreation(CallSetterFn, this);
+		UK2Node_CallFunction* CallParamAddFn = CompilerContext.SpawnIntermediateNode<UK2Node_CallFunction>(this, SourceGraph);
+		CallParamAddFn->SetFromFunction( ParamAddFn );
+		CallParamAddFn->AllocateDefaultPins();
+		CompilerContext.MessageLog.NotifyIntermediateObjectCreation(CallParamAddFn, this);
 
 		//setter fn pins
-		UEdGraphPin* FnExecPin = CallSetterFn->GetExecPin();
-		UEdGraphPin* FnThenPin = CallSetterFn->GetThenPin();
-		UEdGraphPin* FnInputPin = CallSetterFn->FindPinChecked( FApparanceParamsParameterSetterPinNames::InputPinName );
-		UEdGraphPin* FnParamPin = CallSetterFn->FindPinChecked( FApparanceParamsParameterSetterPinNames::ParameterIDPinName );
-		UEdGraphPin* FnValuePin = CallSetterFn->FindPinChecked( FApparanceParamsParameterSetterPinNames::ValuePinName );
+		UEdGraphPin* FnExecPin = CallParamAddFn->GetExecPin();
+		UEdGraphPin* FnThenPin = CallParamAddFn->GetThenPin();
+		UEdGraphPin* FnParamsPin = CallParamAddFn->FindPinChecked( FParameterNodeParameterAddPinNames::ParametersPinName );
+		UEdGraphPin* FnValuePin = CallParamAddFn->FindPinChecked( FParameterNodeParameterAddPinNames::ValuePinName );
 		
-		//hook up function inputs to previous outputs
+		//hook up function call chain from prev to call this
 		CurrentThenPin->MakeLinkTo( FnExecPin );
-
+		CurrentThenPin = FnThenPin; //this is now the next exe pin
+		
 		//hook up parameter collection struct input (same for all setters)
-		CreateFnResultPin->MakeLinkTo( FnInputPin );
+		ParamFnResultPin->MakeLinkTo( FnParamsPin );
 
-		//hook up parameter input
+		//hook up parameter value input
 		CompilerContext.MovePinLinksToIntermediate( *ParameterPin, *FnValuePin );
-
-		//set param id function input
-		FnParamPin->DefaultValue = FString::FromInt( ParameterID );
-
-		//move on to function outputs
-		CurrentThenPin = FnThenPin;		
 	}
 
 	//hook up last in function node chain to then pin
 	CompilerContext.MovePinLinksToIntermediate( *MainThenPin, *CurrentThenPin );
 
 	//hook up parameter collection output
-	CompilerContext.MovePinLinksToIntermediate( *MainOutputPin, *CreateFnResultPin );
-#endif
+	CompilerContext.MovePinLinksToIntermediate( *MainOutputPin, *ParamFnResultPin );
+
+	//After we are done we break all links to this node (not the internally created one)
+	//leaving the newly created internal nodes left to do the work
+	BreakAllNodeLinks();
 }
+
+// collect together the value input pins, associated with the param spec they correspond to
+//
+void UInteractMLParameterNode::CollectParameterPins(TMap<UEdGraphPin*, FParameterSpec*> param_pins)
+{
+	for(UEdGraphPin* pin : Pins)
+	{
+		FParameterSpec* pin_spec = FindPinSpec( pin );
+		if (pin_spec)
+		{
+			//is an input, record
+			param_pins.Add( pin, pin_spec );
+		}
+	}
+}
+
+// locate function used to obtain the parameter collection object
+//
+UFunction* UInteractMLParameterNode::FindParameterAccessFunction() const
+{
+	UClass* LibraryClass = UInteractMLBlueprintLibrary::StaticClass();
+	return LibraryClass->FindFunctionByName( FInteractMLParameterUtilityFunctionNames::AccessParametersName );
+}
+
+// locate function used to set a specific type of parameter on a parameter collection object
+//
+UFunction* UInteractMLParameterNode::FindParameterAddFunctionByType(FEdGraphPinType* pin_type)
+{
+	FInputParameterInfo& param_info = GetInputParameterInfo(*pin_type);
+	if (param_info.Type == UEdGraphSchema_K2::PC_Wildcard)
+	{
+		//not a supported type!
+		return nullptr;
+	}
+
+	//function to use
+	FName param_set_fn_name = param_info.ParamAddFunctionName;
+
+	//library lookup of fn
+	UClass* LibraryClass = UInteractMLBlueprintLibrary::StaticClass();
+	return LibraryClass->FindFunctionByName( param_set_fn_name );	
+}
+
 
 #undef LOCTEXT_NAMESPACE

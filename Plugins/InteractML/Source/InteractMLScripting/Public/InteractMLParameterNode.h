@@ -47,7 +47,10 @@ struct FParameterSpec
 	void ApplyPinType( UEdGraphPin* pin, FEdGraphPinType type ); //change/set
 	void ApplyPinDisplayName( UEdGraphPin* pin, FText display_name ); //change/set
 	void ApplyPinDisplayName( UEdGraphPin* pin ); //re-apply
-	void ApplyPinTooltip( UEdGraphPin* pin ) const; //generate, apply
+	void ApplyPinTooltip(UEdGraphPin* pin) const; //generate, apply
+
+	//access
+	bool IsValid() { return Type.PinCategory != UEdGraphSchema_K2::PC_Wildcard; }
 };
 
 
@@ -122,5 +125,10 @@ private:
 	
 	//editing
 	void RemoveParameterInput(UEdGraphPin* pin);
-		
+
+	//node expansion
+	void CollectParameterPins( TMap<UEdGraphPin*,FParameterSpec*> param_pins );
+	UFunction* FindParameterAccessFunction() const;
+	UFunction* FindParameterAddFunctionByType( FEdGraphPinType* pin_type );	
+	
 };

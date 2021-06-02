@@ -78,17 +78,17 @@ UInteractMLModel* UInteractMLContext::GetModel( UInteractMLContext::TGraphNodeID
 }
 
 // fetch/re-fetch a parameter set for passing around the graph
-TSharedPtr<FInteractMLParameters> UInteractMLContext::GetParameters( UInteractMLContext::TGraphNodeID node_id )
+TSharedPtr<FInteractMLParameterCollection> UInteractMLContext::GetParameters( UInteractMLContext::TGraphNodeID node_id )
 {
 	//existing?
-	TSharedPtr<FInteractMLParameters>* pentry = ParametersLookup.Find(node_id);
+	TSharedPtr<FInteractMLParameterCollection>* pentry = ParametersLookup.Find(node_id);
 	if (pentry)
 	{
 		return *pentry;
 	}
 	
 	//not cached yet, alloc
-	TSharedPtr<FInteractMLParameters> parameters = MakeShareable(new FInteractMLParameters());
+	TSharedPtr<FInteractMLParameterCollection> parameters = MakeShareable(new FInteractMLParameterCollection());
 
 	//cache
 	ParametersCache.Add(parameters);

@@ -27,14 +27,23 @@ class INTERACTML_API UInteractMLBlueprintLibrary
 	GENERATED_BODY()
 public:
 	
-	// context access for blue graph running in any actor
-	UFUNCTION(BlueprintCallable, meta=(BlueprintInternalUseOnly="true"))
-	static UInteractMLContext* GetMLContext(AActor* Actor);
-
-	// parameter access
+	// parameter collection access
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
-	static FInteractMLParametersPtr GetParameters( UInteractMLContext* Context, FString NodeID );	
+	static FInteractMLParameters GetParameters( AActor* Actor, FString NodeID );	
+	// parameter accumulation
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
-	static void AddFloatParameter( FInteractMLParametersPtr Parameters, float Value );
+	static void AddIntegerParameter( FInteractMLParameters Parameters, int Value );
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static void AddFloatParameter( FInteractMLParameters Parameters, float Value );
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static void AddBooleanParameter( FInteractMLParameters Parameters, bool Value );
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static void AddVector2Parameter( FInteractMLParameters Parameters, FVector2D Value );
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static void AddVector3Parameter( FInteractMLParameters Parameters, FVector Value );
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static void AddQuaternionParameter( FInteractMLParameters Parameters, FQuat Value );
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static void AddColourParameter( FInteractMLParameters Parameters, FLinearColor Value );
 	
 };

@@ -13,26 +13,26 @@
 //general declarations
 
 
-// wrapper for passing around parameters by value without copying
+// wrapper for passing around parameters by value without copying the underlying collection object (lives in the context/actor)
 //
 USTRUCT(BlueprintInternalUseOnly)
-struct INTERACTML_API FInteractMLParametersPtr
+struct INTERACTML_API FInteractMLParameters
 {
 	GENERATED_USTRUCT_BODY()
-	TSharedPtr<struct FInteractMLParameters> Ptr;
+	TSharedPtr<struct FInteractMLParameterCollection> Ptr;
 
 	//ctors
-	FInteractMLParametersPtr(){}
-	FInteractMLParametersPtr(TSharedPtr<struct FInteractMLParameters> ptr) : Ptr(ptr) {}
+	FInteractMLParameters(){}
+	FInteractMLParameters(TSharedPtr<struct FInteractMLParameterCollection> ptr) : Ptr(ptr) {}
 };
 
 // InteractML parameter state snapshot, single sample/capture/frame of parameter values
 // List of parameters with associated name/type/value
 // In-memory use only for passing around in node graph
-// NOTE: Not a UObject or USTRUCT, just a plain struct
-// NOTE: pass around via FInteractMLParametersPtr wrapper
+// NOTE: Not a UObject or USTRUCT, just a plain C++ struct
+// NOTE: pass around graph via FInteractMLParameters wrapper (or just a TSharedPtr<struct FInteractMLParameterCollection>)
 //
-struct INTERACTML_API FInteractMLParameters
+struct INTERACTML_API FInteractMLParameterCollection
 {
 	//type information
 	//TArray<FString>  Names;
@@ -57,6 +57,7 @@ struct INTERACTML_API FInteractMLParameters
 	void Add(bool value);
 	void Add(float value);
 	void Add(int value);
+	void Add(FVector2D value);
 	void Add(FVector value);
 	void Add(FQuat value);
 	void Add(FLinearColor value);

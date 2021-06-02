@@ -40,12 +40,12 @@ private:
 	TArray<UInteractMLModel*>          ModelCache;
 
 	//cache of raw object (non UObject)
-	TArray<TSharedPtr<FInteractMLParameters>> ParametersCache;
+	TArray<TSharedPtr<FInteractMLParameterCollection>>             ParametersCache;
 	
 	//lookup accellerators
-	TMap<TGraphNodeID, UInteractMLTrainingSet*>           TrainingSetLookup;
-	TMap<TGraphNodeID, UInteractMLModel*>                 ModelLookup;
-	TMap<TGraphNodeID, TSharedPtr<FInteractMLParameters>> ParametersLookup;
+	TMap<TGraphNodeID, UInteractMLTrainingSet*>                    TrainingSetLookup;
+	TMap<TGraphNodeID, UInteractMLModel*>                          ModelLookup;
+	TMap<TGraphNodeID, TSharedPtr<FInteractMLParameterCollection>> ParametersLookup;
 	
 public:
 	
@@ -58,7 +58,7 @@ public:
 	UInteractMLModel* GetModel( TGraphNodeID node_id, FString data_path );
 
 	// fetch/re-fetch a parameter set for passing around the graph
-	TSharedPtr<FInteractMLParameters> GetParameters( TGraphNodeID node_id );
+	TSharedPtr<FInteractMLParameterCollection> GetParameters( TGraphNodeID node_id );
 	
 
 private:
