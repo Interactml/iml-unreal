@@ -27,18 +27,27 @@ struct FParameterSpec
 {
 	GENERATED_BODY()
 
+	//pin identifier, used to resolve pins (encoded in name)
+	UPROPERTY()
+	int Identifier;
+
+	//actual display name of pin (friendly name, so we can use name as ID)
 	UPROPERTY()
 	FString Name;
 	
+	//type needed to fully re-create the pin
 	UPROPERTY()
-	FName Type;
-
-	//more needed for certain struct based types, e.g. FVector
-
+	FEdGraphPinType Type;
 
 	//setup
 	FParameterSpec(){}
-	FParameterSpec(FName type, FString name) : Name(name), Type(type) {}
+	FParameterSpec(FEdGraphPinType type, int id, FString name="") : Identifier(id), Name(name), Type(type) {}
+
+	//re-gen display name and tooltip of a pin
+	void ApplyPinType( UEdGraphPin* pin, FEdGraphPinType type ); //change/set
+	void ApplyPinDisplayName( UEdGraphPin* pin, FText display_name ); //change/set
+	void ApplyPinDisplayName( UEdGraphPin* pin ); //re-apply
+	void ApplyPinTooltip( UEdGraphPin* pin ) const; //generate, apply
 };
 
 
@@ -61,9 +70,10 @@ public:
 
 private:
 
-	//specialist	
-	//UEdGraphPin* GetOutputPin() const;	
-
+	//specialist
+	UEdGraphPin* GetParametersOutputPin() const;
+	UEdGraphPin* GetActorInputPin() const;
+	
 protected:
 
 
@@ -86,13 +96,15 @@ protected:
 	//~ End UEdGraphNode Interface
 
 	//~ Begin K2Node Interface
-	//virtual void NotifyPinConnectionListChanged(UEdGraphPin* Pin) override;
+	virtual void NotifyPinConnectionListChanged(UEdGraphPin* Pin) override;
 	//virtual bool IsNodePure() const override { return bIsPureGet; }
 	//virtual void ReallocatePinsDuringReconstruction(TArray<UEdGraphPin*>& OldPins) override;
 	virtual bool ShouldShowNodeProperties() const override { return false; }
 	//virtual class FNodeHandlingFunctor* CreateNodeHandler(class FKismetCompilerContext& CompilerContext) const override;
 	virtual void ExpandNode(class FKismetCompilerContext& CompilerContext, UEdGraph* SourceGraph) override;
 	virtual void GetMenuActions(FBlueprintActionDatabaseRegistrar& ActionRegistrar) const override;
+	virtual bool IsConnectionDisallowed(const UEdGraphPin* MyPin, const UEdGraphPin* OtherPin, FString& OutReason) const override;
+	virtual void PostReconstructNode();
 	//~ End K2Node Interface};
 
 	// IK2Node_AddPinInterface interface
@@ -102,4 +114,7 @@ protected:
 private:
 	int CountParameters() const; //only valid ones
 	int CountFloats() const; //only valid ones
+
+	//pin spec
+	FParameterSpec* FindPinSpec(UEdGraphPin* pin);
 };
