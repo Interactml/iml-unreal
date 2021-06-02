@@ -88,7 +88,7 @@ protected:
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 	virtual FText GetTooltipText() const override;
 	virtual FText GetMenuCategory() const override;
-	//virtual void GetNodeContextMenuActions(class UToolMenu* Menu, class UGraphNodeContextMenuContext* Context) const override;
+	virtual void GetNodeContextMenuActions(class UToolMenu* Menu, class UGraphNodeContextMenuContext* Context) const override;
 	//virtual bool IncludeParentNodeContextMenu() const override { return true; }
 	//virtual void ValidateNodeDuringCompilation(class FCompilerResultsLog& MessageLog) const override;
 	//virtual void PostPlacedNewNode();
@@ -111,10 +111,16 @@ protected:
 	virtual void AddInputPin() override;
 	// End of IK2Node_AddPinInterface interface
 
+	
 private:
 	int CountParameters() const; //only valid ones
 	int CountFloats() const; //only valid ones
 
 	//pin spec
-	FParameterSpec* FindPinSpec(UEdGraphPin* pin);
+	const FParameterSpec* FindPinSpec(const UEdGraphPin* pin) const;
+	FParameterSpec* FindPinSpec(const UEdGraphPin* pin);
+	
+	//editing
+	void RemoveParameterInput(UEdGraphPin* pin);
+		
 };

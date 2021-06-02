@@ -28,6 +28,7 @@ public class InteractMLScripting : ModuleRules
 				"UnrealEd",
 				"AssetTools",
 				"Kismet",	//for SContentReference
+				"ToolMenus", //for UToolMenu (node context menus)
 
 				// ... add other public dependencies that you statically link with here ...
 				"InteractML"
@@ -39,7 +40,8 @@ public class InteractMLScripting : ModuleRules
 			{			
 				//fundamental unreal modules
 				"CoreUObject",
-				"CoreUObject",
+				"SlateCore",
+				"Slate",
 				"BlueprintGraph",	//UK2Node
 				"KismetCompiler",	//FKismetCompilerContext
 			}

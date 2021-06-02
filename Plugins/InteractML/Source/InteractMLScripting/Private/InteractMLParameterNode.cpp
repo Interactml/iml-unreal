@@ -12,6 +12,8 @@
 #include "K2Node_CallFunction.h" //UK2Node_Function
 #include "Engine/SimpleConstructionScript.h" //USimpleConstructionScript
 #include "BlueprintEditorUtils.h" //MarkBlueprintAsStructurallyModified
+#include "ToolMenu.h" //UToolMenu
+#include "ScopedTransaction.h" //FScopedTransaction
 
 //module
 #include "InteractMLParameters.h"
@@ -329,6 +331,34 @@ void UInteractMLParameterNode::GetMenuActions(FBlueprintActionDatabaseRegistrar&
 	}
 }
 
+// context menu that appears on the node
+//
+void UInteractMLParameterNode::GetNodeContextMenuActions(UToolMenu* Menu, UGraphNodeContextMenuContext* Context) const
+{
+	Super::GetNodeContextMenuActions(Menu, Context);
+
+	if (!Context->bIsDebugging)
+	{
+		FToolMenuSection& Section = Menu->AddSection("InteractMLParameterNode", LOCTEXT("ParameterNodeContextMenuSection", "Parameter Inputs"));
+		if (Context->Pin != NULL)
+		{
+			const FParameterSpec* pin_spec = FindPinSpec(Context->Pin);
+			if(pin_spec)
+			{
+				Section.AddMenuEntry(
+					"RemovePin",
+					LOCTEXT("ParameterNodeRemovePin", "Remove parameter"),
+					LOCTEXT("ParameterNodeRemovePinTooltip", "Remove this parameter pin from the collection"),
+					FSlateIcon(),
+					FUIAction(
+						FExecuteAction::CreateUObject( const_cast<UInteractMLParameterNode*>(this), &UInteractMLParameterNode::RemoveParameterInput, const_cast<UEdGraphPin*>( Context->Pin ))
+					)
+				);
+			}
+		}
+	}
+}
+
 // block connection of unsupported pin types
 // true if pins cannot be connected due to node's inner logic, put message for user in OutReason
 //
@@ -410,6 +440,7 @@ void UInteractMLParameterNode::AllocateDefaultPins()
 //
 void UInteractMLParameterNode::AddInputPin()
 {
+	//this is an undoable edit
 	Modify();
 
 	//generate ID for pin
@@ -439,6 +470,42 @@ void UInteractMLParameterNode::AddInputPin()
 	}
 }
 
+// we've been asked to remove an existing pin
+//
+void UInteractMLParameterNode::RemoveParameterInput( UEdGraphPin* pin )
+{
+	//locate and remove from list
+	FParameterSpec* pin_spec = FindPinSpec(pin);
+	if(pin_spec)
+	{
+		const FScopedTransaction Transaction( LOCTEXT( "ParameterNodeRemoveInput", "Removing parameter input pin" ) );
+
+		//this is an undoable edit
+		GetGraph()->Modify();	//connections are potentially affected by deleting a pin
+		Modify();
+
+		//remove spec
+		for (int i = 0; i < InputParameters.Num(); i++)
+		{
+			if (InputParameters[i].Identifier == pin_spec->Identifier)
+			{
+				InputParameters.RemoveAt(i);
+				break;
+			}
+		}
+
+		//node change
+		RemovePin(pin);
+
+		//update to reflect new pin
+		const bool bIsCompiling = GetBlueprint()->bBeingCompiled;
+		if(!bIsCompiling)
+		{
+			FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified( GetBlueprint() );
+		}
+	}
+}
+
 
 // pin access helpers : parameters output
 //
@@ -461,7 +528,7 @@ UEdGraphPin* UInteractMLParameterNode::GetActorInputPin() const
 // locate the spec info for a given pin
 // NOTE: temp ptr, don't keep
 //
-FParameterSpec* UInteractMLParameterNode::FindPinSpec(UEdGraphPin* pin)
+FParameterSpec* UInteractMLParameterNode::FindPinSpec(const UEdGraphPin* pin)
 {
 	int pin_code = ParsePinCode( pin->PinName );
 	for (int i = 0; i < InputParameters.Num(); i++)
@@ -472,6 +539,19 @@ FParameterSpec* UInteractMLParameterNode::FindPinSpec(UEdGraphPin* pin)
 		}
 	}
 
+	return nullptr;
+}
+const FParameterSpec* UInteractMLParameterNode::FindPinSpec(const UEdGraphPin* pin) const
+{
+	int pin_code = ParsePinCode( pin->PinName );
+	for (int i = 0; i < InputParameters.Num(); i++)
+	{
+		if (InputParameters[i].Identifier == pin_code)
+		{
+			return &InputParameters[i];
+		}
+	}
+	
 	return nullptr;
 }
 
