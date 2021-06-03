@@ -35,39 +35,39 @@ void FInteractMLParameterCollection::Reset()
 //accumulation
 void FInteractMLParameterCollection::Add(bool value)
 {
-	Values.Add(value?1.0f:0.0f);
+	AccumulateValue( value );
 }
 void FInteractMLParameterCollection::Add(float value)
 {
-	Values.Add(value);
+	AccumulateValue(value);
 }
 void FInteractMLParameterCollection::Add(int value)
 {
-	Values.Add((float)value);
+	AccumulateValue((float)value);
 }
 void FInteractMLParameterCollection::Add(FVector2D value)
 {
-	Values.Add(value.X);
-	Values.Add(value.Y);
+	AccumulateValue(value.X);
+	AccumulateValue(value.Y);
 }
 void FInteractMLParameterCollection::Add(FVector value)
 {
-	Values.Add(value.X);
-	Values.Add(value.Y);
-	Values.Add(value.Z);
+	AccumulateValue(value.X);
+	AccumulateValue(value.Y);
+	AccumulateValue(value.Z);
 }
 void FInteractMLParameterCollection::Add(FQuat value)
 {
-	Values.Add(value.X);
-	Values.Add(value.Y);
-	Values.Add(value.Z);
-	Values.Add(value.W);
+	AccumulateValue(value.X);
+	AccumulateValue(value.Y);
+	AccumulateValue(value.Z);
+	AccumulateValue(value.W);
 }
 void FInteractMLParameterCollection::Add(FLinearColor value)
 {
-	Values.Add(value.R);
-	Values.Add(value.G);
-	Values.Add(value.B);
+	AccumulateValue(value.R);
+	AccumulateValue(value.G);
+	AccumulateValue(value.B);
 }
 void FInteractMLParameterCollection::Add(FColor value)
 {

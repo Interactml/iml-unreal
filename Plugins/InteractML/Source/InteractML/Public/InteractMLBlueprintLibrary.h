@@ -46,4 +46,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
 	static void AddColourParameter( FInteractMLParameters Parameters, FLinearColor Value );
 	
+
+	UFUNCTION(BlueprintCallable)
+	static void DebugParameterCollection(FInteractMLParameters Parameters);
 };

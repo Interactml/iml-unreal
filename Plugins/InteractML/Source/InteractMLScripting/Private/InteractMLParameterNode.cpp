@@ -545,14 +545,16 @@ UEdGraphPin* UInteractMLParameterNode::GetActorInputPin() const
 FParameterSpec* UInteractMLParameterNode::FindPinSpec(const UEdGraphPin* pin)
 {
 	int pin_code = ParsePinCode( pin->PinName );
-	for (int i = 0; i < InputParameters.Num(); i++)
+	if(pin_code != 0)
 	{
-		if (InputParameters[i].Identifier == pin_code)
+		for(int i = 0; i < InputParameters.Num(); i++)
 		{
-			return &InputParameters[i];
+			if(InputParameters[i].Identifier == pin_code)
+			{
+				return &InputParameters[i];
+			}
 		}
 	}
-
 	return nullptr;
 }
 const FParameterSpec* UInteractMLParameterNode::FindPinSpec(const UEdGraphPin* pin) const
@@ -650,7 +652,7 @@ void UInteractMLParameterNode::ExpandNode(class FKismetCompilerContext& Compiler
 		UFunction* ParamAddFn = FindParameterAddFunctionByType( &ParameterPin->PinType );	
 		if (!ParamAddFn)
 		{
-			CompilerContext.MessageLog.Error( *LOCTEXT("ParameterNodeMissingParamSetter", "Failed to find function to add parameter collection parameter of type {0}.").ToString(), *ParameterPin->PinType.PinCategory.ToString() );
+			CompilerContext.MessageLog.Error( *FText::Format( LOCTEXT("ParameterNodeMissingParamSetter", "Failed to find function to add parameter collection parameter of type '{0}'."), FText::FromName( ParameterPin->PinType.PinCategory ) ).ToString(), this );
 			return;
 		}
 
@@ -690,14 +692,14 @@ void UInteractMLParameterNode::ExpandNode(class FKismetCompilerContext& Compiler
 
 // collect together the value input pins, associated with the param spec they correspond to
 //
-void UInteractMLParameterNode::CollectParameterPins(TMap<UEdGraphPin*, FParameterSpec*> param_pins)
+void UInteractMLParameterNode::CollectParameterPins(TMap<UEdGraphPin*, FParameterSpec*>& param_pins)
 {
 	for(UEdGraphPin* pin : Pins)
 	{
 		FParameterSpec* pin_spec = FindPinSpec( pin );
-		if (pin_spec)
+		if (pin_spec && pin_spec->Type.PinCategory!=UEdGraphSchema_K2::PC_Wildcard)
 		{
-			//is an input, record
+			//is an input with a type assigned, record
 			param_pins.Add( pin, pin_spec );
 		}
 	}

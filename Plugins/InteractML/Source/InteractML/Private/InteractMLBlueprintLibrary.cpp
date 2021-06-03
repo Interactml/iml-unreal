@@ -35,8 +35,8 @@ static UInteractMLContext* GetMLContext(AActor* Actor)
 	if (!context)
 	{
 		context = NewObject<UInteractMLContext>( Actor, NAME_None, RF_Transient | RF_DuplicateTransient );
-		context->InitializeComponent();
 		Actor->AddOwnedComponent( context );
+		context->RegisterComponent();
 	}
 
 	return context;
@@ -92,6 +92,31 @@ void UInteractMLBlueprintLibrary::AddColourParameter( FInteractMLParameters Para
 {
 	Parameters.Ptr->Add(Value);
 }
+
+
+//////////////////////////////// TEMP/TEST/DEBUG /////////////////////////////////
+
+// dump parameter collection output
+//
+void UInteractMLBlueprintLibrary::DebugParameterCollection(FInteractMLParameters Parameters)
+{
+	FInteractMLParameterCollection* params = Parameters.Ptr.Get();
+	if (params)
+	{
+		FString txt;
+		for (int i = 0; i < params->Values.Num(); i++)
+		{
+			if (i > 0)
+			{
+				txt.Append(TEXT(", "));
+			}
+			float val = params->Values[i];
+			txt.Appendf( TEXT("%.00f"), val );
+		}
+		UE_LOG(LogInteractML, Display, TEXT("Parameters (%i): %s"), params->Values.Num(), *txt);
+	}
+}
+
 
 // EPILOGUE
 #undef LOCTEXT_NAMESPACE

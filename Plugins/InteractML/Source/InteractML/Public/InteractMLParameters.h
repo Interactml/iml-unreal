@@ -66,4 +66,18 @@ struct INTERACTML_API FInteractMLParameterCollection
 
 private:
 
+	// replace/add a value at current position as needed
+	//
+	void AccumulateValue( float value )
+	{
+		if(Cursor < Values.Num())
+		{
+			Values[Cursor] = value;
+		}
+		else
+		{
+			Values.Add( value );
+		}
+		Cursor++;
+	}
 };

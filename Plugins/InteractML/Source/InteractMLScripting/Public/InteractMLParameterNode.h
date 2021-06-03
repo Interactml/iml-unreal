@@ -127,7 +127,7 @@ private:
 	void RemoveParameterInput(UEdGraphPin* pin);
 
 	//node expansion
-	void CollectParameterPins( TMap<UEdGraphPin*,FParameterSpec*> param_pins );
+	void CollectParameterPins( TMap<UEdGraphPin*,FParameterSpec*>& param_pins );
 	UFunction* FindParameterAccessFunction() const;
 	UFunction* FindParameterAddFunctionByType( FEdGraphPinType* pin_type );	
 	
