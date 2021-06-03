@@ -428,7 +428,7 @@ void UInteractMLParameterNode::AllocateDefaultPins()
 
 	// Target actor (needed for context)
 	UEdGraphPin* actor_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Object, AActor::StaticClass(), FInteractMLParameterNodePinNames::ActorInputPinName);
-	actor_pin->PinToolTip = LOCTEXT("ParameterNodeActorPinTooltip", "Interact ML nodes need an actor to provide context in which they operate.\nTypically this would be actor the graph is attached to (i.e. 'Self').").ToString();
+	actor_pin->PinToolTip = LOCTEXT("BlueprintNodeActorPinTooltip", "Interact ML nodes need an actor to provide context in which they operate.\nTypically this would be actor the graph is attached to (i.e. 'Self').").ToString();
 	
 	// Add known input pins
 	for(int i = 0; i < InputParameters.Num(); i++)

@@ -30,7 +30,8 @@ class INTERACTML_API UInteractMLTrainingSet
 	
 	
 	//---- transient/cached state ----
-	
+	bool bIsRecording;
+	int RecordingMode;
 	
 public:
 	//---- constants ----
@@ -40,6 +41,7 @@ public:
 	
 
 	//---- access ----
+	bool IsRecording() const { return bIsRecording; }
 	
 	//each type provides qualifying extension prefix
 	virtual FString GetExtensionPrefix() const { return cExtensionPrefix; }

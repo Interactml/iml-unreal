@@ -93,12 +93,63 @@ void UInteractMLBlueprintLibrary::AddColourParameter( FInteractMLParameters Para
 	Parameters.Ptr->Add(Value);
 }
 
+///////////////////// TRAINING SET //////////////////////
 
-//////////////////////////////// TEMP/TEST/DEBUG /////////////////////////////////
+
+// Training set access
+// obtain the training set from the context object for this actor
+// NOTE: training sets are shared objects (same path/same object), cached at the plugin level
+// NOTE: we still disambiguate so we can train which nodes/how many are using these objects
+//
+UInteractMLTrainingSet* UInteractMLBlueprintLibrary::GetTrainingSet(AActor* Actor, FString DataPath, FString NodeID)
+{
+	//find the context we cache our state in
+	UInteractMLContext* Context = GetMLContext( Actor );
+	check(Context);
+	
+	//get a parameter collection for this node to use
+	UInteractMLContext::TGraphNodeID id = NodeID;
+	UInteractMLTrainingSet* training_set = Context->GetTrainingSet( id, DataPath );
+	check(training_set);
+	
+	return training_set;
+}
+
+// training set recording
+// when recording requested, takes snapshot of parameter data and associates it with the given label and stores it in the training set
+// when finished returns true briefly to signify the training set change has been completed
+// NOTE: just single snapshots at the moment
+// NOTE: state about recording can be held in the training set object even though it's technically shared because it doesn't make
+//       too much sense to be recording using two training nodes at the same time.
+//
+bool UInteractMLBlueprintLibrary::RecordExample(
+	UInteractMLTrainingSet* TrainingSet, 
+	FInteractMLParameters Parameters, 
+	int Label, 
+	bool Record, 
+	int Mode, 
+	FString NodeID)
+{
+//	check(TrainingSet);
+//	FInteractMLParametersCollection* parameters = Parameters->Ptr.Get();
+
+	//current state
+//	bool is_recording = TrainingSet->IsRecording();
+
+
+	//update state
+
+	//changed?
+	return false;
+}
+
+
+
+///////////////////// DEBUG/DIAGS //////////////////////
 
 // dump parameter collection output
 //
-void UInteractMLBlueprintLibrary::DebugParameterCollection(FInteractMLParameters Parameters)
+void UInteractMLBlueprintLibrary::LogParameterCollection(FInteractMLParameters Parameters)
 {
 	FInteractMLParameterCollection* params = Parameters.Ptr.Get();
 	if (params)

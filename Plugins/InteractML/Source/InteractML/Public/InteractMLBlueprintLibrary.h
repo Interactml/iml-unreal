@@ -26,7 +26,9 @@ class INTERACTML_API UInteractMLBlueprintLibrary
 {
 	GENERATED_BODY()
 public:
-	
+		
+	///////////////////// PARAMETER COLLECTION //////////////////////
+		
 	// parameter collection access
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
 	static FInteractMLParameters GetParameters( AActor* Actor, FString NodeID );	
@@ -45,8 +47,21 @@ public:
 	static void AddQuaternionParameter( FInteractMLParameters Parameters, FQuat Value );
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
 	static void AddColourParameter( FInteractMLParameters Parameters, FLinearColor Value );
-	
 
-	UFUNCTION(BlueprintCallable)
-	static void DebugParameterCollection(FInteractMLParameters Parameters);
+
+	///////////////////// TRAINING SET //////////////////////
+	
+	// training set access
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static UInteractMLTrainingSet* GetTrainingSet(AActor* Actor, FString DataPath, FString NodeID);
+	// training set recording
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static bool RecordExample(UInteractMLTrainingSet* TrainingSet, FInteractMLParameters Parameters, int Label, bool Record, int Mode, FString NodeID);
+
+
+	///////////////////// DEBUG/DIAGS //////////////////////
+
+	// log a parameter collections list of parameter values
+	UFUNCTION(BlueprintCallable,meta=(DevelopmentOnly))
+	static void LogParameterCollection(FInteractMLParameters Parameters);
 };
