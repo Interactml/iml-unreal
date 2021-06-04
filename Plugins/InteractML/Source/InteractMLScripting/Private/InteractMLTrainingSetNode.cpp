@@ -162,7 +162,7 @@ void UInteractMLTrainingSetNode::AllocateDefaultPins()
 
 	// perform reset
 	UEdGraphPin* reset_pin = CreatePin( EGPD_Input, UEdGraphSchema_K2::PC_Boolean, nullptr, FInteractMLTrainingSetNodePinNames::ResetInputPinName );
-	reset_pin->PinToolTip = LOCTEXT( "TrainingSetNodeResetPinTooltip", "Set this to clear our all recorded training data and start again." ).ToString();
+	reset_pin->PinToolTip = LOCTEXT( "TrainingSetNodeResetPinTooltip", "Set this to clear out all recorded training data and start again." ).ToString();
 
 	//---- Outputs ----
 

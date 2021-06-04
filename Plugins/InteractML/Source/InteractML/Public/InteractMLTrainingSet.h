@@ -76,11 +76,11 @@ class INTERACTML_API UInteractMLTrainingSet
 	// how many parameters in each sample (0 if unknown)
 	int ParameterCount;
 	
-	// are we currently recording? (might be only true for a single frame if Single sample mode)
-	bool bIsRecording;
+	// are we currently recording, and which node is doing it? (might be only true for a single frame if Single sample mode)
+	FString RecordingNode;
 	
-	// are we currently resetting? (we track this so we can ignore continuous reset requests)
-	bool bIsResetting;
+	// are we currently resetting, and which node is doing it? (we track this so we can ignore continuous reset requests)
+	FString ResettingNode;
 	
 	// accumulator for current active recording session
 	FInteractMLExample CurrentRecording;
@@ -93,16 +93,16 @@ public:
 	
 
 	//---- access ----
-	bool IsRecording() const { return bIsRecording; }
-	bool IsResetting() const { return bIsResetting; }
+	bool IsRecording() const { return !RecordingNode.IsEmpty(); }
+	bool IsResetting() const { return !ResettingNode.IsEmpty(); }
 	
 	//---- modification ----
-	bool BeginRecording( int label );
-	bool RecordParameters( struct FInteractMLParameterCollection* parameters );
-	bool EndRecording();
+	bool BeginRecording( int label, FString node_id );
+	bool RecordParameters( struct FInteractMLParameterCollection* parameters, FString node_id );
+	bool EndRecording( FString node_id );
 
-	void BeginReset();
-	void EndReset();
+	void BeginReset( FString node_id );
+	void EndReset( FString node_id );
 	
 	//each type provides qualifying extension prefix
 	virtual FString GetExtensionPrefix() const { return cExtensionPrefix; }

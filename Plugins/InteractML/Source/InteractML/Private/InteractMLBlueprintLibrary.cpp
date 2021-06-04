@@ -145,17 +145,17 @@ bool UInteractMLBlueprintLibrary::RecordExample(
 		if (want_recording)
 		{
 			//start recording
-			bool ok = TrainingSet->BeginRecording(Label);
+			bool ok = TrainingSet->BeginRecording(Label, NodeID);
 			if (ok)
 			{
 				//record single snapshot upon start
-				ok = TrainingSet->RecordParameters(parameters);
+				ok = TrainingSet->RecordParameters(parameters,NodeID);
 			}
 		}
 		else
 		{
 			//stop recording
-			bool ok = TrainingSet->EndRecording();
+			bool ok = TrainingSet->EndRecording(NodeID);
 
 			//success?
 			is_finished = ok; //briefly return true upon successful trigger
@@ -169,17 +169,40 @@ bool UInteractMLBlueprintLibrary::RecordExample(
 	{
 		if (want_reset)
 		{
-			TrainingSet->BeginReset();
+			TrainingSet->BeginReset(NodeID);
 		}
 		else
 		{
-			TrainingSet->EndReset();
+			TrainingSet->EndReset(NodeID);
 		}
 	}
 
 	//finished recording
 	return is_finished;
 }
+
+///////////////////// MODEL //////////////////////
+
+// model access
+//
+UInteractMLModel* UInteractMLBlueprintLibrary::GetModel_Classification(AActor* Actor, FString DataPath, FString NodeID)
+{
+	return nullptr;
+}
+
+// model running
+//
+int UInteractMLBlueprintLibrary::RunModel(UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID)
+{
+	return 0;
+}
+
+// model training
+//
+void UInteractMLBlueprintLibrary::TrainModel(UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID)
+{
+}
+
 
 
 ///////////////////// UTILITY //////////////////////
