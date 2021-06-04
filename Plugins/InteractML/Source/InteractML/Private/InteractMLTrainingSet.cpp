@@ -158,34 +158,23 @@ void UInteractMLTrainingSet::ExtractCharacteristics()
 
 // check ready, prep and start recording
 //
-bool UInteractMLTrainingSet::BeginRecording(int label, FString node_id)
+bool UInteractMLTrainingSet::BeginRecording(int label)
 {
-	//checks
-	if (IsRecording())
-	{
-		UE_LOG(LogInteractML, Error, TEXT("Multiple simultaneous example recordings are not supported. Node %s tried to record whilst node %s is recording already. You can only record from one node at a time into training set '%s'."), *node_id, *RecordingNode, *GetFilePath() );
-		return false;
-	}
-
 	//reset
-	CurrentRecording.label = FString::FromInt(label);
+	CurrentRecording.label = label;
 	CurrentRecording.inputSeries.Empty();
-
-	//start
-	RecordingNode = node_id;
 
 	return true;
 }
 
 // submit a parameter set to be accumulated with the current label
 //
-bool UInteractMLTrainingSet::RecordParameters(FInteractMLParameterCollection* parameters, FString node_id )
+bool UInteractMLTrainingSet::RecordParameters(FInteractMLParameterCollection* parameters )
 {
 	int incoming_parameter_count = parameters->Values.Num();
 
 	//checks
 	check(IsRecording());
-	check(RecordingNode == node_id);
 	if(ParameterCount!=0 && incoming_parameter_count!=ParameterCount)
 	{
 		UE_LOG(LogInteractML, Error, TEXT("Parameter set size has changed from %i to %i in training set '%s'. Please reset and re-record all examples."), ParameterCount, incoming_parameter_count, *GetFilePath() );
@@ -214,10 +203,8 @@ bool UInteractMLTrainingSet::RecordParameters(FInteractMLParameterCollection* pa
 
 // done recording, issue accumulated samples to example list and tidy up
 //
-bool UInteractMLTrainingSet::EndRecording( FString node_id )
+bool UInteractMLTrainingSet::EndRecording()
 {
-	check(IsRecording());
-	check(node_id==RecordingNode);
 	bool success = false;
 
 	//any data added?
@@ -246,34 +233,17 @@ bool UInteractMLTrainingSet::EndRecording( FString node_id )
 	}
 	
 	//done
-	RecordingNode.Empty();
 	return success;
 }
 
 // start reset (split because we are driven from a bool and not an event so we need to track on/off state change)
 //
-void UInteractMLTrainingSet::BeginReset( FString node_id )
+void UInteractMLTrainingSet::ResetTrainingSet()
 {
-	if(IsResetting())
-	{
-		UE_LOG(LogInteractML, Error, TEXT("Multiple simultaneous example resets are not supported. Node %s tried to reset whilst node %s is resetting already. You can only reset from one node at a time for training set '%s'."), *node_id, *ResettingNode, *GetFilePath() );
-		return;
-	}
-	ResettingNode = node_id;
-
 	//perform reset
 	UE_LOG(LogInteractML, Log, TEXT("Resetting training set '%s'"), *GetFilePath());
 	ResetExamples();
 	MarkUnsavedData();
-}
-
-// end reset
-//
-void UInteractMLTrainingSet::EndReset( FString node_id )
-{
-	check(IsResetting());
-	check(node_id == ResettingNode);
-	ResettingNode.Empty();
 }
 
 

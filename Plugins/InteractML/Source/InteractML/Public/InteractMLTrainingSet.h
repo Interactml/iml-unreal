@@ -10,8 +10,8 @@
 
 //module
 #include "InteractMLStorage.h"
+#include "InteractMLHelpers.h"
 #include "InteractMLTrainingSet.generated.h"
-
 
 //general declarations
 
@@ -35,7 +35,7 @@ struct INTERACTML_API FInteractMLExample
 	GENERATED_BODY()
 		
 	UPROPERTY()
-	FString label;
+	int label;
 
 	UPROPERTY()
 	TArray<FInteractMLSample> inputSeries;
@@ -76,16 +76,14 @@ class INTERACTML_API UInteractMLTrainingSet
 	// how many parameters in each sample (0 if unknown)
 	int ParameterCount;
 	
-	// are we currently recording, and which node is doing it? (might be only true for a single frame if Single sample mode)
-	FString RecordingNode;
-	
-	// are we currently resetting, and which node is doing it? (we track this so we can ignore continuous reset requests)
-	FString ResettingNode;
-	
 	// accumulator for current active recording session
 	FInteractMLExample CurrentRecording;
 	
 public:
+	FNodeActionInterlock RecordingAction; // are we currently recording, and which node is doing it? (might be only true for a single frame if Single sample mode)
+	FNodeActionInterlock ResettingAction; // are we currently resetting, and which node is doing it? (we track this so we can ignore continuous reset requests)
+	
+
 	//---- constants ----
 	
 	// extension prefix for example/training data files
@@ -93,16 +91,16 @@ public:
 	
 
 	//---- access ----
-	bool IsRecording() const { return !RecordingNode.IsEmpty(); }
-	bool IsResetting() const { return !ResettingNode.IsEmpty(); }
+	const TArray<FInteractMLExample>& GetExamples() const { return Examples; }
+	bool IsRecording() const { return RecordingAction.Active(); }
+	bool IsResetting() const { return ResettingAction.Active(); }
 	
 	//---- modification ----
-	bool BeginRecording( int label, FString node_id );
-	bool RecordParameters( struct FInteractMLParameterCollection* parameters, FString node_id );
-	bool EndRecording( FString node_id );
+	bool BeginRecording( int label );
+	bool RecordParameters( struct FInteractMLParameterCollection* parameters );
+	bool EndRecording();
 
-	void BeginReset( FString node_id );
-	void EndReset( FString node_id );
+	void ResetTrainingSet();
 	
 	//each type provides qualifying extension prefix
 	virtual FString GetExtensionPrefix() const { return cExtensionPrefix; }

@@ -13,9 +13,11 @@ using modelSetFloat = modelSet<float>;
 
 //module
 #include "InteractMLStorage.h"
+#include "InteractMLHelpers.h"
 #include "InteractMLModel.generated.h"
 
 //general declarations
+
 
 // InteractML Model Base
 // represents a trained machine learning model for specific algorithm types to derive from
@@ -31,21 +33,26 @@ class INTERACTML_API UInteractMLModel
 	
 	
 	//---- transient/cached state ----
-	
-	
-public:
-		//---- constants ----
+
+public:	
+	FNodeActionInterlock TrainingAction;	//node currently training this model
+	FNodeActionInterlock ResetAction;	//node currently resetting this model
+
+
+	//---- constants ----
 	
 	// extension prefix part used for ALL model data files
 	static FString cExtensionPrefix;
 	
 	//---- access ----
-
+	bool IsTraining() const { return TrainingAction.Active(); }
+	bool IsResetting() const { return ResetAction.Active(); }
+	
 	//---- operation ----
 	int RunModel(struct FInteractMLParameterCollection* parameters);
 	void TrainModel(class UInteractMLTrainingSet* training_set);
 	void ResetModel();
-
+	
 	//---- persistence ----
 	virtual void Create() override; //nothing to load, created a new one
 	virtual bool LoadJson(const FString& json_string) override;

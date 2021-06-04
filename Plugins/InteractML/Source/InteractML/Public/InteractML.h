@@ -39,7 +39,7 @@ public:
 	bool HasUnsavedData() const; //anything unsaved?
 
 	//state
-	void Save(); //save any unsaved training or model data
+	bool Save(); //save any unsaved training or model data
 	
 	//ml objects : obtain path based ones here to track and synchronise globally
 	class UInteractMLTrainingSet* GetTrainingSet( FString path_and_name );			//note, just [Path/]Name

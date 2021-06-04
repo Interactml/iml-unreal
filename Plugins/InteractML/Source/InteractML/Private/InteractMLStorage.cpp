@@ -44,12 +44,13 @@ void UInteractMLStorage::FInteracMLModule_SetBaseFilePath( FString base_file_pat
 	bool found_file = false;
 	FString full_file_path;
 	TArray<FString> all_data_files;
+	FString model_file_extension = GetExtensionPrefix();
 	file_system.FindFilesRecursively( all_data_files, *root_path, *full_extension );
 	for (int i = 0; i < all_data_files.Num(); i++)
 	{
 		//compare base path/name only for match
 		FString file_path = all_data_files[i];		
-		FString just_path_and_name = SanitisePathAndName(file_path);
+		FString just_path_and_name = SanitisePathAndName(file_path, model_file_extension );
 		if (just_path_and_name.Compare(base_file_path, ESearchCase::IgnoreCase)==0)
 		{
 			//yes, we found our file
@@ -90,7 +91,8 @@ void UInteractMLStorage::FInteracMLModule_SetBaseFilePath( FString base_file_pat
 // is the base path being used for storage?
 bool UInteractMLStorage::CheckBasePath(FString base_file_path) const
 {
-	base_file_path = SanitisePathAndName( base_file_path );
+	FString model_file_extension = GetExtensionPrefix();
+	base_file_path = SanitisePathAndName( base_file_path, model_file_extension );
 	return BaseFilePath.Compare( base_file_path, ESearchCase::IgnoreCase ) == 0;
 }
 
@@ -230,9 +232,10 @@ FGuid UInteractMLStorage::ExtractGuidFromFile(FString full_file_path)
 	{
 		id_start -= prefix_len;
 	}
-	prefix_len = UInteractMLModel::cExtensionPrefix.Len();
+	FString model_file_extension = GetExtensionPrefix();
+	prefix_len = model_file_extension.Len();
 	prefix_start = id_start-prefix_len;
-	if (prefix_start >= 0 && FPlatformString::Strnicmp(&full_file_path[prefix_start], *UInteractMLModel::cExtensionPrefix, prefix_len )==0)
+	if (prefix_start >= 0 && FPlatformString::Strnicmp(&full_file_path[prefix_start], *model_file_extension, prefix_len )==0)
 	{
 		id_start -= prefix_len;
 	}
@@ -271,7 +274,7 @@ FGuid UInteractMLStorage::ExtractGuidFromFile(FString full_file_path)
 
 // ensure just the base path/name are present
 //
-FString UInteractMLStorage::SanitisePathAndName(FString path_and_name)
+FString UInteractMLStorage::SanitisePathAndName(FString path_and_name, FString optional_model_type_extension)
 {
 	//normalise separators
 	path_and_name = path_and_name.Replace( TEXT( "\\" ), TEXT( "/" ) );
@@ -299,9 +302,9 @@ FString UInteractMLStorage::SanitisePathAndName(FString path_and_name)
 	{
 		path_and_name = path_and_name.LeftChop( UInteractMLTrainingSet::cExtensionPrefix.Len() );
 	}
-	if (path_and_name.EndsWith( UInteractMLModel::cExtensionPrefix ))
+	if (!optional_model_type_extension.IsEmpty() && path_and_name.EndsWith( optional_model_type_extension ))
 	{
-		path_and_name = path_and_name.LeftChop( UInteractMLModel::cExtensionPrefix.Len() );
+		path_and_name = path_and_name.LeftChop( optional_model_type_extension.Len() );
 	}
 	
 	//remove ID, e.g. ".5F05C2390B2238A3"

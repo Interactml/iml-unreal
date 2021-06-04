@@ -308,7 +308,7 @@ void UInteractMLModelNode::ExpandNode(class FKismetCompilerContext& CompilerCont
 	//training fn pins
 	UEdGraphPin* TrainFnExecPin = CallTrainFn->GetExecPin();
 	UEdGraphPin* TrainFnThenPin = CallTrainFn->GetThenPin();
-	UEdGraphPin* TrainFnModelPin = CallRunFn->FindPinChecked( FModelNodeTrainModelPinNames::ModelPinName );
+	UEdGraphPin* TrainFnModelPin = CallTrainFn->FindPinChecked( FModelNodeTrainModelPinNames::ModelPinName );
 	UEdGraphPin* TrainFnTrainingSetPin = CallTrainFn->FindPinChecked( FModelNodeTrainModelPinNames::TrainingSetPinName);
 	UEdGraphPin* TrainFnTrainPin = CallTrainFn->FindPinChecked( FModelNodeTrainModelPinNames::TrainPinName );
 	UEdGraphPin* TrainFnResetPin = CallTrainFn->FindPinChecked( FModelNodeTrainModelPinNames::ResetPinName );

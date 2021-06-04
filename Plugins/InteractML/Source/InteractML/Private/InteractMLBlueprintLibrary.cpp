@@ -135,28 +135,24 @@ bool UInteractMLBlueprintLibrary::RecordExample(
 	check(TrainingSet);
 	FInteractMLParameterCollection* parameters = Parameters.Ptr.Get();
 
-	//current state
-	bool is_recording = TrainingSet->IsRecording();
-	bool want_recording = Record;
-
 	//recording
 	bool is_finished = false;
-	if(want_recording!=is_recording) //change of recording request
+	if(TrainingSet->RecordingAction.Triggered( Record, NodeID ))
 	{
-		if (want_recording)
+		if (Record)
 		{
 			//start recording
-			bool ok = TrainingSet->BeginRecording(Label, NodeID);
+			bool ok = TrainingSet->BeginRecording(Label);
 			if (ok)
 			{
 				//record single snapshot upon start
-				ok = TrainingSet->RecordParameters(parameters,NodeID);
+				ok = TrainingSet->RecordParameters(parameters);
 			}
 		}
 		else
 		{
 			//stop recording
-			bool ok = TrainingSet->EndRecording(NodeID);
+			bool ok = TrainingSet->EndRecording();
 
 			//success?
 			is_finished = ok; //briefly return true upon successful trigger
@@ -164,17 +160,12 @@ bool UInteractMLBlueprintLibrary::RecordExample(
 	}
 
 	//reset handling
-	bool is_resetting = TrainingSet->IsResetting();
-	bool want_reset = Reset;
-	if (want_reset!=is_resetting) //change of reset state
+	if (TrainingSet->ResettingAction.Triggered( Reset, NodeID ))
 	{
-		if (want_reset)
+		if (Reset)
 		{
-			TrainingSet->BeginReset(NodeID);
-		}
-		else
-		{
-			TrainingSet->EndReset(NodeID);
+			//just activated
+			TrainingSet->ResetTrainingSet();
 		}
 	}
 
@@ -220,13 +211,29 @@ void UInteractMLBlueprintLibrary::TrainModel( UInteractMLModel* Model, UInteract
 {
 	if(Model)
 	{
-		if(Train)
+		//training state changed?
+		if(Model->TrainingAction.Triggered(Train, NodeID))
 		{
-			Model->TrainModel( TrainingSet );
+			//activated/deactivated?
+			if (Train)
+			{
+				//trigger training when Train bool transitions to true
+				Model->TrainModel(TrainingSet);
+			}
 		}
-		else if(Reset)
+		
+		//reset state changed?
+		if(Model->ResetAction.Triggered(Reset,NodeID))
 		{
-			Model->ResetModel();
+			//activated/deactivated?
+			if (Reset)
+			{
+				//trigger reset when Reset transitions to true
+				Model->ResetModel();
+
+				//explicitly count this as new data
+				Model->MarkUnsavedData();
+			}
 		}
 	}
 }
@@ -238,9 +245,8 @@ void UInteractMLBlueprintLibrary::TrainModel( UInteractMLModel* Model, UInteract
 //persistence
 bool UInteractMLBlueprintLibrary::Save()
 {
-	//TODO: save
-	check(false);
-	return false;
+	FInteractMLModule::Get().Save();
+	return true;
 }
 
 

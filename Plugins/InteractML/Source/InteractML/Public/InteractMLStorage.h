@@ -82,10 +82,10 @@ public:
 	//---- utility ----
 
 	// extract/ensure just path and base file name from a path
-	static FString SanitisePathAndName( FString path_and_name );
+	static FString SanitisePathAndName( FString path_and_name, FString optional_model_type_extension="" );
 		
 	// extract numerical ID from file
-	static FGuid ExtractGuidFromFile(FString full_file_path);
+	FGuid ExtractGuidFromFile(FString full_file_path);
 
 private:
 	//internal access

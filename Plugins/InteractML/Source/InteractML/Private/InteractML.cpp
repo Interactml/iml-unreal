@@ -181,7 +181,7 @@ UInteractMLModel* FInteractMLModule::GetModel( UClass* model_type, FString path_
 	FString model_file_extension = model_type->GetDefaultObject<UInteractMLModel>()->GetExtensionPrefix();
 
 	//clean and make key
-	FString base_file_path = UInteractMLStorage::SanitisePathAndName( path_and_name );
+	FString base_file_path = UInteractMLStorage::SanitisePathAndName( path_and_name, model_file_extension );
 	FString file_key = MakeFilePathKey(base_file_path) + model_file_extension;
 	
 	//locate
@@ -235,9 +235,10 @@ void SetModel(UInteractMLModel* model)
 //    There is a blueprint function for this InteractML -> Save
 // NOTE: won't try and save any training sets or model that haven't changed
 //
-void FInteractMLModule::Save()
+bool FInteractMLModule::Save()
 {
 	//scan known objects for unsaved state
+	bool ok = true;
 	for (auto It = ObjectLookup.CreateConstIterator(); It; ++It)
 	{
 		UInteractMLStorage* pstorage = It.Value();
@@ -247,9 +248,11 @@ void FInteractMLModule::Save()
 			if (!pstorage->Save())
 			{
 				UE_LOG(LogInteractML, Error, TEXT("Failed to save InteractML object: %s"), *pstorage->GetFilePath());
+				ok = false;
 			}
 		}
 	}
+	return ok;
 }
 
 // editor module needs to be able to tell if there is any new data
