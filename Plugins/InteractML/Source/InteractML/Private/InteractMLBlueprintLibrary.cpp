@@ -117,7 +117,7 @@ UInteractMLTrainingSet* UInteractMLBlueprintLibrary::GetTrainingSet(AActor* Acto
 
 // training set recording
 // when recording requested, takes snapshot of parameter data and associates it with the given label and stores it in the training set
-// when finished returns true briefly to signify the training set change has been completed
+// when finished returns true briefly to signify that new training set data is ready
 // NOTE: just single snapshots at the moment
 // NOTE: state about recording can be held in the training set object even though it's technically shared because it doesn't make
 //       too much sense to be recording using two training nodes at the same time.
@@ -126,8 +126,9 @@ bool UInteractMLBlueprintLibrary::RecordExample(
 	UInteractMLTrainingSet* TrainingSet, 
 	FInteractMLParameters Parameters, 
 	int Label, 
-	bool Record, 
-	int Mode, 
+	bool Record,
+	bool Reset,
+	int Mode,
 	FString NodeID)
 {
 	check(TrainingSet);
@@ -158,6 +159,21 @@ bool UInteractMLBlueprintLibrary::RecordExample(
 
 			//success?
 			is_finished = ok; //briefly return true upon successful trigger
+		}
+	}
+
+	//reset handling
+	bool is_resetting = TrainingSet->IsResetting();
+	bool want_reset = Reset;
+	if (want_reset!=is_resetting) //change of reset state
+	{
+		if (want_reset)
+		{
+			TrainingSet->BeginReset();
+		}
+		else
+		{
+			TrainingSet->EndReset();
 		}
 	}
 

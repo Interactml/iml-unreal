@@ -41,6 +41,7 @@ private:
 	UEdGraphPin* GetLiveParametersInputPin() const;
 	UEdGraphPin* GetLabelInputPin() const;
 	UEdGraphPin* GetRecordInputPin() const;
+	UEdGraphPin* GetResetInputPin() const;
 	UEdGraphPin* GetTrainingSetOutputPin() const;
 	UEdGraphPin* GetChangedOutputPin() const;
 	

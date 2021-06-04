@@ -26,7 +26,7 @@ FString UInteractMLTrainingSet::cExtensionPrefix(TEXT(".training"));
 bool UInteractMLTrainingSet::LoadJson(const FString& json_string)
 {
 	//reset
-	Examples.Empty();
+	ResetExamples();
 
 	//load
 	if (json_string.IsEmpty())
@@ -74,6 +74,13 @@ bool UInteractMLTrainingSet::SaveJson(FString& json_string) const
 
 	//failed
 	return false;
+}
+
+// empty out any example state
+//
+void UInteractMLTrainingSet::ResetExamples()
+{
+	Examples.Empty();
 }
 
 // post load we can look at the data to determine:
@@ -241,6 +248,26 @@ bool UInteractMLTrainingSet::EndRecording()
 	return success;
 }
 
+// start reset (split because we are driven from a bool and not an event so we need to track on/off state change)
+//
+void UInteractMLTrainingSet::BeginReset()
+{
+	check(!bIsResetting);
+	bIsResetting = true;
+
+	//perform reset
+	UE_LOG(LogInteractML, Log, TEXT("Resetting training set '%s'"), *GetFilePath());
+	ResetExamples();
+	MarkUnsavedData();
+}
+
+// end reset
+//
+void UInteractMLTrainingSet::EndReset()
+{
+	check(bIsResetting);
+	bIsResetting = false;
+}
 
 
 // EPILOGUE

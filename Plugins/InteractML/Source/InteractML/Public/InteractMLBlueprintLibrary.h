@@ -56,7 +56,7 @@ public:
 	static UInteractMLTrainingSet* GetTrainingSet(AActor* Actor, FString DataPath, FString NodeID);
 	// training set recording
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
-	static bool RecordExample(UInteractMLTrainingSet* TrainingSet, FInteractMLParameters Parameters, int Label, bool Record, int Mode, FString NodeID);
+	static bool RecordExample(UInteractMLTrainingSet* TrainingSet, FInteractMLParameters Parameters, int Label, bool Record, bool Reset, int Mode, FString NodeID);
 	
 	///////////////////// UTILITY //////////////////////
 

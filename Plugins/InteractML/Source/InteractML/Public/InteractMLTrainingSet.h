@@ -78,7 +78,10 @@ class INTERACTML_API UInteractMLTrainingSet
 	
 	// are we currently recording? (might be only true for a single frame if Single sample mode)
 	bool bIsRecording;
-
+	
+	// are we currently resetting? (we track this so we can ignore continuous reset requests)
+	bool bIsResetting;
+	
 	// accumulator for current active recording session
 	FInteractMLExample CurrentRecording;
 	
@@ -91,11 +94,15 @@ public:
 
 	//---- access ----
 	bool IsRecording() const { return bIsRecording; }
-
+	bool IsResetting() const { return bIsResetting; }
+	
 	//---- modification ----
 	bool BeginRecording( int label );
 	bool RecordParameters( struct FInteractMLParameterCollection* parameters );
 	bool EndRecording();
+
+	void BeginReset();
+	void EndReset();
 	
 	//each type provides qualifying extension prefix
 	virtual FString GetExtensionPrefix() const { return cExtensionPrefix; }
@@ -108,6 +115,7 @@ public:
 
 private:
 
+	void ResetExamples();
 	void ExtractCharacteristics();
 
 };
