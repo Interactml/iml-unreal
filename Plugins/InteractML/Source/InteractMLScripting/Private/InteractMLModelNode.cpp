@@ -87,7 +87,7 @@ namespace FModelNodeTrainModelPinNames
 //
 FText UInteractMLModelNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
-	FText node_name = LOCTEXT("ModelNodeTitle", "Machine Learning System");
+	FText node_name = LOCTEXT("ModelNodeTitle", "Machine Learning Robot");
 
 	//check what's needed
 	switch (TitleType)
