@@ -10,6 +10,7 @@
 #include "InteractMLStorage.h"
 #include "InteractMLTrainingSet.h"
 #include "InteractMLModel.h"
+#include "Models/InteractMLClassificationModel.h"
 
 // PROLOGUE
 
@@ -32,9 +33,9 @@ static void InteractMLTests_MLObjectReqeusts()
 	UInteractMLTrainingSet* ts2 = iml.GetTrainingSet(TEXT("Test/MyExamples"));
 	check(ts1==ts2);
 	
-	UInteractMLModel* m1 = iml.GetModel(TEXT("Test/MyModel"));
+	UInteractMLModel* m1 = iml.GetModel( UInteractMLClassificationModel::StaticClass(), TEXT("Test/MyModel"));
 	check(m1);
-	UInteractMLModel* m2 = iml.GetModel(TEXT("Test/MyModel"));
+	UInteractMLModel* m2 = iml.GetModel( UInteractMLClassificationModel::StaticClass(), TEXT("Test/MyModel"));
 	check(m1==m2);
 	
 }

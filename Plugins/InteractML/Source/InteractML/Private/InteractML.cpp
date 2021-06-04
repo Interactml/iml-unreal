@@ -175,11 +175,14 @@ UInteractMLTrainingSet* FInteractMLModule::GetTrainingSet( FString path_and_name
 	return ptraining_set;
 }
 
-UInteractMLModel* FInteractMLModule::GetModel(FString path_and_name)
+UInteractMLModel* FInteractMLModule::GetModel( UClass* model_type, FString path_and_name)
 {
+	//determine extension (need to query model type dynamically)
+	FString model_file_extension = model_type->GetDefaultObject<UInteractMLModel>()->GetExtensionPrefix();
+
 	//clean and make key
 	FString base_file_path = UInteractMLStorage::SanitisePathAndName( path_and_name );
-	FString file_key = MakeFilePathKey(base_file_path) + UInteractMLModel::cExtensionPrefix;
+	FString file_key = MakeFilePathKey(base_file_path) + model_file_extension;
 	
 	//locate
 	auto pentry = ObjectLookup.Find( file_key );
@@ -188,7 +191,7 @@ UInteractMLModel* FInteractMLModule::GetModel(FString path_and_name)
 	//create on demand
 	if(!pobj)
 	{
-		pobj = NewObject<UInteractMLModel>();
+		pobj = NewObject<UInteractMLModel>( GetTransientPackage(), model_type, NAME_None);
 		
 		//owned by plugin
 		pobj->AddToRoot();
@@ -202,7 +205,7 @@ UInteractMLModel* FInteractMLModule::GetModel(FString path_and_name)
 	UInteractMLModel* pmodel = Cast<UInteractMLModel>(pobj);
 	if (!pmodel)
 	{
-		UE_LOG(LogInteractML, Error, TEXT("Path '%s' doesn't refer to a model"), *path_and_name);
+		UE_LOG(LogInteractML, Error, TEXT("Failed to create model from file '%s'."), *path_and_name);
 	}
 	
 	return pmodel;

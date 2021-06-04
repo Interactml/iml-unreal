@@ -42,8 +42,8 @@ public:
 	void Save(); //save any unsaved training or model data
 	
 	//ml objects : obtain path based ones here to track and synchronise globally
-	class UInteractMLTrainingSet* GetTrainingSet( FString path_and_name );	//note, just [Path/]Name
-	class UInteractMLModel* GetModel( FString path_and_name );				//note, just [Path/]Name
+	class UInteractMLTrainingSet* GetTrainingSet( FString path_and_name );			//note, just [Path/]Name
+	class UInteractMLModel* GetModel( UClass* model_type, FString path_and_name );	//note, just [Path/]Name
 
 	//ml objects : inform of any obtained from direct asset references here as we need to synchronise with path based ones
 	void SetTrainingSet( class UInteractMLTrainingSet* training_set );

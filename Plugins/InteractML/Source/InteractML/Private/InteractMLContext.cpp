@@ -49,7 +49,7 @@ UInteractMLTrainingSet* UInteractMLContext::GetTrainingSet( UInteractMLContext::
 }
 
 // fetch/re-fetch a model for a specific graph node
-UInteractMLModel* UInteractMLContext::GetModel( UInteractMLContext::TGraphNodeID node_id, FString data_path)
+UInteractMLModel* UInteractMLContext::GetModel( UClass* model_type, UInteractMLContext::TGraphNodeID node_id, FString data_path)
 {
 	UInteractMLModel** pentry = ModelLookup.Find(node_id);
 	UInteractMLModel* pmodel = pentry?*pentry:nullptr;
@@ -67,7 +67,7 @@ UInteractMLModel* UInteractMLContext::GetModel( UInteractMLContext::TGraphNodeID
 		}
 		
 		//re-obtain
-		pmodel = FInteractMLModule::Get().GetModel( data_path );
+		pmodel = FInteractMLModule::Get().GetModel( model_type, data_path );
 		
 		//update cache
 		ModelCache.Add(pmodel);

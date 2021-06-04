@@ -9,6 +9,7 @@
 //module
 #include "InteractML.h"
 #include "InteractMLContext.h"
+#include "Models/InteractMLClassificationModel.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
@@ -187,20 +188,47 @@ bool UInteractMLBlueprintLibrary::RecordExample(
 //
 UInteractMLModel* UInteractMLBlueprintLibrary::GetModel_Classification(AActor* Actor, FString DataPath, FString NodeID)
 {
-	return nullptr;
+	//find the context we cache our state in
+	UInteractMLContext* Context = GetMLContext( Actor );
+	check( Context );
+
+	//get a parameter collection for this node to use
+	UInteractMLContext::TGraphNodeID id = NodeID;
+	UInteractMLModel* model = Context->GetModel( UInteractMLClassificationModel::StaticClass(), id, DataPath );
+	check( model );
+
+	return model;
 }
 
 // model running
 //
 int UInteractMLBlueprintLibrary::RunModel(UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID)
 {
+	if(Model)
+	{
+		if(Run)
+		{
+			return Model->RunModel( Parameters.Ptr.Get() );
+		}
+	}
 	return 0;
 }
 
 // model training
 //
-void UInteractMLBlueprintLibrary::TrainModel(UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID)
+void UInteractMLBlueprintLibrary::TrainModel( UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID )
 {
+	if(Model)
+	{
+		if(Train)
+		{
+			Model->TrainModel( TrainingSet );
+		}
+		else if(Reset)
+		{
+			Model->ResetModel();
+		}
+	}
 }
 
 

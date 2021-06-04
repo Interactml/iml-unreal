@@ -7,6 +7,10 @@
 //unreal
 #include "CoreMinimal.h"
 
+//rapidlib
+#include "modelSet.h"
+using modelSetFloat = modelSet<float>;
+
 //module
 #include "InteractMLStorage.h"
 #include "InteractMLModel.generated.h"
@@ -17,7 +21,7 @@
 // represents a trained machine learning model for specific algorithm types to derive from
 // holds in-memory version of model instance, trained model state backed by underlying JSON file storage
 //
-UCLASS()
+UCLASS(Abstract)
 class INTERACTML_API UInteractMLModel
 	: public UInteractMLStorage
 {
@@ -32,15 +36,33 @@ class INTERACTML_API UInteractMLModel
 public:
 		//---- constants ----
 	
-	// extension prefix for model data files
+	// extension prefix part used for ALL model data files
 	static FString cExtensionPrefix;
 	
 	//---- access ----
+
+	//---- operation ----
+	int RunModel(struct FInteractMLParameterCollection* parameters);
+	void TrainModel(class UInteractMLTrainingSet* training_set);
+	void ResetModel();
+
+	//---- persistence ----
+	virtual void Create() override; //nothing to load, created a new one
+	virtual bool LoadJson(const FString& json_string) override;
+	virtual bool SaveJson(FString& json_string) const override;
 	
-	//each type provides qualifying extension prefix
-	virtual FString GetExtensionPrefix() const { return cExtensionPrefix; }
+	// each type provides qualifying extension prefix
+	virtual FString GetExtensionPrefix() const override { return GetSpecificExtensionPrefix() + cExtensionPrefix; }
+	//each type provides further qualifying extension prefix
+	virtual FString GetSpecificExtensionPrefix() const { check(false); return ""; }
 	
-	
+protected:
+	//---- per model type specialisations ----
+	virtual int RunModelInstance(struct FInteractMLParameterCollection* parameters);
+	virtual void TrainModelInstance(class UInteractMLTrainingSet* training_set);
+	virtual void ResetModelInstance() { check(false); } //must override
+	virtual modelSetFloat* GetModelInstance() const { check(false); return nullptr; } //must override
+
 private:
 	
 };

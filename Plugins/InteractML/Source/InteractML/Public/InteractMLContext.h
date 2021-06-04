@@ -55,7 +55,7 @@ public:
 	UInteractMLTrainingSet* GetTrainingSet( TGraphNodeID node_id, FString data_path );
 	
 	// fetch/re-fetch a model for a specific graph node
-	UInteractMLModel* GetModel( TGraphNodeID node_id, FString data_path );
+	UInteractMLModel* GetModel( UClass* model_type, TGraphNodeID node_id, FString data_path );
 
 	// fetch/re-fetch a parameter set for passing around the graph
 	TSharedPtr<FInteractMLParameterCollection> GetParameters( TGraphNodeID node_id );

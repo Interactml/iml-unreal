@@ -63,6 +63,9 @@ public:
 
 	//---- persistence ----
 
+	// a new storage object, chance to init when not loaded
+	virtual void Create() {}
+	
 	// load existing ML state from disk
 	virtual bool Load(); //override Load to completely control loading of Json file data
 	virtual bool LoadJson( const FString& json_string ) { check(false); return false; } //or override LoadJson to just parse Json

@@ -82,6 +82,8 @@ void UInteractMLStorage::FInteracMLModule_SetBaseFilePath( FString base_file_pat
 	else
 	{
 		//initial file is only written on first save, this means empty/temp objects aren't persisted
+		//we do need to offer it the chance to set it self up though if we're not loading
+		Create();
 	}
 }
 
