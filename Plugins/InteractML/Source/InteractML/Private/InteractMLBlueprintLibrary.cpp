@@ -130,19 +130,51 @@ bool UInteractMLBlueprintLibrary::RecordExample(
 	int Mode, 
 	FString NodeID)
 {
-//	check(TrainingSet);
-//	FInteractMLParametersCollection* parameters = Parameters->Ptr.Get();
+	check(TrainingSet);
+	FInteractMLParameterCollection* parameters = Parameters.Ptr.Get();
 
 	//current state
-//	bool is_recording = TrainingSet->IsRecording();
+	bool is_recording = TrainingSet->IsRecording();
+	bool want_recording = Record;
 
+	//recording
+	bool is_finished = false;
+	if(want_recording!=is_recording) //change of recording request
+	{
+		if (want_recording)
+		{
+			//start recording
+			bool ok = TrainingSet->BeginRecording(Label);
+			if (ok)
+			{
+				//record single snapshot upon start
+				ok = TrainingSet->RecordParameters(parameters);
+			}
+		}
+		else
+		{
+			//stop recording
+			bool ok = TrainingSet->EndRecording();
 
-	//update state
+			//success?
+			is_finished = ok; //briefly return true upon successful trigger
+		}
+	}
 
-	//changed?
-	return false;
+	//finished recording
+	return is_finished;
 }
 
+
+///////////////////// UTILITY //////////////////////
+
+//persistence
+bool UInteractMLBlueprintLibrary::Save()
+{
+	//TODO: save
+	check(false);
+	return false;
+}
 
 
 ///////////////////// DEBUG/DIAGS //////////////////////

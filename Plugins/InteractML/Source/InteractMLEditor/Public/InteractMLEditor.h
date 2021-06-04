@@ -4,16 +4,15 @@
 
 #pragma once
 
-//module
+//unreal
 #include "CoreMinimal.h"
 #include "Modules/ModuleInterface.h"
-
-//unreal
 //#include "Containers/Tickers.h"
 
+//module
+#include "InteractML.h"
 
 // general declarations
-DECLARE_LOG_CATEGORY_EXTERN(LogInteractML, Log, All);
 
 
 // InteractML editor only module
@@ -30,4 +29,12 @@ public:
 
 private:
 
+	// editor module setup/shutdown
+	void InitHooks();
+	void ShutdownHooks();
+
+	// global editor event handlers	
+	void OnEndPIE(const bool bIsSimulating);
+	void OnWorldSaved(uint32 SaveFlags, UWorld* World, bool bSuccess);
+	
 };

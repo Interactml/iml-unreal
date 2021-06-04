@@ -154,24 +154,28 @@ bool UInteractMLStorage::Load()
 	FString path = GetFilePath();
 	IPlatformFile& file_system = FPlatformFileManager::Get().GetPlatformFile();
 	
-	//open file
-	if (file_system.FileExists( *path ))
+	//file exists?
+	if (!file_system.FileExists(*path))
 	{
-		IFileHandle* handle = file_system.OpenRead( *path );
-		if (handle)
-		{
-			//TODO: load JSON and call
-			//LoadJson( ... )
-		}
-		delete handle;
+		//no file, empty json
+		FString none;
+		return LoadJson( none );
 	}
 
-	return true;
+	//have file, load that
+	FString json_string;
+	if(FFileHelper::LoadFileToString( json_string, *path ))
+	{
+		return LoadJson( json_string );
+	}		
+
+	//failed
+	return false;
 }
 
 // save this ML objects internal state to disk
 //
-bool UInteractMLStorage::Save()
+bool UInteractMLStorage::Save() const
 {
 	//gather
 	FString path = GetFilePath();
@@ -183,18 +187,26 @@ bool UInteractMLStorage::Save()
 	{
 		file_system.CreateDirectoryTree( *directory );
 	}
-
-	//write file
-	IFileHandle* handle = file_system.OpenWrite( *path );
-	if (handle)
+	if (!file_system.DirectoryExists(*directory))
 	{
-		//TODO: call
-		//SaveJson( ... )
-		//..and write out
+		return false;
 	}
-	delete handle;
+
+	//generate Json
+	FString json_string; 
+	SaveJson( json_string );
 	
-	return true;	
+	//write file
+	FStringView whole_string( json_string );
+	if(FFileHelper::SaveStringToFile( whole_string, *path ))
+	{
+		//nolonger needs save
+		bNeedsSave = false;
+		return true;
+	}
+	
+	//failed
+	return false;
 }
 
 

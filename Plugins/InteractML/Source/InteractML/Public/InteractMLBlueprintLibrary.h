@@ -57,7 +57,12 @@ public:
 	// training set recording
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
 	static bool RecordExample(UInteractMLTrainingSet* TrainingSet, FInteractMLParameters Parameters, int Label, bool Record, int Mode, FString NodeID);
+	
+	///////////////////// UTILITY //////////////////////
 
+	//persistence
+	UFUNCTION(BlueprintCallable, meta=(ReturnDisplayName = "Success", ToolTip="Write any unsaved example or model data to disk. Only needed in standalone application, or if you want to save early in an editor play session."))
+	static bool Save();
 
 	///////////////////// DEBUG/DIAGS //////////////////////
 

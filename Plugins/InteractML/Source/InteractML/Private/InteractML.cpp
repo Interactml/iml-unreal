@@ -224,6 +224,53 @@ void SetModel(UInteractMLModel* model)
 
 
 
+///////////////////////////////// STATE ////////////////////////////////////
+
+// save any unsaved training or model data, this is either called:
+// 1. by editor module when world is saved (marked dirty when any changes found)
+// 2. if you are a standalone app you will need to ensure this is called at some point after recording
+//    There is a blueprint function for this InteractML -> Save
+// NOTE: won't try and save any training sets or model that haven't changed
+//
+void FInteractMLModule::Save()
+{
+	//scan known objects for unsaved state
+	for (auto It = ObjectLookup.CreateConstIterator(); It; ++It)
+	{
+		UInteractMLStorage* pstorage = It.Value();
+		if (pstorage->HasUnsavedData())
+		{
+			//save it
+			if (!pstorage->Save())
+			{
+				UE_LOG(LogInteractML, Error, TEXT("Failed to save InteractML object: %s"), *pstorage->GetFilePath());
+			}
+		}
+	}
+}
+
+// editor module needs to be able to tell if there is any new data
+//
+bool FInteractMLModule::HasUnsavedData() const
+{
+	//scan known objects for unsaved state
+	for (auto It = ObjectLookup.CreateConstIterator(); It; ++It)
+	{
+		UInteractMLStorage* pstorage = It.Value();
+		if (pstorage->HasUnsavedData())
+		{
+			//found some unsaved state
+			return true;
+		}
+	}
+
+	//nothing found dirty
+	return false;
+}
+
+
+
+
 // EPILOGUE
 #undef LOCTEXT_NAMESPACE
 IMPLEMENT_MODULE(FInteractMLModule, InteractML)

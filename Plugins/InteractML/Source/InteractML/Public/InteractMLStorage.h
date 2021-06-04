@@ -22,28 +22,28 @@ class INTERACTML_API UInteractMLStorage
 	: public UObject
 {
 	GENERATED_BODY()
-		
-	//---- persistent state ----
 
-	//hard link to underlying data file, if one is present in the filename
-	UPROPERTY()
-	FGuid FileID;
+		//---- persistent state ----
+
+		//hard link to underlying data file, if one is present in the filename
+		UPROPERTY()
+		FGuid FileID;
 
 	//---- transient/cached state ----
-	
+
 	//actual root of file path, e.g. Examples/HandGestures, the rest comes from ID (if it has one) and actual type
 	FString BaseFilePath;
-	
+
 	//has unsaved state?
-	bool bIsDirty;
-	
+	mutable bool bNeedsSave;
+
 public:
-	
+
 	//---- constants ----
 
 	// json format file extension
 	static FString cFileFormatExtension;
-	
+
 	// number of hex digits expected in filename embedded IDs (e.g. MyModel.51B05C30F9A0E984.model.json)
 	static const int cFileIDLength = 32; //big enough for a binary GUID
 
@@ -54,7 +54,7 @@ public:
 
 	// request the full file path to the backing storage for this objects ML data
 	FString GetFilePath() const;      //e.g. D:/MLProject/Content/Examples/HandGestures.19D38579C13759B1.training.json, although pure file-based ones may not have an ID
-	
+
 	// request the full directory path the backing storage for this objects ML data file is located in
 	FString GetDirectoryPath() const; //e.g. D:/MLProject/Content/Examples/
 
@@ -65,14 +65,15 @@ public:
 
 	// load existing ML state from disk
 	virtual bool Load(); //override Load to completely control loading of Json file data
-	virtual bool LoadJson(/*todo*/) { check(false); return false; } //or just override LoadJson to just parse Json
+	virtual bool LoadJson( const FString& json_string ) { check(false); return false; } //or override LoadJson to just parse Json
 
 	// persist current ML state to disk
-	virtual bool Save(); //override Save to completely control saving of Json file data
-	virtual bool SaveJson(/*todo*/) { check(false); return false; } //or just override SaveJson to just have to generate Json
+	virtual bool Save() const; //override Save to completely control saving of Json file data
+	virtual bool SaveJson( FString& json_string ) const { check(false); return false; } //or override SaveJson to just have to generate Json
 
 	// is there unsaved state in this object?
-	bool IsDirty() const { return bIsDirty; }
+	bool HasUnsavedData() const { return bNeedsSave; }
+	void MarkUnsavedData() { bNeedsSave = true; }
 
 	
 	//---- utility ----
