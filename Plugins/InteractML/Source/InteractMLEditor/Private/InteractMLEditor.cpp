@@ -75,8 +75,12 @@ void FInteractMLEditorModule::OnEndPIE(const bool bIsSimulating)
 	if (FInteractMLModule::Get().HasUnsavedData())
 	{
 		UE_LOG(LogInteractML, Log, TEXT("New data detected during PiE session, marking world dirty because save is required to keep changes."));
+		
 		//flag something as dirty to ensure save is triggered by user (see: OnWorldSaved below)
-		GEditor->EditorWorld->MarkPackageDirty();
+		if(GEditor->EditorWorld)
+		{
+			GEditor->EditorWorld->MarkPackageDirty();
+		}
 	}
 }
 

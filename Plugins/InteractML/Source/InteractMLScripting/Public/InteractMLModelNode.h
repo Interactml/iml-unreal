@@ -42,6 +42,7 @@ private:
 	UEdGraphPin* GetTrainingSetInputPin() const;
 	UEdGraphPin* GetTrainInputPin() const;
 	UEdGraphPin* GetResetInputPin() const;
+	UEdGraphPin* GetTrainedOutputPin() const;
 	UEdGraphPin* GetLabelOutputPin() const;
 	
 protected:

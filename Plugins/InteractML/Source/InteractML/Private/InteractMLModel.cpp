@@ -44,7 +44,12 @@ bool UInteractMLModel::LoadJson(const FString& json_string)
 	std::string std_json = ansi_json.Get();
 
 	//apply
-	return model->putJSON( std_json );
+	bool ok = model->putJSON( std_json );
+
+	//TODO: shouldn't assume that a loaded model is trained, currently can't tell
+	bIsTrained = true;
+
+	return ok;
 }
 
 // save out RapidLib model state
@@ -78,7 +83,10 @@ int UInteractMLModel::RunModel(FInteractMLParameterCollection* parameters)
 //
 void UInteractMLModel::TrainModel(UInteractMLTrainingSet* training_set)
 {
-	TrainModelInstance(training_set);
+	//always reset before training
+	ResetModel();
+	//train
+	bIsTrained = TrainModelInstance(training_set);
 }
 
 // reset the model to initialised but empty
@@ -86,6 +94,7 @@ void UInteractMLModel::TrainModel(UInteractMLTrainingSet* training_set)
 void UInteractMLModel::ResetModel()
 {
 	ResetModelInstance();
+	bIsTrained = false;
 }
 
 
@@ -93,6 +102,12 @@ void UInteractMLModel::ResetModel()
 //
 int UInteractMLModel::RunModelInstance(struct FInteractMLParameterCollection* parameters)
 {
+	if (!IsTrained())
+	{
+		UE_LOG(LogInteractML, Warning, TEXT("Running an untrained model: %s"), *GetFilePath());
+		return 0;
+	}
+
 	//convert parameter data to RapidLib form
 	std::vector<float> model_inputs;
 	for (int iparam = 0; iparam < parameters->Values.Num(); iparam++)
@@ -101,7 +116,7 @@ int UInteractMLModel::RunModelInstance(struct FInteractMLParameterCollection* pa
 		model_inputs.push_back(value);
 	}
 	
-	//train the model
+	//run the model
 	modelSetFloat* model = GetModelInstance();
 	std::vector<float> outputs = model->run(model_inputs);
 
@@ -113,7 +128,7 @@ int UInteractMLModel::RunModelInstance(struct FInteractMLParameterCollection* pa
 
 // fallback operation of training a model, can be specialised
 //
-void UInteractMLModel::TrainModelInstance(UInteractMLTrainingSet* training_set)
+bool UInteractMLModel::TrainModelInstance(UInteractMLTrainingSet* training_set)
 {
 	//gather
 	const TArray<FInteractMLExample>& training_examples = training_set->GetExamples();
@@ -162,6 +177,7 @@ void UInteractMLModel::TrainModelInstance(UInteractMLTrainingSet* training_set)
 	{
 		UE_LOG(LogInteractML, Error, TEXT("Training failed: %s"), *GetFilePath() );
 	}
+	return success;
 }
 
 

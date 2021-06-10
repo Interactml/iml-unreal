@@ -51,47 +51,75 @@ static UInteractMLContext* GetMLContext(AActor* Actor)
 //
 FInteractMLParameters UInteractMLBlueprintLibrary::GetParameters(AActor* Actor, UInteractMLContext::TGraphNodeID NodeID)
 {
+	//check
+	if(!Actor)
+	{
+		UE_LOG( LogInteractML, Error, TEXT( "No actor provided to obtain a parameter collection from." ) );
+		return FInteractMLParameters();
+	}
+
 	//find the context we cache our state in
 	UInteractMLContext* Context = GetMLContext( Actor );
 
 	//get a parameter collection for this node to use
 	TSharedPtr<FInteractMLParameterCollection> parameters = Context->GetParameters( NodeID );
-	
+
 	//prep for (re)accumulation
 	parameters->Reset();
 
-	return FInteractMLParameters(parameters);
+	return FInteractMLParameters( parameters );
 }
 
 // Parameter Collection custom node: call to add a parameter
 //
 void UInteractMLBlueprintLibrary::AddIntegerParameter(FInteractMLParameters Parameters, int Value)
 {
-	Parameters.Ptr->Add(Value);
+	if(Parameters.Ptr.IsValid())
+	{
+		Parameters.Ptr->Add( Value );
+	}
 }
 void UInteractMLBlueprintLibrary::AddFloatParameter( FInteractMLParameters Parameters, float Value )
 {
-	Parameters.Ptr->Add(Value);
+	if(Parameters.Ptr.IsValid())
+	{
+		Parameters.Ptr->Add( Value );
+	}
 }
 void UInteractMLBlueprintLibrary::AddBooleanParameter( FInteractMLParameters Parameters, bool Value )
 {
-	Parameters.Ptr->Add(Value);
+	if(Parameters.Ptr.IsValid())
+	{
+		Parameters.Ptr->Add( Value );
+	}
 }
 void UInteractMLBlueprintLibrary::AddVector2Parameter( FInteractMLParameters Parameters, FVector2D Value )
 {
-	Parameters.Ptr->Add(Value);
+	if(Parameters.Ptr.IsValid())
+	{
+		Parameters.Ptr->Add( Value );
+	}
 }
 void UInteractMLBlueprintLibrary::AddVector3Parameter( FInteractMLParameters Parameters, FVector Value )
 {
-	Parameters.Ptr->Add(Value);
+	if(Parameters.Ptr.IsValid())
+	{
+		Parameters.Ptr->Add( Value );
+	}
 }
 void UInteractMLBlueprintLibrary::AddQuaternionParameter( FInteractMLParameters Parameters, FQuat Value )
 {
-	Parameters.Ptr->Add(Value);
+	if(Parameters.Ptr.IsValid())
+	{
+		Parameters.Ptr->Add( Value );
+	}
 }
 void UInteractMLBlueprintLibrary::AddColourParameter( FInteractMLParameters Parameters, FLinearColor Value )
 {
-	Parameters.Ptr->Add(Value);
+	if(Parameters.Ptr.IsValid())
+	{
+		Parameters.Ptr->Add( Value );
+	}
 }
 
 ///////////////////// TRAINING SET //////////////////////
@@ -207,7 +235,7 @@ int UInteractMLBlueprintLibrary::RunModel(UInteractMLModel* Model, FInteractMLPa
 
 // model training
 //
-void UInteractMLBlueprintLibrary::TrainModel( UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID )
+bool UInteractMLBlueprintLibrary::TrainModel( UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID )
 {
 	if(Model)
 	{
@@ -235,7 +263,11 @@ void UInteractMLBlueprintLibrary::TrainModel( UInteractMLModel* Model, UInteract
 				Model->MarkUnsavedData();
 			}
 		}
+
+		return Model->IsTrained();
 	}
+
+	return false;
 }
 
 

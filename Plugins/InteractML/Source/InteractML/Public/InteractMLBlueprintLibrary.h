@@ -73,7 +73,7 @@ public:
 	static int RunModel(UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID);
 	// model training
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
-	static void TrainModel(UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID);
+	static bool TrainModel(UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID);
 	
 
 	///////////////////// UTILITY //////////////////////

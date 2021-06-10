@@ -33,6 +33,8 @@ class INTERACTML_API UInteractMLModel
 	
 	
 	//---- transient/cached state ----
+protected:
+	bool bIsTrained;
 
 public:	
 	FNodeActionInterlock TrainingAction;	//node currently training this model
@@ -47,6 +49,7 @@ public:
 	//---- access ----
 	bool IsTraining() const { return TrainingAction.Active(); }
 	bool IsResetting() const { return ResetAction.Active(); }
+	bool IsTrained() const { return bIsTrained; }
 	
 	//---- operation ----
 	int RunModel(struct FInteractMLParameterCollection* parameters);
@@ -66,7 +69,7 @@ public:
 protected:
 	//---- per model type specialisations ----
 	virtual int RunModelInstance(struct FInteractMLParameterCollection* parameters);
-	virtual void TrainModelInstance(class UInteractMLTrainingSet* training_set);
+	virtual bool TrainModelInstance(class UInteractMLTrainingSet* training_set);
 	virtual void ResetModelInstance() { check(false); } //must override
 	virtual modelSetFloat* GetModelInstance() const { check(false); return nullptr; } //must override
 

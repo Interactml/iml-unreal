@@ -246,6 +246,17 @@ void UInteractMLTrainingSet::ResetTrainingSet()
 	MarkUnsavedData();
 }
 
+//////////////////////// blueprint access /////////////////////////
+
+int UInteractMLTrainingSet::GetExampleCount()
+{
+	return Examples.Num();
+}
+int UInteractMLTrainingSet::GetParameterCount()
+{
+	return ParameterCount;
+}
+
 
 // EPILOGUE
 #undef LOCTEXT_NAMESPACE

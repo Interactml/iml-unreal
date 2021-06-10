@@ -45,6 +45,7 @@ namespace FInteractMLModelNodePinNames
 	static const FName TrainInputPinName("Train");
 	static const FName ResetInputPinName("Reset");
 	//out
+	static const FName TrainedOutputPinName("Trained");
 	static const FName LabelOutputPinName("Label");
 }  	
 namespace FInteractMLModelNodeFunctionNames
@@ -182,6 +183,9 @@ void UInteractMLModelNode::AllocateDefaultPins()
 
 	//---- Outputs ----
 
+	//trained pin
+	UEdGraphPin* trained_pin = CreatePin( EGPD_Output, UEdGraphSchema_K2::PC_Boolean, nullptr, FInteractMLModelNodePinNames::TrainedOutputPinName );
+	trained_pin->PinToolTip = LOCTEXT( "ModelNodeTrainedPinTooltip", "Indicated whether the current model trained or not." ).ToString();
 	// label pin
 	UEdGraphPin* label_pin = CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Int, nullptr, FInteractMLModelNodePinNames::LabelOutputPinName);
 	label_pin->PinToolTip = LOCTEXT("ModelNodeLabelPinTooltip", "Result of running the model on the input parameters.").ToString();
@@ -237,6 +241,12 @@ UEdGraphPin* UInteractMLModelNode::GetResetInputPin() const
 
 // pin access helpers : outputs
 //
+UEdGraphPin* UInteractMLModelNode::GetTrainedOutputPin() const
+{
+	UEdGraphPin* Pin = FindPin( FInteractMLModelNodePinNames::TrainedOutputPinName );
+	check( Pin == NULL || Pin->Direction == EGPD_Output );
+	return Pin;
+}
 UEdGraphPin* UInteractMLModelNode::GetLabelOutputPin() const
 {
 	UEdGraphPin* Pin = FindPin(FInteractMLModelNodePinNames::LabelOutputPinName);
@@ -268,6 +278,7 @@ void UInteractMLModelNode::ExpandNode(class FKismetCompilerContext& CompilerCont
 	//output pins : exec (execution continues)
 	UEdGraphPin* MainThenPin = FindPin( UEdGraphSchema_K2::PN_Then );	
 	//output pins : data
+	UEdGraphPin* MainTrainedOutputPin = GetTrainedOutputPin();
 	UEdGraphPin* MainLabelOutputPin = GetLabelOutputPin();
 
 	//internal model accessor
@@ -308,6 +319,7 @@ void UInteractMLModelNode::ExpandNode(class FKismetCompilerContext& CompilerCont
 	//training fn pins
 	UEdGraphPin* TrainFnExecPin = CallTrainFn->GetExecPin();
 	UEdGraphPin* TrainFnThenPin = CallTrainFn->GetThenPin();
+	UEdGraphPin* TrainFnResultPin = CallTrainFn->GetReturnValuePin();
 	UEdGraphPin* TrainFnModelPin = CallTrainFn->FindPinChecked( FModelNodeTrainModelPinNames::ModelPinName );
 	UEdGraphPin* TrainFnTrainingSetPin = CallTrainFn->FindPinChecked( FModelNodeTrainModelPinNames::TrainingSetPinName);
 	UEdGraphPin* TrainFnTrainPin = CallTrainFn->FindPinChecked( FModelNodeTrainModelPinNames::TrainPinName );
@@ -338,7 +350,8 @@ void UInteractMLModelNode::ExpandNode(class FKismetCompilerContext& CompilerCont
 	CompilerContext.MovePinLinksToIntermediate(*MainTrainPin, *TrainFnTrainPin);
 	CompilerContext.MovePinLinksToIntermediate(*MainResetPin, *TrainFnResetPin);
 	TrainFnNodeIDPin->DefaultValue = NodeID;
-	
+	CompilerContext.MovePinLinksToIntermediate( *MainTrainedOutputPin, *TrainFnResultPin );
+
 	//After we are done we break all links to this node (not the internally created one)
 	//leaving the newly created internal nodes left to do the work
 	BreakAllNodeLinks();

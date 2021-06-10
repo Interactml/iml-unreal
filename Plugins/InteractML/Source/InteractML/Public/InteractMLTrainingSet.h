@@ -110,6 +110,13 @@ public:
 	virtual bool SaveJson(FString& json_string) const override;
 	// End UInteractMLStorage overrides
 	
+	//---- blueprint access ----
+	//How many examples have been recorded into this training set
+	UFUNCTION(BlueprintPure,Category="InteractML",meta=(CompactNodeTitle="Example Count"))
+	int GetExampleCount();
+	//How many parameters are there in each example (if known)
+	UFUNCTION(BlueprintPure,Category="InteractML",meta=(CompactNodeTitle="Parameter Count"))
+	int GetParameterCount();
 
 private:
 

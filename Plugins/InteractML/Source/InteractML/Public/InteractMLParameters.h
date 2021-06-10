@@ -15,7 +15,7 @@
 
 // wrapper for passing around parameters by value without copying the underlying collection object (lives in the context/actor)
 //
-USTRUCT(BlueprintInternalUseOnly)
+USTRUCT(BlueprintType)
 struct INTERACTML_API FInteractMLParameters
 {
 	GENERATED_USTRUCT_BODY()
