@@ -56,7 +56,7 @@ public:
 	static UInteractMLTrainingSet* GetTrainingSet(AActor* Actor, FString DataPath, FString NodeID);
 	// training set recording
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
-	static bool RecordExample(UInteractMLTrainingSet* TrainingSet, FInteractMLParameters Parameters, int Label, bool Record, bool Reset, int Mode, FString NodeID);
+	static bool RecordExample(UInteractMLTrainingSet* TrainingSet, FInteractMLParameters Parameters, float Label, bool Record, bool Reset, int Mode, FString NodeID);
 	
 
 	///////////////////// MODEL //////////////////////
@@ -64,13 +64,13 @@ public:
 	// model access
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
 	static UInteractMLModel* GetModel_Classification(AActor* Actor, FString DataPath, FString NodeID);
-	//UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
-	//static UInteractMLModel* GetModel_Regression(AActor* Actor, FString DataPath, FString NodeID);
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static UInteractMLModel* GetModel_Regression(AActor* Actor, FString DataPath, FString NodeID);
 	//UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
 	//static UInteractMLModel* GetModel_DynamicTimeWarp(AActor* Actor, FString DataPath, FString NodeID);
 	// model running
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
-	static int RunModel(UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID);
+	static float RunModel(UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID);
 	// model training
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
 	static bool TrainModel(UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID);

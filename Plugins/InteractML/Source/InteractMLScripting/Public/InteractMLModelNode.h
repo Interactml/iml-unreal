@@ -25,7 +25,7 @@
 // TODO: initially uses file path/name to refer to external data storage, but can be made switchable to asset objects later
 // TODO: initially uses numbers for labels, later we want to support enums
 //
-UCLASS(/*TODO:Abstract*/)
+UCLASS(Abstract)
 class INTERACTMLSCRIPTING_API UInteractMLModelNode: public UK2Node
 {
 	GENERATED_BODY()
@@ -48,7 +48,9 @@ private:
 protected:
 
 	//~ Begin model specific overrides
-	virtual UFunction* FindModelAccessFunction() const;// { check(false); return nullptr; }
+	virtual FText GetModelName() const { check(false); return FText(); }
+	virtual FText GetModelTooltip() const { check(false); return FText(); }
+	virtual FName GetModelAccessFunctionName() const { check(false); return NAME_None; }
 	//~ End model specific overrides
 
 	//~ Begin UObject Interface
@@ -87,5 +89,6 @@ private:
 
 	UFunction* FindModelRunFunction() const;
 	UFunction* FindModelTrainFunction() const;
+	UFunction* FindModelAccessFunction() const;
 	
 };

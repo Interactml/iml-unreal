@@ -153,7 +153,7 @@ void UInteractMLTrainingSetNode::AllocateDefaultPins()
 	liveparams_pin->PinToolTip = LOCTEXT("TrainingSetNodeLiveParamsPinTooltip", "The live parameters that will be recorded into the training set.").ToString();
 
 	// label to associate with parameters being recorded
-	UEdGraphPin* label_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Int, nullptr, FInteractMLTrainingSetNodePinNames::LabelInputPinName);
+	UEdGraphPin* label_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Float, nullptr, FInteractMLTrainingSetNodePinNames::LabelInputPinName);
 	label_pin->PinToolTip = LOCTEXT("TrainingSetNodeLabelPinTooltip", "The label to associate the current recording with.\nNOTE: Currently only numeric labels are supported.").ToString();
 
 	// enable recording

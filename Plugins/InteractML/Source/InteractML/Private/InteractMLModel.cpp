@@ -73,7 +73,7 @@ bool UInteractMLModel::SaveJson(FString& json_string) const
 // returns the label matched
 // NOTE: runs synchronously, i.e. blocks until complete
 //
-int UInteractMLModel::RunModel(FInteractMLParameterCollection* parameters)
+float UInteractMLModel::RunModel(FInteractMLParameterCollection* parameters)
 {
 	return RunModelInstance( parameters );
 }
@@ -100,7 +100,7 @@ void UInteractMLModel::ResetModel()
 
 // fallback operation of running a model, can be specialised
 //
-int UInteractMLModel::RunModelInstance(struct FInteractMLParameterCollection* parameters)
+float UInteractMLModel::RunModelInstance(struct FInteractMLParameterCollection* parameters)
 {
 	if (!IsTrained())
 	{
@@ -123,7 +123,7 @@ int UInteractMLModel::RunModelInstance(struct FInteractMLParameterCollection* pa
 	//expecting single label
 	bool success = outputs.size() == 1;
 
-	return success?outputs[0]:0;
+	return success?outputs[0]:0.0f;
 }
 
 // fallback operation of training a model, can be specialised

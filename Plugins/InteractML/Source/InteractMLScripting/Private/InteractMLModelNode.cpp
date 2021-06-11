@@ -88,32 +88,31 @@ namespace FModelNodeTrainModelPinNames
 //
 FText UInteractMLModelNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
-	FText node_name = LOCTEXT("ModelNodeTitle", "Machine Learning Robot");
+	FString title = FText::Format(LOCTEXT("ModelNodeTitle", "{0} Robot"), { GetModelName() }).ToString();
 
 	//check what's needed
 	switch (TitleType)
 	{
 		case ENodeTitleType::FullTitle:
-		{
-			FString title = node_name.ToString();
 			title.Append(TEXT("\n"));
-			title.Append( LOCTEXT("ModelNodeSubTitle", "Classification Model").ToString() );
-			return FText::FromString(title);
-		}
+			title.Append( LOCTEXT("ModelNodeSubTitle", "Machine Learning System").ToString() );
+			break;
 
 		case ENodeTitleType::MenuTitle:
 		case ENodeTitleType::ListView:
 		default:
-			return node_name;
+			break;
 
 		case ENodeTitleType::EditableTitle:
-			return FText(); //not editable
+			title = ""; //not editable
 			break;
 	}
+
+	return FText::FromString(title);
 }
 FText UInteractMLModelNode::GetTooltipText() const
 {
-	return LOCTEXT("ModelTooltip", "Load or train a classification machine learning model");
+	return GetModelTooltip();
 }
 FText UInteractMLModelNode::GetMenuCategory() const
 {
@@ -187,7 +186,7 @@ void UInteractMLModelNode::AllocateDefaultPins()
 	UEdGraphPin* trained_pin = CreatePin( EGPD_Output, UEdGraphSchema_K2::PC_Boolean, nullptr, FInteractMLModelNodePinNames::TrainedOutputPinName );
 	trained_pin->PinToolTip = LOCTEXT( "ModelNodeTrainedPinTooltip", "Indicated whether the current model trained or not." ).ToString();
 	// label pin
-	UEdGraphPin* label_pin = CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Int, nullptr, FInteractMLModelNodePinNames::LabelOutputPinName);
+	UEdGraphPin* label_pin = CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Float, nullptr, FInteractMLModelNodePinNames::LabelOutputPinName);
 	label_pin->PinToolTip = LOCTEXT("ModelNodeLabelPinTooltip", "Result of running the model on the input parameters.").ToString();
 	
 	Super::AllocateDefaultPins();
@@ -373,14 +372,12 @@ UFunction* UInteractMLModelNode::FindModelTrainFunction() const
 	return LibraryClass->FindFunctionByName( FInteractMLModelNodeFunctionNames::TrainModelName );
 }
 
-
-//TEMP: model accessor, will be moved to derived implementations
+// locate function to access the model instance
 //
 UFunction* UInteractMLModelNode::FindModelAccessFunction() const
 {
 	UClass* LibraryClass = UInteractMLBlueprintLibrary::StaticClass();
-	static const FName classification_model(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, GetModel_Classification));
-	return LibraryClass->FindFunctionByName( classification_model );
+	return LibraryClass->FindFunctionByName( GetModelAccessFunctionName() );
 }
 
 

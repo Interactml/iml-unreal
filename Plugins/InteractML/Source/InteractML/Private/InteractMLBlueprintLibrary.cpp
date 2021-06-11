@@ -10,6 +10,7 @@
 #include "InteractML.h"
 #include "InteractMLContext.h"
 #include "Models/InteractMLClassificationModel.h"
+#include "Models/InteractMLRegressionModel.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
@@ -154,7 +155,7 @@ UInteractMLTrainingSet* UInteractMLBlueprintLibrary::GetTrainingSet(AActor* Acto
 bool UInteractMLBlueprintLibrary::RecordExample(
 	UInteractMLTrainingSet* TrainingSet, 
 	FInteractMLParameters Parameters, 
-	int Label, 
+	float Label,
 	bool Record,
 	bool Reset,
 	int Mode,
@@ -218,10 +219,23 @@ UInteractMLModel* UInteractMLBlueprintLibrary::GetModel_Classification(AActor* A
 
 	return model;
 }
+UInteractMLModel* UInteractMLBlueprintLibrary::GetModel_Regression(AActor* Actor, FString DataPath, FString NodeID)
+{
+	//find the context we cache our state in
+	UInteractMLContext* Context = GetMLContext( Actor );
+	check( Context );
+	
+	//get a parameter collection for this node to use
+	UInteractMLContext::TGraphNodeID id = NodeID;
+	UInteractMLModel* model = Context->GetModel( UInteractMLRegressionModel::StaticClass(), id, DataPath );
+	check( model );
+	
+	return model;
+}
 
 // model running
 //
-int UInteractMLBlueprintLibrary::RunModel(UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID)
+float UInteractMLBlueprintLibrary::RunModel(UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID)
 {
 	if(Model)
 	{

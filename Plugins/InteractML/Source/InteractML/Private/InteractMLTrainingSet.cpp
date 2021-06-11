@@ -158,7 +158,7 @@ void UInteractMLTrainingSet::ExtractCharacteristics()
 
 // check ready, prep and start recording
 //
-bool UInteractMLTrainingSet::BeginRecording(int label)
+bool UInteractMLTrainingSet::BeginRecording(float label)
 {
 	//reset
 	CurrentRecording.label = label;

@@ -35,7 +35,7 @@ struct INTERACTML_API FInteractMLExample
 	GENERATED_BODY()
 		
 	UPROPERTY()
-	int label;
+	float label;
 
 	UPROPERTY()
 	TArray<FInteractMLSample> inputSeries;
@@ -96,7 +96,7 @@ public:
 	bool IsResetting() const { return ResettingAction.Active(); }
 	
 	//---- modification ----
-	bool BeginRecording( int label );
+	bool BeginRecording( float label );
 	bool RecordParameters( struct FInteractMLParameterCollection* parameters );
 	bool EndRecording();
 

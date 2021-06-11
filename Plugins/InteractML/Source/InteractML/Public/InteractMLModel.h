@@ -52,7 +52,7 @@ public:
 	bool IsTrained() const { return bIsTrained; }
 	
 	//---- operation ----
-	int RunModel(struct FInteractMLParameterCollection* parameters);
+	float RunModel(struct FInteractMLParameterCollection* parameters);
 	void TrainModel(class UInteractMLTrainingSet* training_set);
 	void ResetModel();
 	
@@ -68,7 +68,7 @@ public:
 	
 protected:
 	//---- per model type specialisations ----
-	virtual int RunModelInstance(struct FInteractMLParameterCollection* parameters);
+	virtual float RunModelInstance(struct FInteractMLParameterCollection* parameters);
 	virtual bool TrainModelInstance(class UInteractMLTrainingSet* training_set);
 	virtual void ResetModelInstance() { check(false); } //must override
 	virtual modelSetFloat* GetModelInstance() const { check(false); return nullptr; } //must override
