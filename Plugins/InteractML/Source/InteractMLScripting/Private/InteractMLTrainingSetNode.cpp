@@ -49,7 +49,6 @@ namespace FInteractMLTrainingSetNodePinNames
 namespace FInteractMLTrainingSetNodeFunctionNames
 {
 	static const FName AccessTrainingSetName(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, GetTrainingSet));
-	static const FName RecordExampleName(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, RecordExample));
 }
 namespace FTrainingSetNodeTrainingSetAccessPinNames
 {
@@ -64,7 +63,6 @@ namespace FTrainingSetNodeRecordPinNames
 	static const FName LabelPinName("Label");
 	static const FName RecordPinName("Record");
 	static const FName ResetPinName("Reset");
-	static const FName ModePinName("Mode");
 	static const FName NodeIDPinName("NodeID");
 }
 
@@ -87,15 +85,21 @@ FText UInteractMLTrainingSetNode::GetNodeTitle(ENodeTitleType::Type TitleType) c
 		{
 			FString title = node_name.ToString();
 			title.Append(TEXT("\n"));
-			title.Append( LOCTEXT("TrainingSetNodeSubTitle", "Single sample recording").ToString() );
+			title.Append( GetTrainingSetDescription().ToString() );
 			return FText::FromString(title);
 		}
 
 		case ENodeTitleType::MenuTitle:
 		case ENodeTitleType::ListView:
 		default:
-			return node_name;
-
+		{
+			FString title = node_name.ToString();
+			title.Append(TEXT(" ("));
+			title.Append(GetTrainingSetName().ToString());
+			title.Append(TEXT(")"));
+			return FText::FromString(title);
+		}
+			
 		case ENodeTitleType::EditableTitle:
 			return FText(); //not editable
 			break;
@@ -103,7 +107,7 @@ FText UInteractMLTrainingSetNode::GetNodeTitle(ENodeTitleType::Type TitleType) c
 }
 FText UInteractMLTrainingSetNode::GetTooltipText() const
 {
-	return LOCTEXT("TrainingSetTooltip", "Load or record examples for training machine learning models");
+	return GetTrainingSetTooltip();
 }
 FText UInteractMLTrainingSetNode::GetMenuCategory() const
 {
@@ -283,7 +287,6 @@ void UInteractMLTrainingSetNode::ExpandNode(class FKismetCompilerContext& Compil
 	UEdGraphPin* RecordFnLabelPin = CallRecordFn->FindPinChecked( FTrainingSetNodeRecordPinNames::LabelPinName );
 	UEdGraphPin* RecordFnRecordPin = CallRecordFn->FindPinChecked( FTrainingSetNodeRecordPinNames::RecordPinName );
 	UEdGraphPin* RecordFnResetPin = CallRecordFn->FindPinChecked( FTrainingSetNodeRecordPinNames::ResetPinName );
-	UEdGraphPin* RecordFnModePin = CallRecordFn->FindPinChecked( FTrainingSetNodeRecordPinNames::ModePinName );
 	UEdGraphPin* RecordFnNodeIDPin = CallRecordFn->FindPinChecked( FTrainingSetNodeRecordPinNames::NodeIDPinName );
 
 	//chain execution pins (training access, then recording)
@@ -306,7 +309,6 @@ void UInteractMLTrainingSetNode::ExpandNode(class FKismetCompilerContext& Compil
 	CompilerContext.MovePinLinksToIntermediate(*MainLabelPin, *RecordFnLabelPin);
 	CompilerContext.MovePinLinksToIntermediate(*MainRecordPin, *RecordFnRecordPin);
 	CompilerContext.MovePinLinksToIntermediate(*MainResetPin, *RecordFnResetPin);
-	RecordFnModePin->DefaultValue = TEXT("0");	//default (single)
 	RecordFnNodeIDPin->DefaultValue = NodeID;
 	CompilerContext.MovePinLinksToIntermediate(*MainChangedPin, *RecordFnResultPin);
 
@@ -328,7 +330,7 @@ UFunction* UInteractMLTrainingSetNode::FindTrainingSetAccessFunction() const
 UFunction* UInteractMLTrainingSetNode::FindRecordFunction() const
 {
 	UClass* LibraryClass = UInteractMLBlueprintLibrary::StaticClass();
-	return LibraryClass->FindFunctionByName( FInteractMLTrainingSetNodeFunctionNames::RecordExampleName );
+	return LibraryClass->FindFunctionByName( GetRecordFunctionName() );
 }
 
 

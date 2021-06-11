@@ -145,10 +145,9 @@ UInteractMLTrainingSet* UInteractMLBlueprintLibrary::GetTrainingSet(AActor* Acto
 	return training_set;
 }
 
-// training set recording
+// training set recording : single sample
 // when recording requested, takes snapshot of parameter data and associates it with the given label and stores it in the training set
 // when finished returns true briefly to signify that new training set data is ready
-// NOTE: just single snapshots at the moment
 // NOTE: state about recording can be held in the training set object even though it's technically shared because it doesn't make
 //       too much sense to be recording using two training nodes at the same time.
 //
@@ -158,7 +157,6 @@ bool UInteractMLBlueprintLibrary::RecordExample(
 	float Label,
 	bool Record,
 	bool Reset,
-	int Mode,
 	FString NodeID)
 {
 	check(TrainingSet);
@@ -201,6 +199,65 @@ bool UInteractMLBlueprintLibrary::RecordExample(
 	//finished recording
 	return is_finished;
 }
+
+// training set recording : series of samples
+// when recording is active, accumulates snapshots of parameter data and associates them with the given label and stores it in the training set
+// when finished returns true briefly to signify that new training set data is ready
+// NOTE: state about recording can be held in the training set object even though it's technically shared because it doesn't make
+//       too much sense to be recording using two training nodes at the same time.
+//
+bool UInteractMLBlueprintLibrary::RecordExampleSeries(
+	UInteractMLTrainingSet* TrainingSet, 
+	FInteractMLParameters Parameters, 
+	float Label,
+	bool Record,
+	bool Reset,
+	FString NodeID)
+{
+	check(TrainingSet);
+	FInteractMLParameterCollection* parameters = Parameters.Ptr.Get();
+	
+	//recording start/stop
+	bool is_finished = false;
+	bool ok = true;
+	if(TrainingSet->RecordingAction.Triggered( Record, NodeID ))
+	{
+		if(Record)
+		{
+			//start recording
+			ok = TrainingSet->BeginRecording(Label);
+		}
+		else
+		{
+			//stop recording
+			ok = TrainingSet->EndRecording();
+			
+			//success?
+			is_finished = ok; //briefly return true upon successful trigger
+		}
+	}
+
+	//continuous recording
+	if(Record && ok)
+	{
+		//record single snapshot upon start
+		ok = TrainingSet->RecordParameters(parameters);
+	}
+	
+	//reset handling
+	if(TrainingSet->ResettingAction.Triggered( Reset, NodeID ))
+	{
+		if (Reset)
+		{
+			//just activated
+			TrainingSet->ResetTrainingSet();
+		}
+	}
+	
+	//finished recording
+	return is_finished;
+}
+
 
 ///////////////////// MODEL //////////////////////
 

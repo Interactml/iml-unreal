@@ -19,13 +19,13 @@
 
 //general declarations
 
-// Training set load/save and recording blueprint node
+// Training set load/save and recording blueprint base node
 // Loads in pre-recorded training examples, allows for recording more examples, and provides training data for models
-// TODO: work out how we want to support series vs single modes, initially just single example snapshots
+// Derived implementations specialise for single/series operation
 // TODO: initially uses file path/name to refer to external data storage, but can be made switchable to asset objects later
 // TODO: initially uses numbers for labels, later we want to support enums
 //
-UCLASS()
+UCLASS(Abstract)
 class INTERACTMLSCRIPTING_API UInteractMLTrainingSetNode: public UK2Node
 {
 	GENERATED_BODY()
@@ -47,6 +47,13 @@ private:
 	
 protected:
 
+	//~ Begin training-set specific overrides
+	virtual FText GetTrainingSetName() const { check(false); return FText(); }
+	virtual FText GetTrainingSetDescription() const { check(false); return FText(); }
+	virtual FText GetTrainingSetTooltip() const { check(false); return FText(); }
+	virtual FName GetRecordFunctionName() const { check(false); return NAME_None; }
+	//~ End training-set specific overrides
+	
 	//~ Begin UObject Interface
 	//virtual void Serialize(FArchive& Ar) override;	
 	//virtual void PostEditChangeProperty(struct FPropertyChangedEvent& e) override;
