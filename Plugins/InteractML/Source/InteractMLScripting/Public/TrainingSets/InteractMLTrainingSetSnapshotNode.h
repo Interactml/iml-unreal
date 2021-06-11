@@ -29,6 +29,7 @@ protected:
 	virtual FText GetTrainingSetName() const override;
 	virtual FText GetTrainingSetDescription() const override;
 	virtual FText GetTrainingSetTooltip() const override;
+	virtual FText GetRecordPinTooltip() const override;
 	virtual FName GetRecordFunctionName() const override;
 	//~ End training-set specific overrides
 	

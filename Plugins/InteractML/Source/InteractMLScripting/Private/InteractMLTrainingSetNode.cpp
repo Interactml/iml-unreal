@@ -40,7 +40,7 @@ namespace FInteractMLTrainingSetNodePinNames
 	static const FName DataPathInputPinName("Data Path");
 	static const FName LiveParametersInputPinName("Live Parameters");
 	static const FName LabelInputPinName("Label");
-	static const FName RecordInputPinName("Record Example");
+	static const FName RecordInputPinName("Record");
 	static const FName ResetInputPinName( "Reset All" );
 	//out
 	static const FName TrainingSetOutputPinName("Training Set");
@@ -162,7 +162,7 @@ void UInteractMLTrainingSetNode::AllocateDefaultPins()
 
 	// enable recording
 	UEdGraphPin* record_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Boolean, nullptr, FInteractMLTrainingSetNodePinNames::RecordInputPinName);
-	record_pin->PinToolTip = LOCTEXT("TrainingSetNodeRecordPinTooltip", "Set this to record an example for the current label.").ToString();
+	record_pin->PinToolTip = GetRecordPinTooltip().ToString();
 
 	// perform reset
 	UEdGraphPin* reset_pin = CreatePin( EGPD_Input, UEdGraphSchema_K2::PC_Boolean, nullptr, FInteractMLTrainingSetNodePinNames::ResetInputPinName );

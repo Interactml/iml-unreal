@@ -43,11 +43,15 @@ FText UInteractMLTrainingSetSeriesNode::GetTrainingSetName() const
 }
 FText UInteractMLTrainingSetSeriesNode::GetTrainingSetDescription() const
 {
-	return LOCTEXT("TrainingSetlNameSeries", "Record single sample snaphot");
+	return LOCTEXT("TrainingSetlNameSeries", "Record sample series");
 }
 FText UInteractMLTrainingSetSeriesNode::GetTrainingSetTooltip() const
 {
 	return LOCTEXT("TrainingSetTooltipSeries", "Record a series of parameter snapshots in a row for the current label");
+}
+FText UInteractMLTrainingSetSeriesNode::GetRecordPinTooltip() const
+{
+	return LOCTEXT("TrainingSetRecordPinTooltipSeries", "Records a series of examples for the current label whilst true.");
 }
 FName UInteractMLTrainingSetSeriesNode::GetRecordFunctionName() const
 {

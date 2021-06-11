@@ -49,6 +49,10 @@ FText UInteractMLTrainingSetSnapshotNode::GetTrainingSetTooltip() const
 {
 	return LOCTEXT("TrainingSetTooltipSnapshot", "Record a single parameter snapshot at a time for the current label");
 }
+FText UInteractMLTrainingSetSnapshotNode::GetRecordPinTooltip() const
+{
+	return LOCTEXT("TrainingSetRecordPinTooltipSnapshot", "Set to true to record a single example snapshot for the current label.");
+}
 FName UInteractMLTrainingSetSnapshotNode::GetRecordFunctionName() const
 {
 	static const FName record(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, RecordExample));

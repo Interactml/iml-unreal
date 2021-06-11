@@ -51,6 +51,7 @@ protected:
 	virtual FText GetTrainingSetName() const { check(false); return FText(); }
 	virtual FText GetTrainingSetDescription() const { check(false); return FText(); }
 	virtual FText GetTrainingSetTooltip() const { check(false); return FText(); }
+	virtual FText GetRecordPinTooltip() const { check(false); return FText(); } 
 	virtual FName GetRecordFunctionName() const { check(false); return NAME_None; }
 	//~ End training-set specific overrides
 	
