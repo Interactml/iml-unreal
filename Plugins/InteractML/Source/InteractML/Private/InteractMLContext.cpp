@@ -97,6 +97,27 @@ TSharedPtr<FInteractMLParameterCollection> UInteractMLContext::GetParameters( UI
 	return parameters;
 }
 
+// fetch/re-fetch a model state object for a specific node to run a model
+TSharedPtr<FInteractMLModelState> UInteractMLContext::GetModelState( TGraphNodeID node_id )
+{
+	//existing?
+	TSharedPtr<FInteractMLModelState>* pentry = StateLookup.Find(node_id);
+	if (pentry)
+	{
+		return *pentry;
+	}
+	
+	//not cached yet, alloc
+	TSharedPtr<FInteractMLModelState> state = MakeShareable(new FInteractMLModelState());
+	
+	//cache
+	StateLookup.Add(node_id, state);
+	
+	return state;
+}
+
+
+
 
 
 // EPILOGUE

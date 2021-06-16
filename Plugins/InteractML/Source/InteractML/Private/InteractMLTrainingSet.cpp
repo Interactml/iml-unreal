@@ -25,25 +25,14 @@ FString UInteractMLTrainingSet::cExtensionPrefix(TEXT(".training"));
 //
 bool UInteractMLTrainingSet::LoadJson(const FString& json_string)
 {
-	//reset
-	ResetExamples();
-
-	//load
-	if (json_string.IsEmpty())
-	{
-		//no data
-		return true;
-	}
-
-	//parse actual data
-	if (FJsonObjectConverter::JsonArrayStringToUStruct( json_string, &Examples, 0, 0 ))
+	if (LoadExamplesFromJson(json_string, Examples))
 	{
 		//post-load analysis
 		ExtractCharacteristics();
-
-		return true;
+			
+		return true;		
 	}
-
+	
 	//failed
 	return false;
 }
@@ -52,35 +41,14 @@ bool UInteractMLTrainingSet::LoadJson(const FString& json_string)
 //
 bool UInteractMLTrainingSet::SaveJson(FString& json_string) const
 {
-	//reset
-	json_string = "";
-	
-	//have to manually convert array to json string it seems
-	TArray<TSharedPtr<FJsonValue>> data_values;
-	for(const FInteractMLExample& example : Examples)
-	{
-		TSharedPtr<FJsonObject> example_object = FJsonObjectConverter::UStructToJsonObject( example );
-		if(example_object.IsValid())
-		{
-			data_values.Add( MakeShared<FJsonValueObject>( example_object ) );
-		}
-	}
-	TSharedRef<FJsonValueArray> ValuesArrayValue = MakeShared<FJsonValueArray>( data_values );
-	TSharedRef<TJsonWriter<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>> JsonWriter = TJsonWriterFactory<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>::Create( &json_string );
-	if (FJsonSerializer::Serialize(ValuesArrayValue, FString(), JsonWriter))
-	{
-		return true;
-	}
-
-	//failed
-	return false;
+	return SaveExamplesToJson(Examples, json_string);
 }
 
 // empty out any example state
 //
 void UInteractMLTrainingSet::ResetExamples()
 {
-	Examples.Empty();
+	ClearExamplesCollection(Examples);
 }
 
 // post load we can look at the data to determine:
@@ -155,6 +123,68 @@ void UInteractMLTrainingSet::ExtractCharacteristics()
 		UE_LOG(LogInteractML, Error, TEXT("Inconsistent parameter counts, ranging from %i to %i in training set '%s'"), min_param_count, max_param_count, *GetFilePath() );
 	}
 }
+
+
+// re-usable load function
+//
+bool UInteractMLTrainingSet::LoadExamplesFromJson(const FString& json_string_in, TArray<FInteractMLExample>& examples_out)
+{
+	//reset
+	ClearExamplesCollection( examples_out );
+	
+	//load
+	if (json_string_in.IsEmpty())
+	{
+		//no data
+		return true;
+	}
+	
+	//parse actual data
+	if (FJsonObjectConverter::JsonArrayStringToUStruct( json_string_in, &examples_out, 0, 0 ))
+	{
+		return true;
+	}
+	
+	//failed
+	return false;
+}
+
+// re-usable save function
+//
+bool UInteractMLTrainingSet::SaveExamplesToJson(const TArray<FInteractMLExample>& examples_in, FString& json_string_out)
+{
+	//reset
+	json_string_out = "";
+	
+	//have to manually convert array to json string it seems
+	TArray<TSharedPtr<FJsonValue>> data_values;
+	for(const FInteractMLExample& example : examples_in)
+	{
+		TSharedPtr<FJsonObject> example_object = FJsonObjectConverter::UStructToJsonObject( example );
+		if(example_object.IsValid())
+		{
+			data_values.Add( MakeShared<FJsonValueObject>( example_object ) );
+		}
+	}
+	TSharedRef<FJsonValueArray> ValuesArrayValue = MakeShared<FJsonValueArray>( data_values );
+	TSharedRef<TJsonWriter<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>> JsonWriter = TJsonWriterFactory<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>::Create( &json_string_out );
+	if (FJsonSerializer::Serialize(ValuesArrayValue, FString(), JsonWriter))
+	{
+		return true;
+	}
+	
+	//failed
+	return false;
+}
+
+// re-usable clear function
+//
+bool UInteractMLTrainingSet::ClearExamplesCollection(TArray<FInteractMLExample>& examples)
+{
+	examples.Empty();
+	return true;
+}
+
 
 // check ready, prep and start recording
 //

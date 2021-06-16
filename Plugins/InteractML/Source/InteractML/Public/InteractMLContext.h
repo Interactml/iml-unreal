@@ -11,6 +11,7 @@
 #include "InteractMLTrainingSet.h"
 #include "InteractMLModel.h"
 #include "InteractMLParameters.h"
+#include "InteractMLModelState.h"
 #include "InteractMLContext.generated.h"
 
 
@@ -46,6 +47,7 @@ private:
 	TMap<TGraphNodeID, UInteractMLTrainingSet*>                    TrainingSetLookup;
 	TMap<TGraphNodeID, UInteractMLModel*>                          ModelLookup;
 	TMap<TGraphNodeID, TSharedPtr<FInteractMLParameterCollection>> ParametersLookup;
+	TMap<TGraphNodeID, TSharedPtr<FInteractMLModelState>>          StateLookup;
 	
 public:
 	
@@ -60,6 +62,8 @@ public:
 	// fetch/re-fetch a parameter set for passing around the graph
 	TSharedPtr<FInteractMLParameterCollection> GetParameters( TGraphNodeID node_id );
 	
+	// fetch/re-fetch a model state object for a specific node to run a model
+	TSharedPtr<FInteractMLModelState> GetModelState( TGraphNodeID node_id );
 
 private:
 

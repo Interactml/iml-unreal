@@ -69,13 +69,22 @@ bool UInteractMLModel::SaveJson(FString& json_string) const
 
 
 
-// run the model against the provided parameters
-// returns the label matched
-// NOTE: runs synchronously, i.e. blocks until complete
+// run the model against the single provided parameter set
+// returns the label matched against during the run
+// NOTE: for single match, runs synchronously, i.e. blocks until complete
 //
 float UInteractMLModel::RunModel(FInteractMLParameterCollection* parameters)
 {
 	return RunModelInstance( parameters );
+}
+
+// run the model against the provided series of parameter sets
+// returns the label matched against during the run
+// NOTE: for series match, runs synchronously, i.e. blocks until complete
+//
+float UInteractMLModel::RunModel(FInteractMLParameterSeries* parameter_series)
+{
+	return RunModelInstance( parameter_series );
 }
 
 // train the model with the provided training set
@@ -98,10 +107,11 @@ void UInteractMLModel::ResetModel()
 }
 
 
-// fallback operation of running a model, can be specialised
+// fallback operation of running a single sample model, can be specialised
 //
 float UInteractMLModel::RunModelInstance(struct FInteractMLParameterCollection* parameters)
 {
+	check(!IsSeries()); //shouldn't be trying to run a series model with single input
 	if (!IsTrained())
 	{
 		UE_LOG(LogInteractML, Warning, TEXT("Running an untrained model: %s"), *GetFilePath());
@@ -123,7 +133,12 @@ float UInteractMLModel::RunModelInstance(struct FInteractMLParameterCollection* 
 	//expecting single label
 	bool success = outputs.size() == 1;
 
-	return success?outputs[0]:0.0f;
+	//result
+	if (success)
+	{
+		return outputs[0];
+	}
+	return 0.0f;
 }
 
 // fallback operation of training a model, can be specialised

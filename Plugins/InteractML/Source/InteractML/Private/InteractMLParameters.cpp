@@ -19,6 +19,8 @@
 
 
 
+/////////////////////////// PARAMETER COLLECTION ///////////////////////////
+
 // completely clear out state
 void FInteractMLParameterCollection::Clear()
 {
@@ -73,6 +75,30 @@ void FInteractMLParameterCollection::Add(FColor value)
 {
 	Add(value.ReinterpretAsLinear());
 }
+
+
+
+/////////////////////////// PARAMETER SERIES ///////////////////////////
+
+// add a parameter snapshot to the collection
+//
+void FInteractMLParameterSeries::Add(FInteractMLParameterCollection* parameters)
+{
+	//take a copy
+	TSharedPtr<FInteractMLParameterCollection> new_parameters = MakeShareable(new FInteractMLParameterCollection());
+	new_parameters->Values = parameters->Values;
+	
+	//add to series
+	ParameterSamples.Add( new_parameters );
+}
+
+// reset any stored state back to init
+//
+void FInteractMLParameterSeries::Clear()
+{
+	ParameterSamples.Empty();
+}
+
 
 
 // EPILOGUE

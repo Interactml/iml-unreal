@@ -26,6 +26,7 @@ struct INTERACTML_API FInteractMLParameters
 	FInteractMLParameters(TSharedPtr<struct FInteractMLParameterCollection> ptr) : Ptr(ptr) {}
 };
 
+
 // InteractML parameter state snapshot, single sample/capture/frame of parameter values
 // List of parameters with associated name/type/value
 // In-memory use only for passing around in node graph
@@ -80,4 +81,24 @@ private:
 		}
 		Cursor++;
 	}
+};
+
+
+// wrapper for collecting parameters together into a series of parameter snapshots
+//
+struct INTERACTML_API FInteractMLParameterSeries
+{
+private:
+	TArray<TSharedPtr<struct FInteractMLParameterCollection>> ParameterSamples;
+	
+public:
+	//add a parameter snapshot to the collection
+	void Add( FInteractMLParameterCollection* parameters );
+	
+	//reset any stored state back to init
+	void Clear();
+	
+	//access
+	int Num() { return ParameterSamples.Num(); }
+	const FInteractMLParameterCollection* GetSample(int index) { return ParameterSamples[index].Get(); }
 };

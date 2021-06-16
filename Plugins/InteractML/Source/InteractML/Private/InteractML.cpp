@@ -116,6 +116,9 @@ void FInteractMLModule::InitPaths()
 //
 void FInteractMLModule::ShutdownCache()
 {
+	//Doesn't seem to be needed at application shutdown, everything released anyway
+	//(the removefromroot was crashing, presumably these objects are already removed earlier than the module on exit)
+#if false
 	//clear object lookup cache
 	for (auto it = ObjectLookup.CreateIterator(); it; ++it)
 	{
@@ -124,6 +127,7 @@ void FInteractMLModule::ShutdownCache()
 		pobj->RemoveFromRoot();
 	}
 	ObjectLookup.Empty();
+#endif
 }
 
 

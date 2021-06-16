@@ -63,6 +63,7 @@ namespace FModelNodeModelAccessPinNames
 //UInteractMLBlueprintLibrary::RunModel(...)
 namespace FModelNodeRunModelPinNames
 {
+	static const FName ActorPinName( "Actor" );
 	static const FName ModelPinName("Model");
 	static const FName LiveParametersPinName("Parameters");
 	static const FName RunPinName("Run");
@@ -304,6 +305,7 @@ void UInteractMLModelNode::ExpandNode(class FKismetCompilerContext& CompilerCont
 	UEdGraphPin* RunFnExecPin = CallRunFn->GetExecPin();
 	UEdGraphPin* RunFnThenPin = CallRunFn->GetThenPin();
 	UEdGraphPin* RunFnResultPin = CallRunFn->GetReturnValuePin();
+	UEdGraphPin* RunFnActorPin = CallRunFn->FindPinChecked( FModelNodeRunModelPinNames::ActorPinName );
 	UEdGraphPin* RunFnModelPin = CallRunFn->FindPinChecked( FModelNodeRunModelPinNames::ModelPinName );
 	UEdGraphPin* RunFnLiveParametersPin = CallRunFn->FindPinChecked( FModelNodeRunModelPinNames::LiveParametersPinName );
 	UEdGraphPin* RunFnRunPin = CallRunFn->FindPinChecked( FModelNodeRunModelPinNames::RunPinName );
@@ -337,7 +339,8 @@ void UInteractMLModelNode::ExpandNode(class FKismetCompilerContext& CompilerCont
 	ModelFnNodeIDPin->DefaultValue = NodeID;
 	
 	//hook up run fn pins
-	ModelFnResultPin->MakeLinkTo(RunFnModelPin);
+	ModelFnResultPin->MakeLinkTo( RunFnModelPin );
+	CompilerContext.CopyPinLinksToIntermediate( *ModelFnActorPin, *RunFnActorPin );	//this run fn pin wants same incoming connection as model fn
 	CompilerContext.MovePinLinksToIntermediate(*MainLiveParametersPin, *RunFnLiveParametersPin);
 	CompilerContext.MovePinLinksToIntermediate(*MainRunPin, *RunFnRunPin);
 	RunFnNodeIDPin->DefaultValue = NodeID;

@@ -118,6 +118,12 @@ public:
 	UFUNCTION(BlueprintPure,Category="InteractML",meta=(CompactNodeTitle="Parameter Count"))
 	int GetParameterCount();
 
+	//---- static utility ----
+	static bool LoadExamplesFromJson( const FString& json_string_in, TArray<FInteractMLExample>& examples_out );
+	static bool SaveExamplesToJson( const TArray<FInteractMLExample>& examples_in, FString& json_string_out );
+	static bool ClearExamplesCollection( TArray<FInteractMLExample>& examples );
+	
+
 private:
 
 	void ResetExamples();

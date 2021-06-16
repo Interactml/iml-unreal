@@ -68,11 +68,11 @@ public:
 	static UInteractMLModel* GetModel_Classification(AActor* Actor, FString DataPath, FString NodeID);
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
 	static UInteractMLModel* GetModel_Regression(AActor* Actor, FString DataPath, FString NodeID);
-	//UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
-	//static UInteractMLModel* GetModel_DynamicTimeWarp(AActor* Actor, FString DataPath, FString NodeID);
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static UInteractMLModel* GetModel_DynamicTimeWarp(AActor* Actor, FString DataPath, FString NodeID);
 	// model running
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
-	static float RunModel(UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID);
+	static float RunModel(AActor* Actor, UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID);
 	// model training
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
 	static bool TrainModel(UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID);

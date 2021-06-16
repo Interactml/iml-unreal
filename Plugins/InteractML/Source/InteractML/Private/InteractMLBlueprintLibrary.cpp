@@ -11,6 +11,9 @@
 #include "InteractMLContext.h"
 #include "Models/InteractMLClassificationModel.h"
 #include "Models/InteractMLRegressionModel.h"
+#include "Models/InteractMLDynamicTimeWarpModel.h"
+#include "InteractMLModelState.h"
+#include "InteractMLHelpers.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
@@ -289,19 +292,82 @@ UInteractMLModel* UInteractMLBlueprintLibrary::GetModel_Regression(AActor* Actor
 	
 	return model;
 }
+UInteractMLModel* UInteractMLBlueprintLibrary::GetModel_DynamicTimeWarp(AActor* Actor, FString DataPath, FString NodeID)
+{
+	//find the context we cache our state in
+	UInteractMLContext* Context = GetMLContext( Actor );
+	check( Context );
+	
+	//get a parameter collection for this node to use
+	UInteractMLContext::TGraphNodeID id = NodeID;
+	UInteractMLModel* model = Context->GetModel( UInteractMLDynamicTimeWarpModel::StaticClass(), id, DataPath );
+	check( model );
+	
+	return model;
+}
 
 // model running
 //
-float UInteractMLBlueprintLibrary::RunModel(UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID)
+float UInteractMLBlueprintLibrary::RunModel( AActor* Actor, UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID)
 {
-	if(Model)
+	if (!Model)
 	{
-		if(Run)
+		return 0;
+	}
+
+	//need context and state store to run with
+	UInteractMLContext* Context = GetMLContext( Actor );
+	check( Context );
+	FInteractMLModelState* model_state = Context->GetModelState( NodeID ).Get();
+	check( model_state );
+
+	//series/single operation
+	if(Model->IsSeries())
+	{		
+		//-------------- SERIES: accumulate whilst active and run once complete ---------------
+	
+		//check for transition
+		if (model_state->RunAction.Triggered(Run, NodeID))
 		{
-			return Model->RunModel( Parameters.Ptr.Get() );
+			//change in run state
+			if (Run)
+			{
+				//just started a run
+				//reset stored series
+				model_state->ParameterSeries.Clear();
+			}
+			else
+			{
+				//just stopped a run
+				//TODO: Do we want to include the last parameter set sent as the run is stopped in the test set?
+				float label = Model->RunModel( &model_state->ParameterSeries );
+
+				//this is now our result
+				model_state->CurrentResult = label;
+			}
+		}
+		else if(Run)
+		{
+			//still running
+			//record next parameter set
+			model_state->ParameterSeries.Add( Parameters.Ptr.Get() );
+		}
+
+	}
+	else
+	{
+		//--------------- SINGLE: just repeatedly run against a single parameter set ---------------
+		if (Run)
+		{
+			float label = Model->RunModel( Parameters.Ptr.Get() );
+
+			//this is now our result
+			model_state->CurrentResult = label;
 		}
 	}
-	return 0;
+
+	//report current/last available result
+	return model_state->CurrentResult;
 }
 
 // model training
