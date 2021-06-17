@@ -111,6 +111,9 @@ private:
 	//internal access
 	friend class FInteractMLModule;
 	friend class UInteractMLTrainingSetFactory;
+	friend class UInteractMLClassificationModelFactory;
+	friend class UInteractMLRegressionModelFactory;
+	friend class UInteractMLDynamicTimewarpModelFactory;
 	
 	//various setup happens when you set the base_file_path
 	void FInteracMLModule_SetBaseFilePath( FString base_file_path );

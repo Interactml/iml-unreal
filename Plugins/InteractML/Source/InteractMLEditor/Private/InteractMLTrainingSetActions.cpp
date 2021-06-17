@@ -24,7 +24,7 @@ FText FInteractMLTrainingSetActions::GetName() const
 
 FColor FInteractMLTrainingSetActions::GetTypeColor() const
 {
-	return FColor::FromHex("BB6CD9"); //InteractML Unity plugin machine learning system node run button purple
+	return FColor::FromHex("74DF84"); //InteractML Unity plugin training set icon colour
 }
 
 UClass* FInteractMLTrainingSetActions::GetSupportedClass() const

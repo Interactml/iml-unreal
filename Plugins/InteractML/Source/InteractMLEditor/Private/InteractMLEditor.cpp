@@ -13,6 +13,7 @@
 //module
 #include "InteractML.h"
 #include "InteractMLTrainingSetActions.h"
+#include "InteractMLModelActions.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
@@ -83,6 +84,9 @@ void FInteractMLEditorModule::InitAssets()
 	
 	//register our asset types
 	AssetTools.RegisterAssetTypeActions( MakeShareable( new FInteractMLTrainingSetActions(interactml_category) ));
+	AssetTools.RegisterAssetTypeActions( MakeShareable( new FInteractMLClassificationModelActions(interactml_category) ));
+	AssetTools.RegisterAssetTypeActions( MakeShareable( new FInteractMLRegressionModelActions(interactml_category) ));
+	AssetTools.RegisterAssetTypeActions( MakeShareable( new FInteractMLDynamicTimewarpModelActions(interactml_category) ));
 	
 	//style setup for asset appearance
 	AssetStyleSet = MakeShareable(new FSlateStyleSet("InteractML"));
@@ -91,6 +95,21 @@ void FInteractMLEditorModule::InitAssets()
 	if (TrainingSetThumbnail)
 	{
 		AssetStyleSet->Set("ClassThumbnail.InteractMLTrainingSet", TrainingSetThumbnail);
+	}
+	FSlateImageBrush* ClassificationThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLClassification"), TEXT(".png") ), FVector2D(128.f, 128.f) );
+	if (ClassificationThumbnail)
+	{
+		AssetStyleSet->Set("ClassThumbnail.InteractMLClassificationModel", ClassificationThumbnail);
+	}
+	FSlateImageBrush* RegressionThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLRegression"), TEXT(".png") ), FVector2D(128.f, 128.f) );
+	if (RegressionThumbnail)
+	{
+		AssetStyleSet->Set("ClassThumbnail.InteractMLRegressionModel", RegressionThumbnail);
+	}
+	FSlateImageBrush* DTWThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLDynamicTimewarp"), TEXT(".png") ), FVector2D(128.f, 128.f) );
+	if (DTWThumbnail)
+	{
+		AssetStyleSet->Set("ClassThumbnail.InteractMLDynamicTimewarpModel", DTWThumbnail);
 	}
 	FSlateStyleRegistry::RegisterSlateStyle(*AssetStyleSet);
 }
