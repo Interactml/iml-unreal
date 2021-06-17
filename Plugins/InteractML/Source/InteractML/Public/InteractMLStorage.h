@@ -23,15 +23,27 @@ class INTERACTML_API UInteractMLStorage
 {
 	GENERATED_BODY()
 
-		//---- persistent state ----
+	//---- persistent state ----
 
-		//hard link to underlying data file, if one is present in the filename
-		UPROPERTY()
-		FGuid FileID;
+	//hard link to underlying data file, if one is present in the filename
+	UPROPERTY()
+	FGuid FileID;
 
 	//---- transient/cached state ----
 
+	//was created as temporary interactml object used by nodes that specific data file path explicitly
+	//these are not project assets, and are not persisted, they only act as wrappers for the raw json data representation
+	UPROPERTY(Transient)
+	bool bIsTemporary;
+
+	//file path/id/name/ext/etc this is derived from file search and object state and not editable
+	//TODO: Spot changes to file location and update/sync, update file when object renamed
+	UPROPERTY(VisibleAnywhere)
+	FString DisplayDataFilePath;
+
 	//actual root of file path, e.g. Examples/HandGestures, the rest comes from ID (if it has one) and actual type
+	//case 1: set explicitly for temporary storage objects (data path access on nodes)
+	//case 2: derived from object name and current file directory location (actual asset file access)
 	FString BaseFilePath;
 
 	//has unsaved state?
@@ -78,6 +90,14 @@ public:
 	bool HasUnsavedData() const { return bNeedsSave; }
 	void MarkUnsavedData() { bNeedsSave = true; }
 
+	//~ Begin UObject interface
+	//events that could affect the derived storage path
+	virtual void PostLoad();
+	virtual void PostEditUndo();
+	virtual void PostTransacted(const FTransactionObjectEvent& TransactionEvent);
+	virtual void PostRename(UObject* OldOuter, const FName OldName);
+	virtual void PostEditImport();
+	//~ End UObject interface
 	
 	//---- utility ----
 
@@ -90,8 +110,15 @@ public:
 private:
 	//internal access
 	friend class FInteractMLModule;
+	friend class UInteractMLTrainingSetFactory;
 	
 	//various setup happens when you set the base_file_path
 	void FInteracMLModule_SetBaseFilePath( FString base_file_path );
+
+	//rebuild any derived state, e.g. filename, etc
+	void UpdateDerivedState();
+
+	//ensure file name/path matches the asset, more/rename if not
+	void SyncFileWithAsset();
 	
 };

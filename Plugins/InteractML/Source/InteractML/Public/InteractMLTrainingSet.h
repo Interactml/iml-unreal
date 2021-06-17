@@ -69,7 +69,7 @@ class INTERACTML_API UInteractMLTrainingSet
 	
 
 	//---- transient/cached state ----
-
+		
 	// how was our data recorded? (Unknown if not been set yet)
 	EInteractMLSampleMode SampleMode;
 

@@ -8,9 +8,11 @@
 #include "Modules/ModuleManager.h"
 #include "Interfaces/IPluginManager.h"
 #include "Misc/Paths.h"
+#include "Styling/SlateStyleRegistry.h"
 
 //module
 #include "InteractML.h"
+#include "InteractMLTrainingSetActions.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
@@ -33,6 +35,7 @@ void FInteractMLEditorModule::StartupModule()
 	UE_LOG( LogInteractML, Display, TEXT( "Starting InteractML Plugin - Editor Module" ) );
 
 	InitHooks();
+	InitAssets();
 }
 
 
@@ -46,7 +49,9 @@ void FInteractMLEditorModule::ShutdownModule()
 	UE_LOG( LogInteractML, Display, TEXT( "Stopping InteractML Plugin - Editor Module" ) );
 
 	ShutdownHooks();
+	ShutdownAssets();
 }
+
 
 // start monitoring global editor events we are interested in
 //
@@ -62,6 +67,42 @@ void FInteractMLEditorModule::ShutdownHooks()
 {
 	FEditorDelegates::EndPIE.RemoveAll(this);
 	FEditorDelegates::PostSaveWorld.RemoveAll(this);
+}
+
+
+// register asset types with the editor
+//
+void FInteractMLEditorModule::InitAssets()
+{
+	// gather
+	FString ContentDir = IPluginManager::Get().FindPlugin("InteractML")->GetBaseDir() / "Content";
+	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+	
+	//use custom category for interact ML
+	EAssetTypeCategories::Type interactml_category = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("InteractML")), LOCTEXT("InteractMLAssetCategory", "InteractML"));
+	
+	//register our asset types
+	AssetTools.RegisterAssetTypeActions( MakeShareable( new FInteractMLTrainingSetActions(interactml_category) ));
+	
+	//style setup for asset appearance
+	AssetStyleSet = MakeShareable(new FSlateStyleSet("InteractML"));
+	AssetStyleSet->SetContentRoot(ContentDir);
+	FSlateImageBrush* TrainingSetThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLTrainingSet"), TEXT(".png") ), FVector2D(128.f, 128.f) );
+	if (TrainingSetThumbnail)
+	{
+		AssetStyleSet->Set("ClassThumbnail.InteractMLTrainingSet", TrainingSetThumbnail);
+	}
+	FSlateStyleRegistry::RegisterSlateStyle(*AssetStyleSet);
+}
+
+// deregister asset types
+//
+void FInteractMLEditorModule::ShutdownAssets()
+{
+	//release our custom style
+	FSlateStyleRegistry::UnRegisterSlateStyle( *AssetStyleSet.Get() );
+	ensure(AssetStyleSet.IsUnique());
+	AssetStyleSet.Reset();
 }
 
 

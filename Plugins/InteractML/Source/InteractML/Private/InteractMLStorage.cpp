@@ -32,6 +32,9 @@ FString UInteractMLStorage::cFileFormatExtension( TEXT(".json") );
 //
 void UInteractMLStorage::FInteracMLModule_SetBaseFilePath( FString base_file_path )
 {
+	//this is set up explicitly when created for a node that is using file path based data file referencing instead of assets
+	bIsTemporary = true;
+
 	//gather
 	IPlatformFile& file_system = FPlatformFileManager::Get().GetPlatformFile();
 	FString root_path = FInteractMLModule::Get().GetDataRoot();
@@ -213,6 +216,43 @@ bool UInteractMLStorage::Save() const
 	return false;
 }
 
+//~ Begin UObject interface
+void UInteractMLStorage::PostLoad()
+{
+	//this event could affect the derived storage path
+	UpdateDerivedState();
+
+	Super::PostLoad();
+}
+void UInteractMLStorage::PostEditUndo()
+{
+	//this event could affect the derived storage path
+	UpdateDerivedState();
+
+	Super::PostEditUndo();
+}
+void UInteractMLStorage::PostTransacted(const FTransactionObjectEvent& TransactionEvent)
+{
+	//this event could affect the derived storage path
+	UpdateDerivedState();
+
+	Super::PostTransacted(TransactionEvent);
+}
+void UInteractMLStorage::PostRename(UObject* OldOuter, const FName OldName)
+{
+	//this event could affect the derived storage path
+	UpdateDerivedState();
+
+	Super::PostRename(OldOuter, OldName);
+}
+void UInteractMLStorage::PostEditImport()
+{
+	//this event could affect the derived storage path
+	UpdateDerivedState();
+
+	Super::PostEditImport();
+}
+//~ End UObject interface
 
 // extract numerical ID from file
 //
@@ -330,6 +370,74 @@ FString UInteractMLStorage::SanitisePathAndName(FString path_and_name, FString o
 	}
 
 	return path_and_name;
+}
+
+//rebuild any derived state, e.g. filename, etc
+//
+void UInteractMLStorage::UpdateDerivedState()
+{
+	//only needed for real assets
+	//This is because BaseFilePath is set explicitly for temp ones and we don't need a display name
+	if (bIsTemporary)
+	{
+		return;
+	}
+
+	//ensure has a guid
+	if (!FileID.IsValid())
+	{
+		FileID = FGuid::NewGuid();
+	}
+
+	//rebuild base path (update with asset name)
+	FString new_base_path;
+	if (BaseFilePath.Len() > 0)
+	{
+		//strip old name leaving
+		new_base_path = BaseFilePath;
+		int ifs = -1, ibs = -1;
+		new_base_path.FindLastChar(TCHAR('/'), ifs);
+		new_base_path.FindLastChar(TCHAR('\\'), ibs);
+		int iname = FMath::Max(ifs + 1, ibs + 1);
+		new_base_path = new_base_path.Left(iname);
+	}
+
+	//add name on
+	FString asset_name;
+	GetName(asset_name);
+	if (new_base_path.Len() > 0)
+	{
+		//add to path
+		new_base_path = FPaths::Combine(new_base_path, asset_name);
+	}
+	else
+	{
+		//just name, in root of data dir
+		new_base_path = asset_name;
+	}
+	
+	//changed?
+	if(new_base_path!=BaseFilePath)
+	{
+		UE_LOG(LogInteractML, Log, TEXT("Storage data path changed to '%s' (from '%s')"), *new_base_path, *BaseFilePath);
+		BaseFilePath = new_base_path;
+	}
+
+	//rebuild display path
+	DisplayDataFilePath = BaseFilePath;
+	DisplayDataFilePath += ".";
+	DisplayDataFilePath += FileID.ToString(EGuidFormats::Digits);
+	DisplayDataFilePath += GetExtensionPrefix();	//type prefix
+	DisplayDataFilePath += cFileFormatExtension;	//file format extension
+
+	//sync file existance if needed
+	SyncFileWithAsset();
+}
+
+//ensure file name/path matches the asset, more/rename if not
+void UInteractMLStorage::SyncFileWithAsset()
+{
+	//TODO
 }
 
 

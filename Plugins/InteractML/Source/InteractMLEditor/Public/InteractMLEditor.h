@@ -7,7 +7,7 @@
 //unreal
 #include "CoreMinimal.h"
 #include "Modules/ModuleInterface.h"
-//#include "Containers/Tickers.h"
+#include "Styling/SlateStyle.h"
 
 //module
 #include "InteractML.h"
@@ -20,7 +20,9 @@
 class INTERACTMLEDITOR_API FInteractMLEditorModule 
 	: public IModuleInterface
 {
-
+	// asset appearance
+	TSharedPtr<FSlateStyleSet> AssetStyleSet;
+	
 public:
 
 	/** IModuleInterface implementation */
@@ -31,6 +33,9 @@ private:
 
 	// editor module setup/shutdown
 	void InitHooks();
+	void InitAssets();
+	
+	void ShutdownAssets();
 	void ShutdownHooks();
 
 	// global editor event handlers	
