@@ -56,16 +56,20 @@ float UInteractMLDynamicTimeWarpModel::RunModelInstance(struct FInteractMLParame
 		}
 	}
 
-	//with the accumulated input parameter series we can now run the model
-	std::string label_text = Model->run( InputParameters );
-
-	//interpret label
-	bool success = label_text.size()>0;
-	if (success)
+	//don't run on 0 samples (actually crashes the model)
+	if(num_samples > 0)
 	{
-		//interpret result
-		float label = FCStringAnsi::Atof(label_text.c_str());
-		return label;
+		//with the accumulated input parameter series we can now run the model
+		std::string label_text = Model->run( InputParameters );
+
+		//interpret label
+		bool success = label_text.size() > 0;
+		if(success)
+		{
+			//interpret result
+			float label = FCStringAnsi::Atof( label_text.c_str() );
+			return label;
+		}
 	}
 
 	return 0.0f;
