@@ -158,7 +158,12 @@ bool UInteractMLDynamicTimeWarpModel::ApplyExamples()
 	}
 	
 	//when we say "train" the model, for dtw this is just loading in the example data
-	bool success = Model->train(model_examples);
+	Model->reset();
+	bool success = true;
+	if(model_examples.size() > 0)
+	{
+		success = Model->train( model_examples );
+	}
 	
 	return success;
 }

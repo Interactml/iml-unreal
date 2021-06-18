@@ -73,6 +73,12 @@ public:
 	// is the base path being used for storage?
 	bool CheckBasePath(FString base_file_path) const;
 
+	// any sub-dir part of base file path, e.g. "Examples/Foo/HandGestures" -> "Examples/Foo", and "Hello" -> ""
+	FString GetBaseFilePathDirectoryPart() const;
+
+	// the name part of base file path, e.g. "Examples/Foo/HandGestures" -> "HandGestures", and "Hello" -> "Hello"
+	FString GetBaseFilePathNamePart() const;
+	
 	//---- persistence ----
 
 	// a new storage object, chance to init when not loaded
@@ -88,15 +94,17 @@ public:
 
 	// is there unsaved state in this object?
 	bool HasUnsavedData() const { return bNeedsSave; }
-	void MarkUnsavedData() { bNeedsSave = true; }
+	void MarkUnsavedData();
 
 	//~ Begin UObject interface
 	//events that could affect the derived storage path
-	virtual void PostLoad();
-	virtual void PostEditUndo();
-	virtual void PostTransacted(const FTransactionObjectEvent& TransactionEvent);
-	virtual void PostRename(UObject* OldOuter, const FName OldName);
-	virtual void PostEditImport();
+	virtual void PostLoad() override;
+	virtual void PostEditUndo() override;
+	virtual void PostTransacted(const FTransactionObjectEvent& TransactionEvent) override;
+	virtual void PostRename(UObject* OldOuter, const FName OldName) override;
+	virtual void PostEditImport() override;
+	//save hook
+	virtual void PreSave(const class ITargetPlatform* TargetPlatform) override;
 	//~ End UObject interface
 	
 	//---- utility ----
@@ -122,6 +130,9 @@ private:
 	void UpdateDerivedState();
 
 	//ensure file name/path matches the asset, more/rename if not
-	void SyncFileWithAsset();
+	bool SyncFileWithAsset();
+
+	//ensure our loaded state matches where the file is located
+	bool SyncAssetWithFile();
 	
 };

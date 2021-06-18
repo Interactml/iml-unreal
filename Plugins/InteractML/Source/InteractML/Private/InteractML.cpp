@@ -21,7 +21,7 @@ DEFINE_LOG_CATEGORY(LogInteractML);
 // CONSTANTS & MACROS
 
 // default location of ML data in a project, overridable in game ini files
-const TCHAR* c_DefaultDataDirectoryName = TEXT("Data");
+const TCHAR* c_DefaultDataDirectoryName = TEXT("../Data");
 
 
 // LOCAL CLASSES & TYPES
@@ -72,7 +72,7 @@ void FInteractMLModule::ShutdownModule()
 //	DataPath=my/custom/path/
 //
 // NOTE: this is relative to the Content folder of the project
-// NOTE: The default is "Data/"
+// NOTE: The default is "../Data/", i.e. outside the content folder, but alongside
 //
 void FInteractMLModule::InitPaths()
 {
@@ -92,6 +92,8 @@ void FInteractMLModule::InitPaths()
 
 	//here, use this
 	DataRootPath = FPaths::Combine( FPaths::ProjectContentDir(), data_path );
+	FPaths::NormalizeDirectoryName( DataRootPath );
+	FPaths::CollapseRelativeDirectories( DataRootPath );
 	UE_LOG( LogInteractML, Log, TEXT( "ML data file path set to: '%s'%s" ), *DataRootPath, is_overridden ? TEXT( "" ) : TEXT( " (default)" ) );
 
 	//ensure exists

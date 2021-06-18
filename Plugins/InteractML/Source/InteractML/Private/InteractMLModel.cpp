@@ -31,7 +31,7 @@ void UInteractMLModel::Create()
 
 // read and restore stored model state into actual RapidLib model
 //
-bool UInteractMLModel::LoadJson(const FString& json_string)
+bool UInteractMLModel::LoadJson( const FString& json_string )
 {
 	//ensure model initialised and clear
 	ResetModel();
@@ -39,16 +39,20 @@ bool UInteractMLModel::LoadJson(const FString& json_string)
 	//set up model from json
 	modelSetFloat* model = GetModelInstance();
 
-	//unfortunately we need to convert FString to std::string for this
-	auto ansi_json = StringCast<ANSICHAR>( *json_string );
-	std::string std_json = ansi_json.Get();
+	//anything to do?
+	bool ok = true;
+	if(model && !json_string.IsEmpty())
+	{
+		//unfortunately we need to convert FString to std::string for this
+		auto ansi_json = StringCast<ANSICHAR>( *json_string );
+		std::string std_json = ansi_json.Get();
 
-	//apply
-	bool ok = model->putJSON( std_json );
+		//apply
+		ok = model->putJSON( std_json );
 
-	//TODO: shouldn't assume that a loaded model is trained, currently can't tell
-	bIsTrained = true;
-
+		//TODO: shouldn't assume that a loaded model is trained, currently can't tell
+		bIsTrained = true;
+	}
 	return ok;
 }
 
@@ -58,12 +62,20 @@ bool UInteractMLModel::SaveJson(FString& json_string) const
 {
 	//extract json
 	modelSetFloat* model = GetModelInstance();
-	std::string std_json = model->getJSON();
+	if(model)
+	{
+		std::string std_json = model->getJSON();
 
-	//unfortunately we need to convert the std::string back to an FString for this
-	auto tchar_json = StringCast<TCHAR>( std_json.c_str() );
-	json_string = tchar_json.Get();
-	
+		//unfortunately we need to convert the std::string back to an FString for this
+		auto tchar_json = StringCast<TCHAR>( std_json.c_str() );
+		json_string = tchar_json.Get();
+	}
+	else
+	{
+		//nothing to save
+		json_string.Empty();
+	}
+
 	return true;
 }
 
