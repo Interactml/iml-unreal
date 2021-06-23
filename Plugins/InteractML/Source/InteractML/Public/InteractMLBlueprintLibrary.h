@@ -76,7 +76,7 @@ public:
 	// model training
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
 	static bool TrainModel(UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID);
-	
+
 
 	///////////////////// UTILITY //////////////////////
 

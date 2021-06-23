@@ -76,7 +76,7 @@ namespace FTrainingSetNodeRecordPinNames
 //
 FText UInteractMLTrainingSetNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
-	FText node_name = LOCTEXT("TrainingSetNodeTitle", "Train The Machine");
+	FText node_name = LOCTEXT("TrainingSetNodeTitle", "Teach The Machine");
 
 	//check what's needed
 	switch (TitleType)
