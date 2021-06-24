@@ -18,6 +18,7 @@
 //module
 #include "InteractMLParameters.h"
 #include "InteractMLBlueprintLibrary.h"
+#include "InteractMLConstants.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
@@ -141,7 +142,6 @@ static FString GetInputParameterTypesDescription()
 namespace FInteractMLParameterNodePinNames
 {
 	//in
-	static const FName ActorInputPinName("Actor");
 	//out
 	static const FName ParametersOutputPinName("Parameters");
 }  	
@@ -291,14 +291,6 @@ FText UInteractMLParameterNode::GetTooltipText() const
 {
 	return LOCTEXT("ParameterNodeTooltip", "Connect all the parameters to be used as training inputs");
 }
-FText UInteractMLParameterNode::GetMenuCategory() const
-{
-	return LOCTEXT("ParameterNodeMenuCategory", "InteractML");
-}
-FLinearColor UInteractMLParameterNode::GetNodeTitleColor() const
-{
-	return cInteractMLPrimaryColour.ReinterpretAsLinear(); 
-}
 
 
 // how many valid parameters does this collection have?
@@ -328,21 +320,6 @@ int UInteractMLParameterNode::CountFloats() const
 	return count;
 }
 
-
-// put node in blueprint menu
-//
-void UInteractMLParameterNode::GetMenuActions(FBlueprintActionDatabaseRegistrar& ActionRegistrar) const
-{
-	Super::GetMenuActions( ActionRegistrar );
-	
-	UClass* Action = GetClass();
-	if (ActionRegistrar.IsOpenForRegistration( Action ))
-	{
-		UBlueprintNodeSpawner* Spawner = UBlueprintNodeSpawner::Create(GetClass());
-		check(Spawner != nullptr);
-		ActionRegistrar.AddBlueprintAction(Action, Spawner);
-	}
-}
 
 // context menu that appears on the node
 //
@@ -420,15 +397,10 @@ void UInteractMLParameterNode::PostReconstructNode()
 //
 void UInteractMLParameterNode::AllocateDefaultPins()
 {
-	// Execution pins
-	CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Exec, UEdGraphSchema_K2::PN_Execute);
-	CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Exec, UEdGraphSchema_K2::PN_Then);
+	//handle actor context pin
+	Super::AllocateDefaultPins();
 
 	//---- Inputs ----
-
-	// Target actor (needed for context)
-	UEdGraphPin* actor_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Object, AActor::StaticClass(), FInteractMLParameterNodePinNames::ActorInputPinName);
-	actor_pin->PinToolTip = LOCTEXT("BlueprintNodeActorPinTooltip", "Interact ML nodes need an actor to provide context in which they operate.\nTypically this would be actor the graph is attached to (i.e. 'Self').").ToString();
 	
 	// Add known input pins
 	for(int i = 0; i < InputParameters.Num(); i++)
@@ -447,7 +419,6 @@ void UInteractMLParameterNode::AllocateDefaultPins()
 	// Resulting Parameter (ptr) struct
 	CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Struct, TBaseStructure<FInteractMLParameters>::Get(), FInteractMLParameterNodePinNames::ParametersOutputPinName);
 	
-	Super::AllocateDefaultPins();
 }
 
 // we've been asked to add a new pin
@@ -530,15 +501,6 @@ UEdGraphPin* UInteractMLParameterNode::GetParametersOutputPin() const
 	return Pin;
 }
 
-// pin access helpers : actor input
-//
-UEdGraphPin* UInteractMLParameterNode::GetActorInputPin() const
-{
-	UEdGraphPin* Pin = FindPin(FInteractMLParameterNodePinNames::ActorInputPinName);
-	check(Pin == NULL || Pin->Direction == EGPD_Input);
-	return Pin;
-}
-
 // locate the spec info for a given pin
 // NOTE: temp ptr, don't keep
 //
@@ -614,7 +576,6 @@ void UInteractMLParameterNode::ExpandNode(class FKismetCompilerContext& Compiler
 
 	//input pins : exec (execution triggered)
 	UEdGraphPin* MainExecPin = GetExecPin();
-	UEdGraphPin* MainActorPin = GetActorInputPin();
 	//input pins : parameter inputs
 	TMap<UEdGraphPin*,FParameterSpec*> param_pins;
 	CollectParameterPins( param_pins );
@@ -638,7 +599,7 @@ void UInteractMLParameterNode::ExpandNode(class FKismetCompilerContext& Compiler
 	//hook up create fn to exec first
 	CompilerContext.MovePinLinksToIntermediate( *MainExecPin, *ParamFnExecPin );
 	//hook up other data parameter access needs
-	CompilerContext.MovePinLinksToIntermediate(*MainActorPin, *ParamFnActorPin);	//the actor/context
+	ConnectContextActor(CompilerContext, SourceGraph, ParamFnActorPin);
 	ParamFnGuidPin->DefaultValue = NodeGuid.ToString( EGuidFormats::Digits );	//node disambiguation/context
 	
 	//each parameter input pin needs a function call node chained together to fully set up the parameter collection

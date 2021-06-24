@@ -124,9 +124,12 @@ void FInteractMLModule::ShutdownCache()
 	//clear object lookup cache
 	for (auto it = ObjectLookup.CreateIterator(); it; ++it)
 	{
-		UInteractMLStorage* pobj = it.Value();
-		//done owning it, release to GC
-		pobj->RemoveFromRoot();
+		UInteractMLStorage* pobj = it.Value().Get();
+		if (pobj && pobj->bIsTemporary)
+		{
+			//done owning it, release to GC
+			pobj->RemoveFromRoot();
+		}
 	}
 	ObjectLookup.Empty();
 #endif
@@ -156,16 +159,16 @@ UInteractMLTrainingSet* FInteractMLModule::GetTrainingSet( FString path_and_name
 	
 	//locate
 	auto pentry = ObjectLookup.Find( file_key );
-	UInteractMLStorage* pobj = pentry?*pentry:nullptr;
+	UInteractMLStorage* pobj = pentry?(pentry->Get()):nullptr;
 	
 	//create on demand
 	if(!pobj)
 	{
 		pobj = NewObject<UInteractMLTrainingSet>();
 
-		//owned by plugin
+		//temp objects are owned by plugin
 		pobj->AddToRoot();
-		pobj->FInteracMLModule_SetBaseFilePath(base_file_path);	//will resolve/create/assign-id as needed
+		pobj->FInteracMLModule_SetBaseFilePath(base_file_path);	//will resolve/create/assign-id as needed, marks object as temp
 
 		//store for lookup
 		ObjectLookup.Add( file_key, pobj);
@@ -192,16 +195,16 @@ UInteractMLModel* FInteractMLModule::GetModel( UClass* model_type, FString path_
 	
 	//locate
 	auto pentry = ObjectLookup.Find( file_key );
-	UInteractMLStorage* pobj = pentry?*pentry:nullptr;
+	UInteractMLStorage* pobj = pentry?pentry->Get():nullptr;
 	
 	//create on demand
 	if(!pobj)
 	{
 		pobj = NewObject<UInteractMLModel>( GetTransientPackage(), model_type, NAME_None);
 		
-		//owned by plugin
+		//temp objects are owned by plugin
 		pobj->AddToRoot();
-		pobj->FInteracMLModule_SetBaseFilePath(base_file_path);	//will resolve/create/assign-id as needed
+		pobj->FInteracMLModule_SetBaseFilePath(base_file_path);	//will resolve/create/assign-id as needed, marks object as temp
 
 		//store for lookup
 		ObjectLookup.Add( file_key, pobj);
@@ -221,14 +224,45 @@ UInteractMLModel* FInteractMLModule::GetModel( UClass* model_type, FString path_
 
 // ml objects : inform of any obtained from direct asset references here as we need to synchronise with path based ones
 //
-void SetTrainingSet(UInteractMLTrainingSet* training_set)
+void FInteractMLModule::SetTrainingSet(UInteractMLTrainingSet* training_set)
 {
-	check(false);	//TODO: support direct asset ref ml objects
+	//scan known objects for unsaved state
+	for (auto It = ObjectLookup.CreateConstIterator(); It; ++It)
+	{
+		UInteractMLStorage* pstorage = It.Value().Get();
+		if (pstorage == training_set)
+		{
+			//found, already registered
+			return;
+		}
+	}
+		
+	//clean and make key
+	FString file_key = MakeFilePathKey( training_set->GetBaseFilePath() ) + UInteractMLTrainingSet::cExtensionPrefix;
+	
+	//remember
+	ObjectLookup.Add( file_key, training_set );
 }
 
-void SetModel(UInteractMLModel* model)
+void FInteractMLModule::SetModel(UInteractMLModel* model)
 {
-	check(false);	//TODO: support direct asset ref ml objects
+	//scan known objects for unsaved state
+	for (auto It = ObjectLookup.CreateConstIterator(); It; ++It)
+	{
+		UInteractMLStorage* pstorage = It.Value().Get();
+		if (pstorage == model)
+		{
+			//found, already registered
+			return;
+		}
+	}
+	
+	//clean and make key
+	FString model_file_extension = model->GetExtensionPrefix();
+	FString file_key = MakeFilePathKey( model->GetBaseFilePath() ) + model_file_extension;
+	
+	//remember
+	ObjectLookup.Add( file_key, model );
 }
 
 
@@ -247,8 +281,8 @@ bool FInteractMLModule::Save()
 	bool ok = true;
 	for (auto It = ObjectLookup.CreateConstIterator(); It; ++It)
 	{
-		UInteractMLStorage* pstorage = It.Value();
-		if (pstorage->HasUnsavedData())
+		UInteractMLStorage* pstorage = It.Value().Get();
+		if (pstorage && pstorage->HasUnsavedData())
 		{
 			//save it
 			if (!pstorage->Save())
@@ -261,15 +295,16 @@ bool FInteractMLModule::Save()
 	return ok;
 }
 
-// editor module needs to be able to tell if there is any new data
+// editor module needs to be able to tell if there is any new temp data objects?
+// NOTE: different to assets, these are the temporary objects just wrapping external data
 //
 bool FInteractMLModule::HasUnsavedData() const
 {
 	//scan known objects for unsaved state
 	for (auto It = ObjectLookup.CreateConstIterator(); It; ++It)
 	{
-		UInteractMLStorage* pstorage = It.Value();
-		if (pstorage->HasUnsavedData())
+		UInteractMLStorage* pstorage = It.Value().Get();
+		if(pstorage && pstorage->HasUnsavedData() && pstorage->bIsTemporary)	//ARE temp
 		{
 			//found some unsaved state
 			return true;
@@ -278,6 +313,26 @@ bool FInteractMLModule::HasUnsavedData() const
 
 	//nothing found dirty
 	return false;
+}
+
+// anything in unsaved assets?
+//
+bool FInteractMLModule::GetUnsavedAssets(TArray<UInteractMLStorage*>& changed_assets)
+{
+	bool found_any = false;
+	//scan known objects for unsaved state
+	for (auto It = ObjectLookup.CreateConstIterator(); It; ++It)
+	{
+		UInteractMLStorage* pstorage = It.Value().Get();
+		if(pstorage && pstorage->HasUnsavedData() && !pstorage->bIsTemporary)	//NOT temp
+		{
+			//found some unsaved state
+			changed_assets.Add(pstorage);
+			found_any = true;
+		}
+	}
+	
+	return found_any;
 }
 
 

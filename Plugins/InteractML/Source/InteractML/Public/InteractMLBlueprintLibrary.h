@@ -15,6 +15,16 @@
 
 //general declarations
 
+UENUM(BlueprintType)
+enum class EInteractMLModelType : uint8
+{
+	//unknown/empty/unspecified
+	None = 0,
+	//current types
+	Classification,
+	Regression,
+	DynamicTimewarp,
+};
 
 // InteractML blueprint support library
 // * Internal - Various functions for building our custom blueprint nodes from
@@ -53,29 +63,25 @@ public:
 	
 	// training set access
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
-	static UInteractMLTrainingSet* GetTrainingSet(AActor* Actor, FString DataPath, FString NodeID);
+	static UInteractMLTrainingSet* GetTrainingSet(AActor* Actor, FString DataPath, FString NodeID, bool& HasData);
 	// training set recording
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
-	static bool RecordExample(UInteractMLTrainingSet* TrainingSet, FInteractMLParameters Parameters, float Label, bool Record, bool Reset, FString NodeID);
+	static bool RecordExample(AActor* Actor, UInteractMLTrainingSet* TrainingSet, FInteractMLParameters Parameters, float Label, bool Record, bool Reset, FString NodeID);
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
-	static bool RecordExampleSeries(UInteractMLTrainingSet* TrainingSet, FInteractMLParameters Parameters, float Label, bool Record, bool Reset, FString NodeID);
+	static bool RecordExampleSeries(AActor* Actor, UInteractMLTrainingSet* TrainingSet, FInteractMLParameters Parameters, float Label, bool Record, bool Reset, FString NodeID);
 	
 
 	///////////////////// MODEL //////////////////////
 	
 	// model access
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
-	static UInteractMLModel* GetModel_Classification(AActor* Actor, FString DataPath, FString NodeID);
-	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
-	static UInteractMLModel* GetModel_Regression(AActor* Actor, FString DataPath, FString NodeID);
-	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
-	static UInteractMLModel* GetModel_DynamicTimeWarp(AActor* Actor, FString DataPath, FString NodeID);
+	static UInteractMLModel* GetModel(AActor* Actor, FString DataPath, UClass* ModelType, FString NodeID, bool& IsTrained);
 	// model running
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
 	static float RunModel(AActor* Actor, UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID);
 	// model training
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
-	static bool TrainModel(UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID);
+	static bool TrainModel(AActor* Actor, UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID);
 
 
 	///////////////////// UTILITY //////////////////////
@@ -89,4 +95,16 @@ public:
 	// log a parameter collections list of parameter values
 	UFUNCTION(BlueprintCallable,meta=(DevelopmentOnly))
 	static void LogParameterCollection(FInteractMLParameters Parameters);
+
+
+	///////////////////// DEPRECATED //////////////////////
+
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly, meta=(DeprecatedFunction))
+	static UInteractMLTrainingSet* DEPRECATED_GetTrainingSet(AActor* Actor, FString DataPath, FString NodeID);
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly, meta=(DeprecatedFunction))
+	static UInteractMLModel* DEPRECATED_GetModel_Classification(AActor* Actor, FString DataPath, FString NodeID);
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly, meta=(DeprecatedFunction))
+	static UInteractMLModel* DEPRECATED_GetModel_Regression(AActor* Actor, FString DataPath, FString NodeID);
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly, meta=(DeprecatedFunction))
+	static UInteractMLModel* DEPRECATED_GetModel_DynamicTimeWarp(AActor* Actor, FString DataPath, FString NodeID);
 };

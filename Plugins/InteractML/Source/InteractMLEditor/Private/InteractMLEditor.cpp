@@ -14,6 +14,7 @@
 #include "InteractML.h"
 #include "InteractMLTrainingSetActions.h"
 #include "InteractMLModelActions.h"
+#include "InteractMLStorage.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
@@ -140,6 +141,16 @@ void FInteractMLEditorModule::OnEndPIE(const bool bIsSimulating)
 		if(GEditor->EditorWorld)
 		{
 			GEditor->EditorWorld->MarkPackageDirty();
+		}
+	}
+
+	//also any assets modified during PIE need marking
+	TArray<UInteractMLStorage*> changed_assets;
+	if(FInteractMLModule::Get().GetUnsavedAssets(changed_assets))
+	{
+		for (int i = 0; i < changed_assets.Num(); i++)
+		{
+			changed_assets[i]->MarkPackageDirty();
 		}
 	}
 }

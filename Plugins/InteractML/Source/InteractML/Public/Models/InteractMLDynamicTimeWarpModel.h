@@ -19,7 +19,7 @@
 
 // InteractML Model for running a Dynamic Time-warp algorithm
 //
-UCLASS()
+UCLASS(BlueprintType)
 class INTERACTML_API UInteractMLDynamicTimeWarpModel
 	: public UInteractMLModel
 {

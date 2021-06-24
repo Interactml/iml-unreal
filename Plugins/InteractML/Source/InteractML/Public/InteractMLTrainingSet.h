@@ -55,7 +55,7 @@ enum class EInteractMLSampleMode
 // represents collection of training data used to train a model
 // holds in-memory version of training set, backed by underlying JSON file storage
 //
-UCLASS()
+UCLASS(BlueprintType)
 class INTERACTML_API UInteractMLTrainingSet
 	: public UInteractMLStorage
 {
@@ -91,6 +91,7 @@ public:
 	
 
 	//---- access ----
+	bool HasExamples() const { return Examples.Num()>0; }
 	const TArray<FInteractMLExample>& GetExamples() const { return Examples; }
 	bool IsRecording() const { return RecordingAction.Active(); }
 	bool IsResetting() const { return ResettingAction.Active(); }

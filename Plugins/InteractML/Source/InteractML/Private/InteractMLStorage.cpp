@@ -252,9 +252,6 @@ void UInteractMLStorage::MarkUnsavedData()
 {
 	//our own flag
 	bNeedsSave = true;
-
-	//tell Unreal
-	MarkPackageDirty();
 }
 
 

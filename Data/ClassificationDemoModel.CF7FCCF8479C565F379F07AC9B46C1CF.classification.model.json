@@ -1,0 +1,62 @@
+{
+   "metadata" : {
+      "creator" : "Rapid API C++",
+      "inputNames" : [
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2"
+      ],
+      "numInputs" : 2,
+      "numOutputs" : 1,
+      "version" : "v0.1.1"
+   },
+   "modelSet" : [
+      {
+         "examples" : [
+            {
+               "class" : 1,
+               "features" : [ 102.20466613769531, -308.87701416015625 ]
+            },
+            {
+               "class" : 1,
+               "features" : [ -357.62844848632813, -260.69024658203125 ]
+            },
+            {
+               "class" : 2,
+               "features" : [ -290.97927856445313, -28.977203369140625 ]
+            },
+            {
+               "class" : 2,
+               "features" : [ 142.18196105957031, -9.1526021957397461 ]
+            },
+            {
+               "class" : 3,
+               "features" : [ 146.20169067382813, 402.14236450195313 ]
+            },
+            {
+               "class" : 3,
+               "features" : [ -347.63626098632813, 373.65652465820313 ]
+            }
+         ],
+         "inputNames" : [
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2"
+         ],
+         "k" : 1,
+         "modelType" : "kNN Classificiation",
+         "numInputs" : 2,
+         "whichInputs" : [ 0, 1 ]
+      }
+   ]
+}

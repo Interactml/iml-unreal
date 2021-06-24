@@ -2,7 +2,7 @@
 // InteractML - University Of Arts London
 //----
 
-#include "InteractMLRegressionNode.h"
+#include "InteractMLClassificationNode.h"
 
 //unreal
 //#include "BlueprintActionDatabaseRegistrar.h" //FBlueprintActionDatabaseRegistrar
@@ -37,20 +37,19 @@
 //////////////////// CLASSIFICATION MODEL NODE SPECIALISATION ///////////////////
 
 
-FText UInteractMLRegressionNode::GetModelName() const
+FText UInteractMLClassificationNode::GetModelName() const
 {
-	return LOCTEXT("ModelNameRegression", "Regression");
+	return LOCTEXT("ModelNameClassification", "Classification");
 }
-FText UInteractMLRegressionNode::GetModelTooltip() const
+FText UInteractMLClassificationNode::GetModelTooltip() const
 {
-	return LOCTEXT("ModelTooltipRegression", "Load or train a regression machine learning model");
+	return LOCTEXT("ModelTooltipClassification", "Load or train a classification machine learning model");
 }
-FName UInteractMLRegressionNode::GetModelAccessFunctionName() const
+FName UInteractMLClassificationNode::GetModelAccessFunctionName() const
 {
-	static const FName get_model(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, GetModel_Regression));
+	static const FName get_model(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, DEPRECATED_GetModel_Classification));
 	return get_model;
 }
-
 
 
 

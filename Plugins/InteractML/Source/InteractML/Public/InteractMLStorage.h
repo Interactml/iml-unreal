@@ -78,6 +78,9 @@ public:
 
 	// the name part of base file path, e.g. "Examples/Foo/HandGestures" -> "HandGestures", and "Hello" -> "Hello"
 	FString GetBaseFilePathNamePart() const;
+
+	// fill base file path
+	FString GetBaseFilePath() const { return BaseFilePath; }
 	
 	//---- persistence ----
 

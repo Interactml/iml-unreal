@@ -18,7 +18,7 @@
 
 // InteractML Model for running a Regression algorithm
 //
-UCLASS()
+UCLASS(BlueprintType)
 class INTERACTML_API UInteractMLRegressionModel
 	: public UInteractMLModel
 {

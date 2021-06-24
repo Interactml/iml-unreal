@@ -18,7 +18,7 @@
 
 // InteractML Model for running a Classification algorithm
 //
-UCLASS()
+UCLASS(BlueprintType)
 class INTERACTML_API UInteractMLClassificationModel
 	: public UInteractMLModel
 {

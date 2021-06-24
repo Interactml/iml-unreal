@@ -2,7 +2,7 @@
 // InteractML - University Of Arts London
 //----
 
-#include "InteractMLDynamicTimeWarpNode.h"
+#include "InteractMLRegressionNode.h"
 
 //unreal
 //#include "BlueprintActionDatabaseRegistrar.h" //FBlueprintActionDatabaseRegistrar
@@ -34,22 +34,23 @@
 
 
 
-/////////////////// DYNAMIC TIMEWARP MODEL NODE SPECIALISATION //////////////////
+//////////////////// CLASSIFICATION MODEL NODE SPECIALISATION ///////////////////
 
 
-FText UInteractMLDynamicTimeWarpNode::GetModelName() const
+FText UInteractMLRegressionNode::GetModelName() const
 {
-	return LOCTEXT("ModelNameDynamicTimeWarp", "Dynamic Time Warp");
+	return LOCTEXT("ModelNameRegression", "Regression");
 }
-FText UInteractMLDynamicTimeWarpNode::GetModelTooltip() const
+FText UInteractMLRegressionNode::GetModelTooltip() const
 {
-	return LOCTEXT("ModelTooltipDynamicTimeWarp", "Load or train a dynamic time-warp machine learning model");
+	return LOCTEXT("ModelTooltipRegression", "Load or train a regression machine learning model");
 }
-FName UInteractMLDynamicTimeWarpNode::GetModelAccessFunctionName() const
+FName UInteractMLRegressionNode::GetModelAccessFunctionName() const
 {
-	static const FName get_model(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, GetModel_DynamicTimeWarp));
+	static const FName get_model(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, DEPRECATED_GetModel_Regression));
 	return get_model;
 }
+
 
 
 

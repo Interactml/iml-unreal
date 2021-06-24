@@ -65,6 +65,16 @@ public:
 	// fetch/re-fetch a model state object for a specific node to run a model
 	TSharedPtr<FInteractMLModelState> GetModelState( TGraphNodeID node_id );
 
+	//---- notification ----
+
+	// notify use of a training set asset
+	void SetTrainingSet( TGraphNodeID node_id, UInteractMLTrainingSet* training_set );
+	
+	// notify use of a model asset
+	void SetModel( TGraphNodeID node_id, UInteractMLModel* model );
+	
+
+
 private:
 
 };

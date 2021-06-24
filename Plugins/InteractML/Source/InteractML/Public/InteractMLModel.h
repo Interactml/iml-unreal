@@ -23,7 +23,7 @@ using modelSetFloat = modelSet<float>;
 // represents a trained machine learning model for specific algorithm types to derive from
 // holds in-memory version of model instance, trained model state backed by underlying JSON file storage
 //
-UCLASS(Abstract)
+UCLASS(Abstract,BlueprintType)
 class INTERACTML_API UInteractMLModel
 	: public UInteractMLStorage
 {

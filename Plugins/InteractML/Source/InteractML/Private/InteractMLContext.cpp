@@ -118,6 +118,68 @@ TSharedPtr<FInteractMLModelState> UInteractMLContext::GetModelState( TGraphNodeI
 
 
 
+// notify use of a training set asset
+//
+void UInteractMLContext::SetTrainingSet( UInteractMLContext::TGraphNodeID node_id, UInteractMLTrainingSet* training_set )
+{
+	UInteractMLTrainingSet** pentry = TrainingSetLookup.Find(node_id);
+	UInteractMLTrainingSet* ptrainingset = pentry?*pentry:nullptr;
+	
+	//known?
+	if (ptrainingset && ptrainingset == training_set)
+	{
+		return;
+	}
+
+	//not cached yet or changed
+	if(!ptrainingset)
+	{
+		//remove old from cache
+		if(ptrainingset)
+		{
+			TrainingSetCache.Remove(ptrainingset);
+		}
+		
+		//register
+		FInteractMLModule::Get().SetTrainingSet( training_set );
+		
+		//update cache
+		TrainingSetCache.Add(training_set);
+		TrainingSetLookup.Add(node_id, training_set);
+	}
+}
+
+// notify use of a model asset
+//
+void UInteractMLContext::SetModel( UInteractMLContext::TGraphNodeID node_id, UInteractMLModel* model )
+{
+	UInteractMLModel** pentry = ModelLookup.Find(node_id);
+	UInteractMLModel* pmodel = pentry?*pentry:nullptr;
+
+	//known?
+	if (pmodel && pmodel == model)
+	{
+		return;
+	}
+	
+	//not cached yet or changed
+	if(!pmodel)
+	{
+		//remove old from cache
+		if(pmodel)
+		{
+			ModelCache.Remove(pmodel);
+		}
+		
+		//register
+		FInteractMLModule::Get().SetModel( model );
+		
+		//update cache
+		ModelCache.Add(model);
+		ModelLookup.Add(node_id, model);
+	}
+}
+
 
 
 // EPILOGUE

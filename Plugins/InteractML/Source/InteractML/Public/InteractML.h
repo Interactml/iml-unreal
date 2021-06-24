@@ -28,7 +28,7 @@ class INTERACTML_API FInteractMLModule
 	FString DataRootPath;
 
 	// catalogue of IML objects in use
-	TMap<FString, class UInteractMLStorage*> ObjectLookup;
+	TMap<FString, TWeakObjectPtr<class UInteractMLStorage>> ObjectLookup;
 
 public:
 	//systems
@@ -36,7 +36,8 @@ public:
 
 	//access
 	FString GetDataRoot() const { return DataRootPath; }
-	bool HasUnsavedData() const; //anything unsaved?
+	bool HasUnsavedData() const; //anything in unsaved temp objects? (handled differently to assets)
+	bool GetUnsavedAssets(TArray<class UInteractMLStorage*>& changed_assets); //anything in unsaved assets?
 
 	//state
 	bool Save(); //save any unsaved training or model data

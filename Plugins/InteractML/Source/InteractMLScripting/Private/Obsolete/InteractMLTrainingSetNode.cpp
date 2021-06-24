@@ -36,7 +36,6 @@
 namespace FInteractMLTrainingSetNodePinNames
 {
 	//in
-	static const FName ActorInputPinName("Actor");
 	static const FName DataPathInputPinName("Data Path");
 	static const FName LiveParametersInputPinName("Live Parameters");
 	static const FName LabelInputPinName("Label");
@@ -111,7 +110,7 @@ FText UInteractMLTrainingSetNode::GetTooltipText() const
 }
 FText UInteractMLTrainingSetNode::GetMenuCategory() const
 {
-	return LOCTEXT("TrainingSetNodeMenuCategory", "InteractML");
+	return InteractMLConstants::NodeMenuCategory;
 }
 FLinearColor UInteractMLTrainingSetNode::GetNodeTitleColor() const
 {
@@ -124,7 +123,7 @@ FLinearColor UInteractMLTrainingSetNode::GetNodeTitleColor() const
 void UInteractMLTrainingSetNode::GetMenuActions(FBlueprintActionDatabaseRegistrar& ActionRegistrar) const
 {
 	Super::GetMenuActions( ActionRegistrar );
-	
+#if false
 	UClass* Action = GetClass();
 	if (ActionRegistrar.IsOpenForRegistration( Action ))
 	{
@@ -132,6 +131,7 @@ void UInteractMLTrainingSetNode::GetMenuActions(FBlueprintActionDatabaseRegistra
 		check(Spawner != nullptr);
 		ActionRegistrar.AddBlueprintAction(Action, Spawner);
 	}
+#endif
 }
 
 // custom pins
@@ -145,8 +145,8 @@ void UInteractMLTrainingSetNode::AllocateDefaultPins()
 	//---- Inputs ----
 
 	// Target actor (needed for context)
-	UEdGraphPin* actor_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Object, AActor::StaticClass(), FInteractMLTrainingSetNodePinNames::ActorInputPinName);
-	actor_pin->PinToolTip = LOCTEXT("BlueprintNodeActorPinTooltip", "Interact ML nodes need an actor to provide context in which they operate.\nTypically this would be actor the graph is attached to (i.e. 'Self').").ToString();
+	UEdGraphPin* actor_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Object, AActor::StaticClass(), InteractMLConstants::BlueprintNodeActorPinName);
+	actor_pin->PinToolTip = InteractMLConstants::BlueprintNodeActorPinTooltip.ToString();
 
 	// Which data file to persist training data?	
 	UEdGraphPin* data_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_String, nullptr, FInteractMLTrainingSetNodePinNames::DataPathInputPinName);
@@ -186,7 +186,7 @@ void UInteractMLTrainingSetNode::AllocateDefaultPins()
 //
 UEdGraphPin* UInteractMLTrainingSetNode::GetActorInputPin() const
 {
-	UEdGraphPin* Pin = FindPin(FInteractMLTrainingSetNodePinNames::ActorInputPinName);
+	UEdGraphPin* Pin = FindPin(InteractMLConstants::BlueprintNodeActorPinName);
 	check(Pin == NULL || Pin->Direction == EGPD_Input);
 	return Pin;
 }
@@ -243,6 +243,8 @@ void UInteractMLTrainingSetNode::ExpandNode(class FKismetCompilerContext& Compil
 {
 	Super::ExpandNode( CompilerContext, SourceGraph );
 
+	CompilerContext.MessageLog.Warning(TEXT("DEPRECATED: Please replace @@ with 'Example Recorder' node."), this);
+	
 	//input pins : exec (execution triggered)
 	UEdGraphPin* MainExecPin = GetExecPin();
 	//input pins : data

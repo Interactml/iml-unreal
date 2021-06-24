@@ -128,13 +128,12 @@ void UInteractMLBlueprintLibrary::AddColourParameter( FInteractMLParameters Para
 
 ///////////////////// TRAINING SET //////////////////////
 
-
 // Training set access
 // obtain the training set from the context object for this actor
 // NOTE: training sets are shared objects (same path/same object), cached at the plugin level
-// NOTE: we still disambiguate so we can train which nodes/how many are using these objects
+// NOTE: we still disambiguate so we can track which nodes/how many are using these objects
 //
-UInteractMLTrainingSet* UInteractMLBlueprintLibrary::GetTrainingSet(AActor* Actor, FString DataPath, FString NodeID)
+UInteractMLTrainingSet* UInteractMLBlueprintLibrary::GetTrainingSet(AActor* Actor, FString DataPath, FString NodeID, bool& HasData)
 {
 	//find the context we cache our state in
 	UInteractMLContext* Context = GetMLContext( Actor );
@@ -144,6 +143,9 @@ UInteractMLTrainingSet* UInteractMLBlueprintLibrary::GetTrainingSet(AActor* Acto
 	UInteractMLContext::TGraphNodeID id = NodeID;
 	UInteractMLTrainingSet* training_set = Context->GetTrainingSet( id, DataPath );
 	check(training_set);
+
+	//any data?
+	HasData = training_set->HasExamples();
 	
 	return training_set;
 }
@@ -155,6 +157,7 @@ UInteractMLTrainingSet* UInteractMLBlueprintLibrary::GetTrainingSet(AActor* Acto
 //       too much sense to be recording using two training nodes at the same time.
 //
 bool UInteractMLBlueprintLibrary::RecordExample(
+	AActor* Actor,
 	UInteractMLTrainingSet* TrainingSet, 
 	FInteractMLParameters Parameters, 
 	float Label,
@@ -184,6 +187,11 @@ bool UInteractMLBlueprintLibrary::RecordExample(
 			//stop recording
 			bool ok = TrainingSet->EndRecording();
 
+			//need to make sure context/module are aware of model use/changes during PIE
+			UInteractMLContext* Context = GetMLContext( Actor );
+			check( Context );
+			Context->SetTrainingSet(NodeID, TrainingSet);
+			
 			//success?
 			is_finished = ok; //briefly return true upon successful trigger
 		}
@@ -210,6 +218,7 @@ bool UInteractMLBlueprintLibrary::RecordExample(
 //       too much sense to be recording using two training nodes at the same time.
 //
 bool UInteractMLBlueprintLibrary::RecordExampleSeries(
+	AActor* Actor, 
 	UInteractMLTrainingSet* TrainingSet, 
 	FInteractMLParameters Parameters, 
 	float Label,
@@ -234,6 +243,11 @@ bool UInteractMLBlueprintLibrary::RecordExampleSeries(
 		{
 			//stop recording
 			ok = TrainingSet->EndRecording();
+
+			//need to make sure context/module are aware of model use/changes during PIE
+			UInteractMLContext* Context = GetMLContext( Actor );
+			check( Context );
+			Context->SetTrainingSet(NodeID, TrainingSet);
 			
 			//success?
 			is_finished = ok; //briefly return true upon successful trigger
@@ -266,7 +280,7 @@ bool UInteractMLBlueprintLibrary::RecordExampleSeries(
 
 // model access
 //
-UInteractMLModel* UInteractMLBlueprintLibrary::GetModel_Classification(AActor* Actor, FString DataPath, FString NodeID)
+UInteractMLModel* UInteractMLBlueprintLibrary::GetModel(AActor* Actor, FString DataPath, UClass* ModelType, FString NodeID, bool& IsTrained)
 {
 	//find the context we cache our state in
 	UInteractMLContext* Context = GetMLContext( Actor );
@@ -274,37 +288,14 @@ UInteractMLModel* UInteractMLBlueprintLibrary::GetModel_Classification(AActor* A
 
 	//get a parameter collection for this node to use
 	UInteractMLContext::TGraphNodeID id = NodeID;
-	UInteractMLModel* model = Context->GetModel( UInteractMLClassificationModel::StaticClass(), id, DataPath );
+	UInteractMLModel* model = Context->GetModel( ModelType, id, DataPath );
 	check( model );
+
+	IsTrained = model->IsTrained();
 
 	return model;
 }
-UInteractMLModel* UInteractMLBlueprintLibrary::GetModel_Regression(AActor* Actor, FString DataPath, FString NodeID)
-{
-	//find the context we cache our state in
-	UInteractMLContext* Context = GetMLContext( Actor );
-	check( Context );
-	
-	//get a parameter collection for this node to use
-	UInteractMLContext::TGraphNodeID id = NodeID;
-	UInteractMLModel* model = Context->GetModel( UInteractMLRegressionModel::StaticClass(), id, DataPath );
-	check( model );
-	
-	return model;
-}
-UInteractMLModel* UInteractMLBlueprintLibrary::GetModel_DynamicTimeWarp(AActor* Actor, FString DataPath, FString NodeID)
-{
-	//find the context we cache our state in
-	UInteractMLContext* Context = GetMLContext( Actor );
-	check( Context );
-	
-	//get a parameter collection for this node to use
-	UInteractMLContext::TGraphNodeID id = NodeID;
-	UInteractMLModel* model = Context->GetModel( UInteractMLDynamicTimeWarpModel::StaticClass(), id, DataPath );
-	check( model );
-	
-	return model;
-}
+
 
 // model running
 //
@@ -372,10 +363,12 @@ float UInteractMLBlueprintLibrary::RunModel( AActor* Actor, UInteractMLModel* Mo
 
 // model training
 //
-bool UInteractMLBlueprintLibrary::TrainModel( UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID )
+bool UInteractMLBlueprintLibrary::TrainModel( AActor* Actor, UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID )
 {
 	if(Model)
 	{
+		bool changed = false;
+
 		//training state changed?
 		if(Model->TrainingAction.Triggered(Train, NodeID))
 		{
@@ -384,6 +377,7 @@ bool UInteractMLBlueprintLibrary::TrainModel( UInteractMLModel* Model, UInteract
 			{
 				//trigger training when Train bool transitions to true
 				Model->TrainModel(TrainingSet);
+				changed = true;
 			}
 		}
 		
@@ -398,7 +392,16 @@ bool UInteractMLBlueprintLibrary::TrainModel( UInteractMLModel* Model, UInteract
 
 				//explicitly count this as new data
 				Model->MarkUnsavedData();
+				changed = true;
 			}
+		}
+
+		//need to make sure context/module are aware of model use/changes during PIE
+		if (changed)
+		{	
+			UInteractMLContext* Context = GetMLContext( Actor );
+			check( Context );
+			Context->SetModel(NodeID, Model);
 		}
 
 		return Model->IsTrained();
@@ -442,6 +445,63 @@ void UInteractMLBlueprintLibrary::LogParameterCollection(FInteractMLParameters P
 	}
 }
 
+
+
+///////////////////// DEPRECATED //////////////////////
+
+UInteractMLTrainingSet* UInteractMLBlueprintLibrary::DEPRECATED_GetTrainingSet(AActor* Actor, FString DataPath, FString NodeID)
+{
+	//find the context we cache our state in
+	UInteractMLContext* Context = GetMLContext( Actor );
+	check(Context);
+	
+	//get a parameter collection for this node to use
+	UInteractMLContext::TGraphNodeID id = NodeID;
+	UInteractMLTrainingSet* training_set = Context->GetTrainingSet( id, DataPath );
+	check(training_set);
+	
+	return training_set;
+}
+
+UInteractMLModel* UInteractMLBlueprintLibrary::DEPRECATED_GetModel_Classification(AActor* Actor, FString DataPath, FString NodeID)
+{
+	//find the context we cache our state in
+	UInteractMLContext* Context = GetMLContext( Actor );
+	check( Context );
+	
+	//get a parameter collection for this node to use
+	UInteractMLContext::TGraphNodeID id = NodeID;
+	UInteractMLModel* model = Context->GetModel( UInteractMLClassificationModel::StaticClass(), id, DataPath );
+	check( model );
+	
+	return model;
+}
+UInteractMLModel* UInteractMLBlueprintLibrary::DEPRECATED_GetModel_Regression(AActor* Actor, FString DataPath, FString NodeID)
+{
+	//find the context we cache our state in
+	UInteractMLContext* Context = GetMLContext( Actor );
+	check( Context );
+	
+	//get a parameter collection for this node to use
+	UInteractMLContext::TGraphNodeID id = NodeID;
+	UInteractMLModel* model = Context->GetModel( UInteractMLRegressionModel::StaticClass(), id, DataPath );
+	check( model );
+	
+	return model;
+}
+UInteractMLModel* UInteractMLBlueprintLibrary::DEPRECATED_GetModel_DynamicTimeWarp(AActor* Actor, FString DataPath, FString NodeID)
+{
+	//find the context we cache our state in
+	UInteractMLContext* Context = GetMLContext( Actor );
+	check( Context );
+	
+	//get a parameter collection for this node to use
+	UInteractMLContext::TGraphNodeID id = NodeID;
+	UInteractMLModel* model = Context->GetModel( UInteractMLDynamicTimeWarpModel::StaticClass(), id, DataPath );
+	check( model );
+	
+	return model;
+}
 
 // EPILOGUE
 #undef LOCTEXT_NAMESPACE
