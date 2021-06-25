@@ -280,15 +280,34 @@ bool UInteractMLBlueprintLibrary::RecordExampleSeries(
 
 // model access
 //
-UInteractMLModel* UInteractMLBlueprintLibrary::GetModel(AActor* Actor, FString DataPath, UClass* ModelType, FString NodeID, bool& IsTrained)
+UInteractMLModel* UInteractMLBlueprintLibrary::GetModel(AActor* Actor, FString DataPath, EInteractMLModelType ModelType, FString NodeID, bool& IsTrained)
 {
+	IsTrained = false;
+
 	//find the context we cache our state in
 	UInteractMLContext* Context = GetMLContext( Actor );
 	check( Context );
 
+	UClass* model_class = nullptr;
+	switch (ModelType)
+	{
+		case EInteractMLModelType::Classification:
+			model_class = UInteractMLClassificationModel::StaticClass();
+			break;
+		case EInteractMLModelType::Regression:
+			model_class = UInteractMLRegressionModel::StaticClass();
+			break;
+		case EInteractMLModelType::DynamicTimewarp:
+			model_class = UInteractMLDynamicTimeWarpModel::StaticClass();
+			break;
+		default:
+			UE_LOG(LogInteractML, Error, TEXT("Unspecified model type requested. Ensure you have set the Model type you require on the Model node."));
+			return nullptr;
+	}
+
 	//get a parameter collection for this node to use
 	UInteractMLContext::TGraphNodeID id = NodeID;
-	UInteractMLModel* model = Context->GetModel( ModelType, id, DataPath );
+	UInteractMLModel* model = Context->GetModel( model_class, id, DataPath );
 	check( model );
 
 	IsTrained = model->IsTrained();

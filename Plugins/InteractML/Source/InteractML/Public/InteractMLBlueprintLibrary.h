@@ -15,12 +15,11 @@
 
 //general declarations
 
+// model types as an enumeration
+//
 UENUM(BlueprintType)
 enum class EInteractMLModelType : uint8
 {
-	//unknown/empty/unspecified
-	None = 0,
-	//current types
 	Classification,
 	Regression,
 	DynamicTimewarp,
@@ -75,7 +74,7 @@ public:
 	
 	// model access
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
-	static UInteractMLModel* GetModel(AActor* Actor, FString DataPath, UClass* ModelType, FString NodeID, bool& IsTrained);
+	static UInteractMLModel* GetModel(AActor* Actor, FString DataPath, EInteractMLModelType ModelType, FString NodeID, bool& IsTrained);
 	// model running
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
 	static float RunModel(AActor* Actor, UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID);
