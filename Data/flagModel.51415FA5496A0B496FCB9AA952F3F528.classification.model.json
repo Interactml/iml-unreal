@@ -1,0 +1,19 @@
+{
+   "metadata" : {
+      "creator" : "Rapid API C++",
+      "inputNames" : [
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2"
+      ],
+      "numInputs" : -1,
+      "numOutputs" : -1,
+      "version" : "v0.1.1"
+   },
+   "modelSet" : null
+}
