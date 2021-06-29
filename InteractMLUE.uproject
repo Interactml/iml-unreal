@@ -17,6 +17,10 @@
 		{
 			"Name": "BlueprintFileUtils",
 			"Enabled": true
+		},
+		{
+			"Name": "Text3D",
+			"Enabled": true
 		}
 	]
 }
