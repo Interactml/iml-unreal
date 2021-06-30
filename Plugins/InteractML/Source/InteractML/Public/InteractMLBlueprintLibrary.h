@@ -86,13 +86,17 @@ public:
 	///////////////////// UTILITY //////////////////////
 
 	//persistence
-	UFUNCTION(BlueprintCallable, meta=(ReturnDisplayName = "Success", ToolTip="Write any unsaved example or model data to disk. Only needed in standalone application, or if you want to save early in an editor play session."))
+	UFUNCTION(BlueprintCallable, Category="InteractML", meta=(ReturnDisplayName = "Success", ToolTip="Write any unsaved example or model data to disk. Only needed in standalone application, or if you want to save early in an editor play session."))
 	static bool Save();
+
+	//persistence
+	UFUNCTION( BlueprintCallable, Category = "Utility", meta = (ReturnDisplayName = "Value", ToolTip = "Access an objects float property by name.") )
+	static float GetFloatProperty( UObject* Target, FName Name );
 
 	///////////////////// DEBUG/DIAGS //////////////////////
 
 	// log a parameter collections list of parameter values
-	UFUNCTION(BlueprintCallable,meta=(DevelopmentOnly))
+	UFUNCTION(BlueprintCallable, Category = "InteractML",meta=(DevelopmentOnly))
 	static void LogParameterCollection(FInteractMLParameters Parameters);
 
 
