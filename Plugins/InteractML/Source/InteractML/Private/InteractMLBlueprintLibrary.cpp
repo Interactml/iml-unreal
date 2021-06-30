@@ -440,6 +440,27 @@ bool UInteractMLBlueprintLibrary::Save()
 	return true;
 }
 
+//property access, by name
+float UInteractMLBlueprintLibrary::GetFloatProperty( UObject* Target, FName Name )
+{
+	float value = 0;
+	if(Target)
+	{
+		FProperty* prop = Target->GetClass()->FindPropertyByName( Name );
+		if(prop)
+		{
+			FFloatProperty* fprop = CastField<FFloatProperty>( prop );
+			if(fprop)
+			{
+				void* ptr = prop->ContainerPtrToValuePtr<float>( Target );
+				value = (float)fprop->GetFloatingPointPropertyValue( ptr );
+			}
+		}
+	}
+	return value;
+}
+
+
 
 ///////////////////// DEBUG/DIAGS //////////////////////
 
