@@ -49,6 +49,7 @@ bool UInteractMLTrainingSet::SaveJson(FString& json_string) const
 void UInteractMLTrainingSet::ResetExamples()
 {
 	ClearExamplesCollection(Examples);
+	ParameterCount = 0;
 }
 
 // post load we can look at the data to determine:

@@ -83,6 +83,12 @@ void knnClassification<T>::train(const std::vector<trainingExampleTemplate<T> > 
 
 template<typename T>
 T knnClassification<T>::run(const std::vector<T> &inputVector) {
+
+    if(inputVector.size() != numInputs)
+    {
+        return 0;
+    }
+
     for (int i = 0; i < currentK; ++i) {
         nearestNeighbours[i] = {0, 0.};
     };
