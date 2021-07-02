@@ -126,13 +126,13 @@
 					}
 				},
 				{
-					"mode": "joystick",
-					"path": "/user/hand/left/input/joystick",
+					"mode": "trackpad",
+					"path": "/user/hand/right/input/trackpad",
 					"inputs":
 					{
-						"click":
+						"touch":
 						{
-							"output": "/actions/main/in/TeleportLeft"
+							"output": "/actions/main/in/ShowHideMenu"
 						}
 					}
 				},

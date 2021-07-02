@@ -8,17 +8,6 @@
 		{
 			"sources": [
 				{
-					"mode": "trackpad",
-					"path": "/user/hand/left/input/trackpad",
-					"inputs":
-					{
-						"click":
-						{
-							"output": "/actions/main/in/TeleportLeft"
-						}
-					}
-				},
-				{
 					"mode": "scalar_constant",
 					"path": "/user/hand/left/input/trackpad",
 					"inputs":

@@ -192,6 +192,10 @@
 			"type": "boolean"
 		},
 		{
+			"name": "/actions/main/in/ShowHideMenu",
+			"type": "boolean"
+		},
+		{
 			"name": "/actions/main/in/MotionControllerThumbLeft_X,MotionControllerThumbLeft_Y X Y_axis2d",
 			"type": "vector2"
 		},
@@ -467,6 +471,7 @@
 			"/actions/main/in/Action_SelectPreviousLabel": "Action_SelectPreviousLabel",
 			"/actions/main/in/Action_ResetExamples": "Action_ResetExamples",
 			"/actions/main/in/Action_ResetModel": "Action_ResetModel",
+			"/actions/main/in/ShowHideMenu": "ShowHideMenu",
 			"/actions/main/in/MotionControllerThumbLeft_X,MotionControllerThumbLeft_Y X Y_axis2d": "MotionControllerThumbLeft",
 			"/actions/main/in/MotionControllerThumbRight_X,MotionControllerThumbRight_Y X Y_axis2d": "MotionControllerThumbRight",
 			"/actions/main/in/Axis_MoveForward axis": "Axis_MoveForward",
