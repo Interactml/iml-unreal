@@ -192,6 +192,14 @@
 			"type": "boolean"
 		},
 		{
+			"name": "/actions/main/in/Action_SelectNextLabelRow",
+			"type": "boolean"
+		},
+		{
+			"name": "/actions/main/in/Action_SelectPreviousLabelRow",
+			"type": "boolean"
+		},
+		{
 			"name": "/actions/main/in/ShowHideMenu",
 			"type": "boolean"
 		},
@@ -471,6 +479,8 @@
 			"/actions/main/in/Action_SelectPreviousLabel": "Action_SelectPreviousLabel",
 			"/actions/main/in/Action_ResetExamples": "Action_ResetExamples",
 			"/actions/main/in/Action_ResetModel": "Action_ResetModel",
+			"/actions/main/in/Action_SelectNextLabelRow": "Action_SelectNextLabelRow",
+			"/actions/main/in/Action_SelectPreviousLabelRow": "Action_SelectPreviousLabelRow",
 			"/actions/main/in/ShowHideMenu": "ShowHideMenu",
 			"/actions/main/in/MotionControllerThumbLeft_X,MotionControllerThumbLeft_Y X Y_axis2d": "MotionControllerThumbLeft",
 			"/actions/main/in/MotionControllerThumbRight_X,MotionControllerThumbRight_Y X Y_axis2d": "MotionControllerThumbRight",

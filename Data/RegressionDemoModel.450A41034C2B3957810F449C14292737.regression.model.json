@@ -1,34 +1,52 @@
 {
    "metadata" : {
       "creator" : "Rapid API C++",
-      "inputNames" : [ "inputs-1", "inputs-2", "inputs-1", "inputs-2" ],
+      "inputNames" : [
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2"
+      ],
       "numInputs" : 2,
       "numOutputs" : 1,
       "version" : "v0.1.1"
    },
    "modelSet" : [
       {
-         "inBases" : [ -61.782852172851563, 30.808120727539063 ],
-         "inRanges" : [ 363.25555419921875, 362.4462890625 ],
-         "inputNames" : [ "inputs-1", "inputs-2", "inputs-1", "inputs-2" ],
+         "inBases" : [ -106.05618286132812, 50.071456909179688 ],
+         "inRanges" : [ 339.5233154296875, 286.416015625 ],
+         "inputNames" : [
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2"
+         ],
          "modelType" : "Neural Network",
          "nodes" : [
             {
-               "Node 1" : 0.1316312849521637,
-               "Node 2" : -2.0940303802490234,
-               "Threshold" : 1.0212985277175903,
+               "Node 1" : 0.3607809841632843,
+               "Node 2" : -2.4304471015930176,
+               "Threshold" : 1.015887975692749,
                "name" : "Linear Node 0"
             },
             {
-               "Attrib inputs-1" : 0.52738302946090698,
-               "Attrib inputs-2" : 0.4342823326587677,
-               "Threshold" : -0.52992469072341919,
+               "Attrib inputs-1" : 0.32965162396430969,
+               "Attrib inputs-2" : 0.036055881530046463,
+               "Threshold" : 0.11013972014188766,
                "name" : "Sigmoid Node 1"
             },
             {
-               "Attrib inputs-1" : -0.01657412014901638,
-               "Attrib inputs-2" : -4.3307757377624512,
-               "Threshold" : -0.42889276146888733,
+               "Attrib inputs-1" : 0.2589363157749176,
+               "Attrib inputs-2" : -2.4346163272857666,
+               "Threshold" : -0.041665386408567429,
                "name" : "Sigmoid Node 2"
             }
          ],
@@ -36,8 +54,8 @@
          "numHiddenNodes" : 2,
          "numHiddenOutputs" : 1,
          "numInputs" : 2,
-         "outBase" : 2,
-         "outRange" : 1,
+         "outBase" : 0.5,
+         "outRange" : 0.5,
          "whichInputs" : [ 0, 1 ]
       }
    ]
