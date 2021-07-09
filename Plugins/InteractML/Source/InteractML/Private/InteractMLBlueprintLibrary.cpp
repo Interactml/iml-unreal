@@ -166,6 +166,10 @@ bool UInteractMLBlueprintLibrary::RecordExample(
 	FString NodeID)
 {
 	check(TrainingSet);
+	if(!TrainingSet)
+	{
+		return false;
+	}
 	FInteractMLParameterCollection* parameters = Parameters.Ptr.Get();
 
 	//recording
