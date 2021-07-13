@@ -67,6 +67,10 @@
          "inputs-1",
          "inputs-2",
          "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
          "inputs-2"
       ],
       "numInputs" : 2,
@@ -75,9 +79,13 @@
    },
    "modelSet" : [
       {
-         "inBases" : [ -18.746734619140625, -11.777114868164063 ],
-         "inRanges" : [ 393.30633544921875, 437.76544189453125 ],
+         "inBases" : [ 155.74851989746094, -94.370025634765625 ],
+         "inRanges" : [ 300.13494873046875, 508.78213500976563 ],
          "inputNames" : [
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
             "inputs-1",
             "inputs-2",
             "inputs-1",
@@ -148,21 +156,21 @@
          "modelType" : "Neural Network",
          "nodes" : [
             {
-               "Node 1" : 0.31652921438217163,
-               "Node 2" : -2.2203240394592285,
-               "Threshold" : 1.0601271390914917,
+               "Node 1" : 1.8823086023330688,
+               "Node 2" : -1.3228496313095093,
+               "Threshold" : 0.28757676482200623,
                "name" : "Linear Node 0"
             },
             {
-               "Attrib inputs-1" : -0.41965523362159729,
-               "Attrib inputs-2" : -0.021721487864851952,
-               "Threshold" : -0.89069437980651855,
+               "Attrib inputs-1" : 3.5822052955627441,
+               "Attrib inputs-2" : -0.089153558015823364,
+               "Threshold" : -2.98679518699646,
                "name" : "Sigmoid Node 1"
             },
             {
-               "Attrib inputs-1" : -0.091456212103366852,
-               "Attrib inputs-2" : -3.1050901412963867,
-               "Threshold" : -0.046553004533052444,
+               "Attrib inputs-1" : -3.3104174137115479,
+               "Attrib inputs-2" : -0.03792167454957962,
+               "Threshold" : 2.7258305549621582,
                "name" : "Sigmoid Node 2"
             }
          ],
@@ -170,8 +178,8 @@
          "numHiddenNodes" : 2,
          "numHiddenOutputs" : 1,
          "numInputs" : 2,
-         "outBase" : 2,
-         "outRange" : 1,
+         "outBase" : 0.5,
+         "outRange" : 0.5,
          "whichInputs" : [ 0, 1 ]
       }
    ]
