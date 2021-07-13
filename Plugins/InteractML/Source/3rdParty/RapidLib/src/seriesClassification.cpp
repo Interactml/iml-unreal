@@ -81,6 +81,11 @@ void seriesClassificationTemplate<T>::reset() {
 template<typename T>
 std::string seriesClassificationTemplate<T>::run(const std::vector<std::vector<T>> &inputSeries) {
     //TODO: Check to see if trained
+    if(allTrainingSeries.size() == 0)
+    {
+        return "";
+    }
+
     int closestSeries = 0;
     allCosts.clear();
     T lowestCost = fastDTW<T>::getCost(inputSeries, allTrainingSeries[0].input, SEARCH_RADIUS);
