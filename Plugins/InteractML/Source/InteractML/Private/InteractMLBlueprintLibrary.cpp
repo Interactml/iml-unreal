@@ -165,9 +165,9 @@ bool UInteractMLBlueprintLibrary::RecordExample(
 	bool Reset,
 	FString NodeID)
 {
-	check(TrainingSet);
 	if(!TrainingSet)
 	{
+		UE_LOG( LogInteractML, Warning, TEXT( "Recording node used with no training set (actor %s)" ), *AActor::GetDebugName( Actor ) );
 		return false;
 	}
 	FInteractMLParameterCollection* parameters = Parameters.Ptr.Get();
