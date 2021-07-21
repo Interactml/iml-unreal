@@ -39,6 +39,8 @@
          "inputs-1",
          "inputs-2",
          "inputs-1",
+         "inputs-2",
+         "inputs-1",
          "inputs-2"
       ],
       "numInputs" : 2,
@@ -110,6 +112,8 @@
             }
          ],
          "inputNames" : [
+            "inputs-1",
+            "inputs-2",
             "inputs-1",
             "inputs-2",
             "inputs-1",

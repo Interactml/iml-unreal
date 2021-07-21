@@ -71,6 +71,14 @@
          "inputs-1",
          "inputs-2",
          "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
          "inputs-2"
       ],
       "numInputs" : 2,
@@ -79,9 +87,17 @@
    },
    "modelSet" : [
       {
-         "inBases" : [ 155.74851989746094, -94.370025634765625 ],
-         "inRanges" : [ 300.13494873046875, 508.78213500976563 ],
+         "inBases" : [ -16.656982421875, 39.1370849609375 ],
+         "inRanges" : [ 441.5760498046875, 484.65460205078125 ],
          "inputNames" : [
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
             "inputs-1",
             "inputs-2",
             "inputs-1",
@@ -156,21 +172,21 @@
          "modelType" : "Neural Network",
          "nodes" : [
             {
-               "Node 1" : 1.8823086023330688,
-               "Node 2" : -1.3228496313095093,
-               "Threshold" : 0.28757676482200623,
+               "Node 1" : 0.56294894218444824,
+               "Node 2" : -2.2821509838104248,
+               "Threshold" : 0.85020893812179565,
                "name" : "Linear Node 0"
             },
             {
-               "Attrib inputs-1" : 3.5822052955627441,
-               "Attrib inputs-2" : -0.089153558015823364,
-               "Threshold" : -2.98679518699646,
+               "Attrib inputs-1" : 0.52584463357925415,
+               "Attrib inputs-2" : -0.32493725419044495,
+               "Threshold" : -0.014018230140209198,
                "name" : "Sigmoid Node 1"
             },
             {
-               "Attrib inputs-1" : -3.3104174137115479,
-               "Attrib inputs-2" : -0.03792167454957962,
-               "Threshold" : 2.7258305549621582,
+               "Attrib inputs-1" : 0.93382036685943604,
+               "Attrib inputs-2" : -3.5742423534393311,
+               "Threshold" : -0.27988636493682861,
                "name" : "Sigmoid Node 2"
             }
          ],
