@@ -1,0 +1,18 @@
+{
+	"source": "UE",
+	"applications": [
+		{
+			"app_key": "application.generated.ue.interactmlue-15973114.ue4editor.exe",
+			"launch_type": "url",
+			"url": "steam://launch/",
+			"action_manifest_path": "D:/Documents/2020/PROJECTS/4i/4i_project_2021/Unreal4iSempahore2/Config/SteamVRBindings/steamvr_manifest.json",
+			"strings":
+			{
+				"en_us":
+				{
+					"name": "InteractMLUE-15973114 [UE Editor]"
+				}
+			}
+		}
+	]
+}
