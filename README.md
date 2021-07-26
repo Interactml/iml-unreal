@@ -1,13 +1,13 @@
-                                **InteractML**
-                   **Machine Learning for Unreal Engine**
+# InteractML
+*Bringing Machine Learning to Unreal Engine*
 
 InteractML brings machine learning visual scripting to Unreal, empowering game creators to develop novel gameplay mechanics and control schemes without writing code. You can create ML models by joining Blueprint nodes together, feeding them from any game parameters, and then using the outputs to drive any in-game systems or effects you like.
 
-_Machine Learning_
+**Machine Learning**
 
 Interactive machine learning (IML) is a subfield of artificial intelligence (AI) research where users, generally non-experts, can quickly create and test ML models. These models can learn input/outputs from real-time data through human/computer examples (e.g. when the user moves his arms up-down the character swims upwards).
 
-_Create New Interfaces_
+**Create New Interfaces**
 
 Joysticks for videogames? Really? We can do more for our players. Using the power of Interactive Machine Learning, InteractML lets you control what interfaces you use as inputs and what the gestures look and feel like in your game. Let players tell you how they want to play. Set your game's interface free.
 
