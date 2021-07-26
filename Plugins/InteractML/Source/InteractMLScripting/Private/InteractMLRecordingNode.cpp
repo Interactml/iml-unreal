@@ -20,6 +20,7 @@
 #include "InteractMLTrainingSet.h"
 #include "InteractMLBlueprintLibrary.h"
 #include "InteractMLConstants.h"
+#include "InteractMLLabel.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
@@ -39,7 +40,7 @@ namespace FInteractMLRecordingNodePinNames
 	//in
 	static const FName TrainingSetInputPinName("Training Set");
 	static const FName LiveParametersInputPinName("Live Parameters");
-	static const FName LabelInputPinName("Label");
+	static const FName LabelInputPinName("Expected Output");
 	static const FName RecordInputPinName("Record");
 	static const FName ResetInputPinName( "Reset All" );
 	//out
@@ -47,18 +48,23 @@ namespace FInteractMLRecordingNodePinNames
 }  	
 namespace FInteractMLRecordingNodeFunctionNames
 {
-	static const FName RecordSingleFunctionName(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, RecordExample));
-	static const FName RecordSeriesFunctionName(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, RecordExampleSeries));
+	static const FName RecordSimpleLabelFunctionName(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, RecordExampleSimple));
+	static const FName RecordCompositeLabelFunctionName(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, RecordExampleComposite));
 }
 namespace FInteractMLRecordingNodeRecordFunctionPinNames
 {
 	static const FName ActorPinName("Actor");
 	static const FName TrainingSetPinName("TrainingSet");
 	static const FName LiveParametersPinName("Parameters");
-	static const FName LabelPinName("Label");
+	static const FName WantSeriesPinName("WantSeries");
 	static const FName RecordPinName("Record");
 	static const FName ResetPinName("Reset");
 	static const FName NodeIDPinName("NodeID");
+	//simple label
+	static const FName LabelPinName("Label");
+	//composite label
+	static const FName LabelTypePinName("LabelType");
+	static const FName LabelDataPinName("LabelData");
 }
 
 /////////////////////////////////// HELPERS /////////////////////////////////////
@@ -136,7 +142,8 @@ FText UInteractMLRecordingNode::GetTooltipText() const
 void UInteractMLRecordingNode::PostEditChangeProperty(struct FPropertyChangedEvent& e)
 {
 	const FName PropertyName = e.GetPropertyName();
-	if (PropertyName == GET_MEMBER_NAME_CHECKED(UInteractMLRecordingNode, Mode))
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(UInteractMLRecordingNode, Mode)
+	  ||PropertyName == GET_MEMBER_NAME_CHECKED(UInteractMLRecordingNode, LabelType))
 	{
 		//rebuild because mode changed
 		ReconstructNode();
@@ -163,8 +170,18 @@ void UInteractMLRecordingNode::AllocateDefaultPins()
 	liveparams_pin->PinToolTip = LOCTEXT("RecordingNodeLiveParamsPinTooltip", "The live parameters that will be recorded into the training set.").ToString();
 
 	// label to associate with parameters being recorded
-	UEdGraphPin* label_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Float, nullptr, FInteractMLRecordingNodePinNames::LabelInputPinName);
-	label_pin->PinToolTip = LOCTEXT("RecordingNodeLabelPinTooltip", "The label to associate the current recording with.\nNOTE: Currently only numeric labels are supported.").ToString();
+	if (LabelType)
+	{
+		//composite label
+		UEdGraphPin* label_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Struct, LabelType, FInteractMLRecordingNodePinNames::LabelInputPinName);
+		label_pin->PinToolTip = LOCTEXT("RecordingNodeCompositeLabelPinTooltip", "The set of label values expected as output to be associated with the current recorded parameters.").ToString();
+	}
+	else
+	{
+		//simple numerical label
+		UEdGraphPin* label_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Float, nullptr, FInteractMLRecordingNodePinNames::LabelInputPinName);
+		label_pin->PinToolTip = LOCTEXT("RecordingNodeNumericLabelPinTooltip", "The numeric label expected as output to be associated with the current recorded parameters.").ToString();
+	}
 
 	// enable recording
 	UEdGraphPin* record_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Boolean, nullptr, FInteractMLRecordingNodePinNames::RecordInputPinName);
@@ -265,12 +282,27 @@ void UInteractMLRecordingNode::ExpandNode(class FKismetCompilerContext& Compiler
 	UEdGraphPin* RecordFnResultPin = CallRecordFn->GetReturnValuePin();
 	UEdGraphPin* RecordFnActorPin = CallRecordFn->FindPinChecked( FInteractMLRecordingNodeRecordFunctionPinNames::ActorPinName );
 	UEdGraphPin* RecordFnTrainingSetPin = CallRecordFn->FindPinChecked( FInteractMLRecordingNodeRecordFunctionPinNames::TrainingSetPinName );
+	UEdGraphPin* RecordFnWantSeriesPin = CallRecordFn->FindPinChecked( FInteractMLRecordingNodeRecordFunctionPinNames::WantSeriesPinName );
 	UEdGraphPin* RecordFnLiveParametersPin = CallRecordFn->FindPinChecked( FInteractMLRecordingNodeRecordFunctionPinNames::LiveParametersPinName );
-	UEdGraphPin* RecordFnLabelPin = CallRecordFn->FindPinChecked( FInteractMLRecordingNodeRecordFunctionPinNames::LabelPinName );
 	UEdGraphPin* RecordFnRecordPin = CallRecordFn->FindPinChecked( FInteractMLRecordingNodeRecordFunctionPinNames::RecordPinName );
 	UEdGraphPin* RecordFnResetPin = CallRecordFn->FindPinChecked( FInteractMLRecordingNodeRecordFunctionPinNames::ResetPinName );
-	UEdGraphPin* RecordFnNodeIDPin = CallRecordFn->FindPinChecked( FInteractMLRecordingNodeRecordFunctionPinNames::NodeIDPinName );
-
+	UEdGraphPin* RecordFnNodeIDPin = CallRecordFn->FindPinChecked( FInteractMLRecordingNodeRecordFunctionPinNames::NodeIDPinName );	
+	//label pins
+	UEdGraphPin* RecordFnLabelPin = nullptr; 
+	if(LabelType != nullptr)
+	{
+		RecordFnLabelPin = CallRecordFn->FindPinChecked(FInteractMLRecordingNodeRecordFunctionPinNames::LabelDataPinName);
+		//force generic struct to be the known struct type for passing
+		RecordFnLabelPin->PinType = MainLabelPin->PinType;
+		//there is a type pin to set up too
+		UEdGraphPin* RecordFnLabelTypePin = CallRecordFn->FindPinChecked( FInteractMLRecordingNodeRecordFunctionPinNames::LabelTypePinName );
+		RecordFnLabelTypePin->DefaultObject = LabelType;
+	}
+	else
+	{
+		RecordFnLabelPin = CallRecordFn->FindPinChecked(FInteractMLRecordingNodeRecordFunctionPinNames::LabelPinName);
+	}
+	
 	//chain functionality together
 	CompilerContext.MovePinLinksToIntermediate( *MainExecPin, *RecordFnExecPin );
 	CompilerContext.MovePinLinksToIntermediate( *MainThenPin, *RecordFnThenPin );
@@ -286,6 +318,7 @@ void UInteractMLRecordingNode::ExpandNode(class FKismetCompilerContext& Compiler
 	CompilerContext.MovePinLinksToIntermediate(*MainRecordPin, *RecordFnRecordPin);
 	CompilerContext.MovePinLinksToIntermediate(*MainResetPin, *RecordFnResetPin);
 	RecordFnNodeIDPin->DefaultValue = NodeID;
+	RecordFnWantSeriesPin->DefaultValue = (Mode == EInteractMLRecordingMode::Series)?TEXT("true"):TEXT("false");
 	CompilerContext.MovePinLinksToIntermediate(*MainChangedPin, *RecordFnResultPin);
 
 	//After we are done we break all links to this node (not the internally created one)
@@ -298,17 +331,15 @@ void UInteractMLRecordingNode::ExpandNode(class FKismetCompilerContext& Compiler
 UFunction* UInteractMLRecordingNode::FindRecordFunction() const
 {
 	FName record_function_name;
-	switch (Mode)
+	if (LabelType)
 	{
-		case EInteractMLRecordingMode::Single:
-			record_function_name = FInteractMLRecordingNodeFunctionNames::RecordSingleFunctionName;
-			break;
-		case EInteractMLRecordingMode::Series:
-			record_function_name = FInteractMLRecordingNodeFunctionNames::RecordSeriesFunctionName;
-			break;
-		default:
-			check(false);
-			return nullptr;
+		//composite label	
+		record_function_name = FInteractMLRecordingNodeFunctionNames::RecordCompositeLabelFunctionName;
+	}
+	else
+	{
+		//simple label
+		record_function_name = FInteractMLRecordingNodeFunctionNames::RecordSimpleLabelFunctionName;
 	}
 	UClass* LibraryClass = UInteractMLBlueprintLibrary::StaticClass();
 	return LibraryClass->FindFunctionByName( record_function_name );

@@ -150,16 +150,17 @@ UInteractMLTrainingSet* UInteractMLBlueprintLibrary::GetTrainingSet(AActor* Acto
 	return training_set;
 }
 
-// training set recording : single sample
-// when recording requested, takes snapshot of parameter data and associates it with the given label and stores it in the training set
+// training set recording : simple label
+// SINGLE: when recording requested, takes snapshot of parameter data and associates it with the given label and stores it in the training set
+// SERIES: when recording is active, accumulates snapshots of parameter data and associates them with the given label and stores it in the training set
 // when finished returns true briefly to signify that new training set data is ready
 // NOTE: state about recording can be held in the training set object even though it's technically shared because it doesn't make
 //       too much sense to be recording using two training nodes at the same time.
-//
-bool UInteractMLBlueprintLibrary::RecordExample(
+bool UInteractMLBlueprintLibrary::RecordExampleSimple(
 	AActor* Actor,
 	UInteractMLTrainingSet* TrainingSet, 
-	FInteractMLParameters Parameters, 
+	FInteractMLParameters Parameters,
+	bool WantSeries,
 	float Label,
 	bool Record,
 	bool Reset,
@@ -174,22 +175,24 @@ bool UInteractMLBlueprintLibrary::RecordExample(
 
 	//recording
 	bool is_finished = false;
+	bool ok = true;
+	bool initial_record = false;
 	if(TrainingSet->RecordingAction.Triggered( Record, NodeID ))
 	{
 		if (Record)
 		{
 			//start recording
-			bool ok = TrainingSet->BeginRecording(Label);
+			ok = TrainingSet->BeginRecording(Label);
 			if (ok)
 			{
 				//record single snapshot upon start
-				ok = TrainingSet->RecordParameters(parameters);
+				initial_record = true;
 			}
 		}
 		else
 		{
 			//stop recording
-			bool ok = TrainingSet->EndRecording();
+			ok = TrainingSet->EndRecording();
 
 			//need to make sure context/module are aware of model use/changes during PIE
 			UInteractMLContext* Context = GetMLContext( Actor );
@@ -197,7 +200,17 @@ bool UInteractMLBlueprintLibrary::RecordExample(
 			Context->SetTrainingSet(NodeID, TrainingSet);
 			
 			//success?
-			is_finished = ok; //briefly return true upon successful trigger
+			is_finished = ok; //briefly return true upon successful end trigger
+		}
+	}
+	
+	//single/continuous recording
+	if (ok)
+	{
+		if (initial_record || (WantSeries && Record))
+		{
+			//perform a sample of the parameters
+			ok = TrainingSet->RecordParameters(parameters);
 		}
 	}
 
@@ -215,58 +228,96 @@ bool UInteractMLBlueprintLibrary::RecordExample(
 	return is_finished;
 }
 
-// training set recording : series of samples
-// when recording is active, accumulates snapshots of parameter data and associates them with the given label and stores it in the training set
+// training set recording : composite label
+// SINGLE: when recording requested, takes snapshot of parameter data and associates it with the given label and stores it in the training set
+// SERIES: when recording is active, accumulates snapshots of parameter data and associates them with the given label and stores it in the training set
 // when finished returns true briefly to signify that new training set data is ready
 // NOTE: state about recording can be held in the training set object even though it's technically shared because it doesn't make
 //       too much sense to be recording using two training nodes at the same time.
-//
-bool UInteractMLBlueprintLibrary::RecordExampleSeries(
-	AActor* Actor, 
-	UInteractMLTrainingSet* TrainingSet, 
-	FInteractMLParameters Parameters, 
-	float Label,
+bool UInteractMLBlueprintLibrary::RecordExampleComposite(
+	AActor* Actor,
+	UInteractMLTrainingSet* TrainingSet,
+	FInteractMLParameters Parameters,
+	bool WantSeries,
+	const UInteractMLLabel* LabelType,
+	const FGenericStruct& LabelData, 	//<-- placeholder for the generic parameter mapped in the thunk function below
 	bool Record,
 	bool Reset,
 	FString NodeID)
 {
-	check(TrainingSet);
+	//placeholder for generic structure binding, never actually called
+	//see Generic_RecordExampleComposite below
+	check(0);
+	return false;
+}
+
+// generic implementation of above
+//
+bool UInteractMLBlueprintLibrary::Generic_RecordExampleComposite(
+	AActor* Actor,
+	UInteractMLTrainingSet* TrainingSet,
+	FInteractMLParameters Parameters,
+	bool WantSeries,
+	const UInteractMLLabel* LabelType,
+	const void* LabelData,	//<-- the generic parameter
+	bool Record,
+	bool Reset,
+	FString NodeID)
+{
+	//NOTE: Code should be identical to RecordExampleSimple above, but passing
+	//NOTE:  LabelType/LabelData instead of Label (float) to RecordingAction.Triggered
+	//NOTE: Other than that they should be kept in sync.
+
+	if(!TrainingSet)
+	{
+		UE_LOG( LogInteractML, Warning, TEXT( "Recording node used with no training set (actor %s)" ), *AActor::GetDebugName( Actor ) );
+		return false;
+	}
 	FInteractMLParameterCollection* parameters = Parameters.Ptr.Get();
 	
-	//recording start/stop
+	//recording
 	bool is_finished = false;
 	bool ok = true;
-	if(TrainingSet->RecordingAction.Triggered( Record, NodeID ))
+	bool initial_record = false;
+	if(TrainingSet->RecordingAction.Triggered( Record, NodeID )) //<-- This line is different to RecordExampleSimple
 	{
-		if(Record)
+		if (Record)
 		{
 			//start recording
-			ok = TrainingSet->BeginRecording(Label);
+			ok = TrainingSet->BeginRecording(LabelType, LabelData);
+			if (ok)
+			{
+				//record single snapshot upon start
+				initial_record = true;
+			}
 		}
 		else
 		{
 			//stop recording
 			ok = TrainingSet->EndRecording();
-
+			
 			//need to make sure context/module are aware of model use/changes during PIE
 			UInteractMLContext* Context = GetMLContext( Actor );
 			check( Context );
 			Context->SetTrainingSet(NodeID, TrainingSet);
 			
 			//success?
-			is_finished = ok; //briefly return true upon successful trigger
+			is_finished = ok; //briefly return true upon successful end trigger
 		}
 	}
-
-	//continuous recording
-	if(Record && ok)
+	
+	//single/continuous recording
+	if (ok)
 	{
-		//record single snapshot upon start
-		ok = TrainingSet->RecordParameters(parameters);
+		if (initial_record || (WantSeries && Record))
+		{
+			//perform a sample of the parameters
+			ok = TrainingSet->RecordParameters(parameters);
+		}
 	}
 	
 	//reset handling
-	if(TrainingSet->ResettingAction.Triggered( Reset, NodeID ))
+	if (TrainingSet->ResettingAction.Triggered( Reset, NodeID ))
 	{
 		if (Reset)
 		{
