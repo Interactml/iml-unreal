@@ -14,6 +14,7 @@
 #include "Models/InteractMLDynamicTimeWarpModel.h"
 #include "InteractMLModelState.h"
 #include "InteractMLHelpers.h"
+#include "InteractMLLabel.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
@@ -371,9 +372,14 @@ UInteractMLModel* UInteractMLBlueprintLibrary::GetModel(AActor* Actor, FString D
 }
 
 
-// model running
+// model running : simple label
 //
-float UInteractMLBlueprintLibrary::RunModel( AActor* Actor, UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID)
+float UInteractMLBlueprintLibrary::RunModelSimple( 
+	AActor* Actor, 
+	UInteractMLModel* Model, 
+	FInteractMLParameters Parameters, 
+	bool Run, 
+	FString NodeID)
 {
 	if (!Model)
 	{
@@ -387,6 +393,7 @@ float UInteractMLBlueprintLibrary::RunModel( AActor* Actor, UInteractMLModel* Mo
 	check( model_state );
 
 	//series/single operation
+	bool success = true;
 	if(Model->IsSeries())
 	{		
 		//-------------- SERIES: accumulate whilst active and run once complete ---------------
@@ -405,10 +412,7 @@ float UInteractMLBlueprintLibrary::RunModel( AActor* Actor, UInteractMLModel* Mo
 			{
 				//just stopped a run
 				//TODO: Do we want to include the last parameter set sent as the run is stopped in the test set?
-				float label = Model->RunModel( &model_state->ParameterSeries );
-
-				//this is now our result
-				model_state->CurrentResult = label;
+				success = Model->RunModel( &model_state->ParameterSeries, model_state->CurrentResult );
 			}
 		}
 		else if(Run)
@@ -424,16 +428,136 @@ float UInteractMLBlueprintLibrary::RunModel( AActor* Actor, UInteractMLModel* Mo
 		//--------------- SINGLE: just repeatedly run against a single parameter set ---------------
 		if (Run)
 		{
-			float label = Model->RunModel( Parameters.Ptr.Get() );
-
-			//this is now our result
-			model_state->CurrentResult = label;
+			success = Model->RunModel( Parameters.Ptr.Get(), model_state->CurrentResult );
 		}
 	}
 
+	
 	//report current/last available result
-	return model_state->CurrentResult;
+	if (success)
+	{
+		if (model_state->CurrentResult.Num() == 1)
+		{
+			return model_state->CurrentResult[0];
+		}
+	}
+	return 0.0f;
 }
+
+// model running : composite label
+//
+void UInteractMLBlueprintLibrary::RunModelComposite( 
+	AActor* Actor, 
+	UInteractMLModel* Model, 
+	FInteractMLParameters Parameters, 
+	bool Run, 
+	FString NodeID,
+	const UInteractMLLabel* LabelType,
+	FGenericStruct& LabelData) 	//<-- placeholder for the generic output parameter mapped in the thunk function below
+{
+	//placeholder for generic structure binding, never actually called
+	//see Generic_RunModelComposite below
+	check(0);
+}
+
+// generic implementation of above
+//
+void UInteractMLBlueprintLibrary::Generic_RunModelComposite(
+	AActor* Actor, 
+	UInteractMLModel* Model, 
+	FInteractMLParameters Parameters, 
+	bool Run, 
+	FString NodeID,
+	const UInteractMLLabel* LabelType,
+	void* LabelData)	//<-- the generic parameter
+{
+	//NOTE: Code should be identical to RunModelSimple above, but passing
+	//NOTE:  LabelType/LabelData instead of returning Label (float)
+	//NOTE: Other than that they should be kept in sync.
+
+	if (!Model)
+	{
+		return;
+	}
+	
+	//need context and state store to run with
+	UInteractMLContext* Context = GetMLContext( Actor );
+	check( Context );
+	FInteractMLModelState* model_state = Context->GetModelState( NodeID ).Get();
+	check( model_state );
+	
+	//series/single operation
+	bool success = true;
+	if(Model->IsSeries())
+	{		
+		//-------------- SERIES: accumulate whilst active and run once complete ---------------
+		
+		//check for transition
+		if (model_state->RunAction.Triggered(Run, NodeID))
+		{
+			//change in run state
+			if (Run)
+			{
+				//just started a run
+				//reset stored series
+				model_state->ParameterSeries.Clear();
+			}
+			else
+			{
+				//just stopped a run
+				//TODO: Do we want to include the last parameter set sent as the run is stopped in the test set?
+				success = Model->RunModel( &model_state->ParameterSeries, model_state->CurrentResult );
+			}
+		}
+		else if(Run)
+		{
+			//still running
+			//record next parameter set
+			model_state->ParameterSeries.Add( Parameters.Ptr.Get() );
+		}
+		
+	}
+	else
+	{
+		//--------------- SINGLE: just repeatedly run against a single parameter set ---------------
+		if (Run)
+		{
+			success = Model->RunModel( Parameters.Ptr.Get(), model_state->CurrentResult );
+		}
+	}
+	
+	//report current/last available result
+	if (success)
+	{
+		const FInteractMLLabelCache& label_cache = Model->GetLabelCache();
+
+		//map results back to output label structure
+		if (Model->IsDiscrete())
+		{
+			//just one, use labels as-is, just index the one needed
+			if (ensure(model_state->CurrentResult.Num() == 1)) //should only be single model output value
+			{
+				//find label to apply
+				int label_index = (int)model_state->CurrentResult[0];
+				TArray<float> specific_label;
+				if (label_cache.GetLabel(label_index, specific_label))
+				{
+					//rebuild struct from this specific label
+					LabelType->RecreateData( specific_label, LabelData, label_cache );
+				}
+			}
+		}
+		else
+		{
+			//interpolated multi-value output, they map to each structure member directly
+			LabelType->RecreateData( model_state->CurrentResult, LabelData, label_cache );
+		}
+	}
+}
+
+
+
+
 
 // model training
 //

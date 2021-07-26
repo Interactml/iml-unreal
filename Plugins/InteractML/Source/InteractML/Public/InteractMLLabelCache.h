@@ -77,8 +77,22 @@ public:
 private:
 
 public:
+
+	///////////////// ACCESS /////////////////
+
+	//how many float values does this label map to/contain?
+	int GetNumValues() const;
+
+
+	/////////////// OPERATION ///////////////
+
 	//clear out cache of all label captures
 	void Reset();
+
+	//take on the cached state from another cache
+	void Assign( const FInteractMLLabelCache& source );
+
+	///////////////// QUERY /////////////////
 
 	//resolve/cache a specific label value (set) and get it's associated numeric label
 	float Find(const class UInteractMLLabel* label_type, const void *label_data);
@@ -86,6 +100,11 @@ public:
 	// look up/cache strings for each string property slot, mapping to an identifying value (for mapping in recognition phase later)
 	float FindString( const FString& string_value, int property_slot );
 	
+	// get label values for specific label index
+	bool GetLabel(int label_index, TArray<float>& out_values) const;
+
+	// lookup a string previously cached
+	FString GetString(int property_slot, float label_value) const;
 
 private:
 	

@@ -46,7 +46,8 @@ namespace FInteractMLRunningNodePinNames
 }  	
 namespace FInteractMLRunningNodeFunctionNames
 {
-	static const FName RunModelFunctionName(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, RunModel));
+	static const FName RunModelSimpleFunctionName(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, RunModelSimple));
+	static const FName RunModelCompositeFunctionName(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, RunModelComposite));
 }
 //UInteractMLBlueprintLibrary::RunModel(...)
 namespace FInteractMLRunningNodeRunModelPinNames
@@ -56,6 +57,9 @@ namespace FInteractMLRunningNodeRunModelPinNames
 	static const FName LiveParametersPinName("Parameters");
 	static const FName RunPinName("Run");
 	static const FName NodeIDPinName("NodeID");
+	//composite
+	static const FName LabelTypePinName("LabelType");
+	static const FName LabelDataPinName("LabelData");
 }
 
 /////////////////////////////////// HELPERS /////////////////////////////////////
@@ -95,6 +99,18 @@ FText UInteractMLRunningNode::GetTooltipText() const
 	return LOCTEXT("RunningNodeTooltip", "Runs a machine learning model on live parameters to find a label");
 }
 
+void UInteractMLRunningNode::PostEditChangeProperty(struct FPropertyChangedEvent& e)
+{
+	const FName PropertyName = e.GetPropertyName();
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(UInteractMLRunningNode, LabelType))
+	{
+		//rebuild because mode changed
+		ReconstructNode();
+	}
+	
+	Super::PostEditChangeProperty(e);
+}
+
 // custom pins
 //
 void UInteractMLRunningNode::AllocateDefaultPins()
@@ -118,9 +134,19 @@ void UInteractMLRunningNode::AllocateDefaultPins()
 
 	//---- Outputs ----
 
-	// label pin
-	UEdGraphPin* label_pin = CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Float, nullptr, FInteractMLRunningNodePinNames::LabelOutputPinName);
-	label_pin->PinToolTip = LOCTEXT("RunningNodeLabelPinTooltip", "Result of running the model on the input parameters.").ToString();
+	// label to produce with parameters being matched
+	if (LabelType)
+	{
+		//composite label
+		UEdGraphPin* label_pin = CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Struct, LabelType, FInteractMLRunningNodePinNames::LabelOutputPinName);
+		label_pin->PinToolTip = LOCTEXT("RunningNodeCompositeLabelPinTooltip", "Result of running the model on the input parameters.").ToString();
+	}
+	else
+	{
+		//simple numerical label
+		UEdGraphPin* label_pin = CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Float, nullptr, FInteractMLRunningNodePinNames::LabelOutputPinName);
+		label_pin->PinToolTip = LOCTEXT("RecordingNodeSimpleNumericLabelPinTooltip", "Result of running the model on the input parameters.").ToString();
+	}
 	
 }
 
@@ -186,24 +212,41 @@ void UInteractMLRunningNode::ExpandNode(class FKismetCompilerContext& CompilerCo
 	//run fn pins
 	UEdGraphPin* RunFnExecPin = CallRunFn->GetExecPin();
 	UEdGraphPin* RunFnThenPin = CallRunFn->GetThenPin();
-	UEdGraphPin* RunFnResultPin = CallRunFn->GetReturnValuePin();
 	UEdGraphPin* RunFnActorPin = CallRunFn->FindPinChecked( FInteractMLRunningNodeRunModelPinNames::ActorPinName );
 	UEdGraphPin* RunFnModelPin = CallRunFn->FindPinChecked( FInteractMLRunningNodeRunModelPinNames::ModelPinName );
 	UEdGraphPin* RunFnLiveParametersPin = CallRunFn->FindPinChecked( FInteractMLRunningNodeRunModelPinNames::LiveParametersPinName );
 	UEdGraphPin* RunFnRunPin = CallRunFn->FindPinChecked( FInteractMLRunningNodeRunModelPinNames::RunPinName );
 	UEdGraphPin* RunFnNodeIDPin = CallRunFn->FindPinChecked( FInteractMLRunningNodeRunModelPinNames::NodeIDPinName );
 
+	//label pins
+	if (LabelType!=nullptr)
+	{
+		//composite label operation (passed struct filled in)
+		UEdGraphPin* RunFnLabelDataPin = CallRunFn->FindPinChecked(FInteractMLRunningNodeRunModelPinNames::LabelDataPinName);
+		CompilerContext.MovePinLinksToIntermediate(*MainLabelOutputPin, *RunFnLabelDataPin);
+		//force generic struct to be the known struct type for passing
+		RunFnLabelDataPin->PinType = MainLabelOutputPin->PinType;
+		//there is a type pin to set up too
+		UEdGraphPin* RunFnLabelTypePin = CallRunFn->FindPinChecked(FInteractMLRunningNodeRunModelPinNames::LabelTypePinName);
+		RunFnLabelTypePin->DefaultObject = LabelType;
+	}
+	else
+	{
+		//simple label operation (result returned)
+		UEdGraphPin* RunFnResultPin = CallRunFn->GetReturnValuePin();
+		CompilerContext.MovePinLinksToIntermediate(*MainLabelOutputPin, *RunFnResultPin);
+	}
+	
 	//chain functionality together
 	CompilerContext.MovePinLinksToIntermediate( *MainExecPin, *RunFnExecPin );
 	CompilerContext.MovePinLinksToIntermediate( *MainThenPin, *RunFnThenPin );
 	
-	//hook up run fn pins
+	//hook up rest of run fn pins
 	ConnectContextActor(CompilerContext, SourceGraph, RunFnActorPin);
 	CompilerContext.MovePinLinksToIntermediate(*MainModelPin, *RunFnModelPin);
 	CompilerContext.MovePinLinksToIntermediate(*MainLiveParametersPin, *RunFnLiveParametersPin);
 	CompilerContext.MovePinLinksToIntermediate(*MainRunPin, *RunFnRunPin);
 	RunFnNodeIDPin->DefaultValue = NodeID;
-	CompilerContext.MovePinLinksToIntermediate(*MainLabelOutputPin, *RunFnResultPin);
 
 	//After we are done we break all links to this node (not the internally created one)
 	//leaving the newly created internal nodes left to do the work
@@ -214,8 +257,19 @@ void UInteractMLRunningNode::ExpandNode(class FKismetCompilerContext& CompilerCo
 //
 UFunction* UInteractMLRunningNode::FindModelRunFunction() const
 {
+	FName record_function_name;
+	if (LabelType)
+	{
+		//composite label	
+		record_function_name = FInteractMLRunningNodeFunctionNames::RunModelCompositeFunctionName;
+	}
+	else
+	{
+		//simple label
+		record_function_name = FInteractMLRunningNodeFunctionNames::RunModelSimpleFunctionName;
+	}
 	UClass* LibraryClass = UInteractMLBlueprintLibrary::StaticClass();
-	return LibraryClass->FindFunctionByName( FInteractMLRunningNodeFunctionNames::RunModelFunctionName );
+	return LibraryClass->FindFunctionByName( record_function_name );
 }
 
 

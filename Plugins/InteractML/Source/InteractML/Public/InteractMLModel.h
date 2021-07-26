@@ -14,6 +14,7 @@ using modelSetFloat = modelSet<float>;
 //module
 #include "InteractMLStorage.h"
 #include "InteractMLHelpers.h"
+#include "InteractMLLabelCache.h"
 #include "InteractMLModel.generated.h"
 
 //general declarations
@@ -31,6 +32,10 @@ class INTERACTML_API UInteractMLModel
 		
 	//---- persistent state ----
 	
+	//label information
+	UPROPERTY()
+	FInteractMLLabelCache LabelCache;
+
 	
 	//---- transient/cached state ----
 
@@ -51,10 +56,11 @@ public:
 	bool IsTraining() const { return TrainingAction.Active(); }
 	bool IsResetting() const { return ResetAction.Active(); }
 	bool IsTrained() const { return bIsTrained; }
+	const FInteractMLLabelCache& GetLabelCache() const { return LabelCache; }
 	
 	//---- operation ----
-	float RunModel( struct FInteractMLParameterCollection* parameters );	//single sample
-	float RunModel( struct FInteractMLParameterSeries* parameter_series );	//series of samples
+	bool RunModel( struct FInteractMLParameterCollection* parameters, TArray<float>& out_values );		//single sample
+	bool RunModel( struct FInteractMLParameterSeries* parameter_series, TArray<float>& out_values );	//series of samples
 	void TrainModel(class UInteractMLTrainingSet* training_set);
 	void ResetModel();
 	
@@ -65,15 +71,20 @@ public:
 	
 	//type of model
 	virtual bool IsSeries() const { return false; }	//matching against a series of snapshots instead of a single shapshot?
+	virtual bool IsContinuous() const { return false; }	//produces interpolated outputs instead of discreet values?
 	// each type provides qualifying extension prefix
 	virtual FString GetExtensionPrefix() const override { return GetSpecificExtensionPrefix() + cExtensionPrefix; }
 	//each type provides further qualifying extension prefix
 	virtual FString GetSpecificExtensionPrefix() const { check(false); return ""; }
+
+	//derived
+	bool IsSingle() const { return !IsSeries(); }	//matching against a single snapshot of samples instead of a series?
+	bool IsDiscrete() const { return !IsContinuous(); } //produces discrete value outputs instead of interpolated?
 	
 protected:
 	//---- per model type specialisations ----
-	virtual float RunModelInstance(struct FInteractMLParameterCollection* parameters);
-	virtual float RunModelInstance( struct FInteractMLParameterSeries* parameter_series ) { check(false); return 0; }
+	virtual bool RunModelInstance(struct FInteractMLParameterCollection* parameters, TArray<float>& out_values);
+	virtual bool RunModelInstance(struct FInteractMLParameterSeries* parameter_series, TArray<float>& out_values) { check(false); return 0; }
 	virtual bool TrainModelInstance(class UInteractMLTrainingSet* training_set);
 	virtual void ResetModelInstance() { check(false); } //must override
 	virtual modelSetFloat* GetModelInstance() const { check(false); return nullptr; } //must override

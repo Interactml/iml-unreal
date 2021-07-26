@@ -289,8 +289,9 @@ void UInteractMLRecordingNode::ExpandNode(class FKismetCompilerContext& Compiler
 	UEdGraphPin* RecordFnNodeIDPin = CallRecordFn->FindPinChecked( FInteractMLRecordingNodeRecordFunctionPinNames::NodeIDPinName );	
 	//label pins
 	UEdGraphPin* RecordFnLabelPin = nullptr; 
-	if(LabelType != nullptr)
+	if(LabelType!=nullptr)
 	{
+		//composite label operation (passed struct)
 		RecordFnLabelPin = CallRecordFn->FindPinChecked(FInteractMLRecordingNodeRecordFunctionPinNames::LabelDataPinName);
 		//force generic struct to be the known struct type for passing
 		RecordFnLabelPin->PinType = MainLabelPin->PinType;
@@ -300,6 +301,7 @@ void UInteractMLRecordingNode::ExpandNode(class FKismetCompilerContext& Compiler
 	}
 	else
 	{
+		//simple label operation (direct float value)
 		RecordFnLabelPin = CallRecordFn->FindPinChecked(FInteractMLRecordingNodeRecordFunctionPinNames::LabelPinName);
 	}
 	
@@ -310,7 +312,7 @@ void UInteractMLRecordingNode::ExpandNode(class FKismetCompilerContext& Compiler
 	//generate node disambiguation/context
 	FString NodeID = NodeGuid.ToString( EGuidFormats::Digits );
 
-	//hook up recording fn pins
+	//hook up rest of recording fn pins
 	ConnectContextActor(CompilerContext, SourceGraph, RecordFnActorPin);
 	CompilerContext.MovePinLinksToIntermediate(*MainTrainingSetPin, *RecordFnTrainingSetPin);
 	CompilerContext.MovePinLinksToIntermediate(*MainLiveParametersPin, *RecordFnLiveParametersPin);

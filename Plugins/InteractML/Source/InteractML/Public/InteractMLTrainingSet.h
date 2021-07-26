@@ -100,6 +100,9 @@ public:
 	bool IsRecording() const { return RecordingAction.Active(); }
 	bool IsResetting() const { return ResettingAction.Active(); }
 	
+	const FInteractMLLabelCache& GetLabelCache() const { return LabelCache; }
+	bool HasCompositeLabels() const { return LabelCache.LabelType != nullptr; }
+	
 	//---- modification ----
 	bool BeginRecording( float label );
 	bool BeginRecording( const UInteractMLLabel* label_type, const void* label_data );

@@ -38,6 +38,19 @@ void FInteractMLLabelCache::Reset()
 	StringsMap.Empty();
 }
 
+// copy state from another cache
+// NOTE: Used when propagating label info from training set to model (during training), as model will need the labels to provide corresponding output
+//
+void FInteractMLLabelCache::Assign(const FInteractMLLabelCache& source)
+{
+	//full copy (assume we need all of it for all model types for now)
+	//TODO: Might not need to copy (and persist) all label info in the model for some model types
+	LabelType = source.LabelType;
+	Labels = source.Labels;
+	StringsMap = source.StringsMap;
+}
+
+
 // resolve/cache a specific label value (set) and get it's associated numeric label
 //
 float FInteractMLLabelCache::Find(const UInteractMLLabel* label_type, const void *label_data)
@@ -117,6 +130,57 @@ float FInteractMLLabelCache::FindString(const FString& string_value, int propert
 	StringsMap.Add( ms );
 	//implicitly first entry for this slot, hence index 0
 	return 0;
+}
+
+// how many float values does this label map to/contain?
+//
+int FInteractMLLabelCache::GetNumValues() const
+{ 
+	if (LabelType)
+	{
+		return LabelType->GetCaptureCount();
+	}
+	return 0;
+}
+
+// get label values for specific label index
+//
+bool FInteractMLLabelCache::GetLabel(int label_index, TArray<float>& out_values) const
+{
+	//find existing label
+	if (label_index >= 0 && label_index < Labels.Num())
+	{
+		//copy out
+		out_values = Labels[label_index].LabelData;
+		return true;
+	}
+
+	//not found
+	return false;
+}
+
+// get string value cached for specific property slot
+//
+FString FInteractMLLabelCache::GetString(int property_slot, float label_value) const
+{
+	for (int s = 0; s < StringsMap.Num(); s++)
+	{
+		if (StringsMap[s].PropertySlot == property_slot)
+		{
+			//yes we have a slot
+			const TArray<FString>& strings = StringsMap[s].Strings;
+			if (strings.Num() > 0)
+			{
+				//resolve string index
+				int index = FMath::RoundToInt(label_value);			//map to nearest
+				index = FMath::Clamp(index, 0, strings.Num()-1);	//ensure in range (outside range map to first/last FWIW)
+				return strings[index];
+			}
+		}
+	}
+
+	//no string found
+	return TEXT("");
 }
 
 

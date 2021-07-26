@@ -23,7 +23,7 @@ FString UInteractMLDynamicTimeWarpModel::cExtensionPrefix(TEXT(".dtw"));
 
 // handle DTW running
 //
-float UInteractMLDynamicTimeWarpModel::RunModelInstance(struct FInteractMLParameterSeries* parameter_series)
+bool UInteractMLDynamicTimeWarpModel::RunModelInstance(struct FInteractMLParameterSeries* parameter_series, TArray<float>& out_values)
 {
 	//check
 	if (!IsTrained())
@@ -68,11 +68,14 @@ float UInteractMLDynamicTimeWarpModel::RunModelInstance(struct FInteractMLParame
 		{
 			//interpret result
 			float label = FCStringAnsi::Atof( label_text.c_str() );
-			return label;
+
+			out_values.Reset();
+			out_values.Add(label);
+			return true;
 		}
 	}
 
-	return 0.0f;
+	return false;
 }
 
 // handle DTW training

@@ -25,12 +25,13 @@
 void UInteractMLLabel::CaptureData( const void* in_struct_instance, TArray<float>& out_float_data, FInteractMLLabelCache& label_cache ) const
 {
 	FField* prop = ChildProperties;
-	CaptureData(prop, 0, (const uint8*)in_struct_instance, out_float_data, label_cache);
+	int iprop = 0;
+	CaptureData(prop, iprop, (const uint8*)in_struct_instance, out_float_data, label_cache);
 }
 
 // internal capture impl, to allow for recursive struct evaluation
 //
-int UInteractMLLabel::CaptureData( FField* prop, int iprop, const uint8* in_struct_instance, TArray<float>& out_float_data, FInteractMLLabelCache& label_cache ) const
+void UInteractMLLabel::CaptureData( FField* prop, int& iprop, const uint8* in_struct_instance, TArray<float>& out_float_data, FInteractMLLabelCache& label_cache ) const
 {
 	while (prop)
 	{
@@ -53,14 +54,14 @@ int UInteractMLLabel::CaptureData( FField* prop, int iprop, const uint8* in_stru
 			else
 			{
 				//what other sort of numeric prop do we need to support?
-				check(false);
+				UE_LOG(LogInteractML, Warning, TEXT("Unable to capture unsupported type '%s' in field '%s' of label structure %s'"), *prop->GetClass()->GetName(), *prop->GetName(), *GetDisplayNameText().ToString() );
 			}
 		}
 		else if (FStructProperty* struct_prop = CastField<FStructProperty>(prop))
 		{
 			//structures, dig in
 			const uint8* pdata = in_struct_instance + struct_prop->GetOffset_ForUFunction();
-			iprop = CaptureData( struct_prop->Struct->ChildProperties, iprop, pdata, out_float_data, label_cache);
+			CaptureData( struct_prop->Struct->ChildProperties, iprop, pdata, out_float_data, label_cache);
 		}
 		else if (FStrProperty* str_prop = CastField<FStrProperty>(prop))
 		{
@@ -84,8 +85,6 @@ int UInteractMLLabel::CaptureData( FField* prop, int iprop, const uint8* in_stru
 		prop = prop->Next;
 		iprop++;
 	}
-
-	return iprop;
 }
 
 
@@ -110,6 +109,142 @@ bool UInteractMLLabel::Equal(const UInteractMLLabel* other) const
 	//good if both reached end together
 	return pmyfield == nullptr && potherfield == nullptr;
 }
+
+
+//rebuild any derived state
+//NOTE: needs to be const as used from accessors and updates on demand
+//
+void UInteractMLLabel::ValidateDerived() const
+{
+	//anything needed?
+	if (CaptureCount != 0)
+	{
+		return;
+	}
+
+	//rebuild states
+	CaptureCount = 	CountValues( ChildProperties );
+}
+
+// count float values the fields of an instance of this struct type will capture
+//
+int UInteractMLLabel::CountValues( FField* prop ) const
+{
+	int count = 0;
+	while (prop)
+	{
+		//numeric
+		if (FNumericProperty* num_prop = CastField<FNumericProperty>(prop))
+		{
+			count++;
+		}
+		else if (FStructProperty* struct_prop = CastField<FStructProperty>(prop))
+		{
+			//structures, dig in
+			count += CountValues( struct_prop->Struct->ChildProperties );
+		}
+		else if (FStrProperty* str_prop = CastField<FStrProperty>(prop))
+		{
+			count++;
+		}
+		else if(FBoolProperty* bool_prop = CastField<FBoolProperty>( prop ))
+		{
+			count++;
+		}
+		else
+		{
+			UE_LOG(LogInteractML, Warning, TEXT("Unable to capture unsupported type '%s' in field '%s' of label structure %s'"), *prop->GetClass()->GetName(), *prop->GetName(), *GetDisplayNameText().ToString() );
+		}
+				
+		prop = prop->Next;
+	}
+	
+	return count;
+}
+
+
+// capture the fields of an instance of this struct type into an array of floats
+//
+void UInteractMLLabel::RecreateData( const TArray<float>& label_values, void* out_struct_instance, const FInteractMLLabelCache& label_cache ) const
+{
+	//ensure enough props available
+	if (GetCaptureCount()!=label_values.Num())
+	{
+		UE_LOG(LogInteractML, Error, TEXT("Label definition changed since model trained, model produced %i values whilst %s label expects %i values"), label_values.Num(), *GetDisplayNameText().ToString(), GetCaptureCount() );
+		return;
+	}
+
+	//rebuild
+	FField* prop = ChildProperties;
+	int iprop = 0;
+	int ivalue = 0;
+	RecreateData(prop, iprop, label_values, ivalue, (uint8*)out_struct_instance, label_cache);
+}
+
+// internal recreation impl, to allow for recursive struct evaluation
+//
+void UInteractMLLabel::RecreateData(FField* prop, int& iprop, const TArray<float>& label_values, int& ivalue, uint8* out_struct_instance, const FInteractMLLabelCache& label_cache) const
+{
+	while (prop)
+	{
+		//numeric
+		if (FNumericProperty* num_prop = CastField<FNumericProperty>(prop))
+		{
+			uint8* pdata = out_struct_instance + num_prop->GetOffset_ForUFunction();
+			if (num_prop->IsInteger())
+			{
+				//int/uint/short/ushort/etc
+				int32 value = FMath::RoundToInt(label_values[ivalue]);
+				num_prop->SetIntPropertyValue(pdata, (int64)value);
+				ivalue++;
+			}
+			else if (num_prop->IsFloatingPoint())
+			{
+				//float/double
+				float value = label_values[ivalue];
+				num_prop->SetFloatingPointPropertyValue(pdata, value);
+				ivalue++;
+			}
+			else
+			{
+				//what other sort of numeric prop do we need to support?
+				UE_LOG(LogInteractML, Warning, TEXT("Unable to recreate unsupported type '%s' in field '%s' of label structure %s'"), *prop->GetClass()->GetName(), *prop->GetName(), *GetDisplayNameText().ToString());
+			}
+		}
+		else if (FStructProperty* struct_prop = CastField<FStructProperty>(prop))
+		{
+			//structures, dig in
+			uint8* pdata = out_struct_instance + struct_prop->GetOffset_ForUFunction();
+			RecreateData(struct_prop->Struct->ChildProperties, iprop, label_values, ivalue, pdata, label_cache);
+		}
+		else if (FStrProperty* str_prop = CastField<FStrProperty>(prop))
+		{
+			uint8* pdata = out_struct_instance + str_prop->GetOffset_ForUFunction();
+			//find nearest string
+			int32 value = FMath::RoundToInt(label_values[ivalue]);
+			const FString label_string = label_cache.GetString(iprop, value);
+			//apply
+			str_prop->SetPropertyValue(pdata, *label_string);
+			ivalue++;
+		}
+		else if (FBoolProperty* bool_prop = CastField<FBoolProperty>(prop))
+		{
+			uint8* pdata = out_struct_instance + bool_prop->GetOffset_ForUFunction();
+			//float/double
+			float value = label_values[ivalue];
+			bool_prop->SetPropertyValue(pdata, value > 0.5f);
+			ivalue++;
+		}
+		else
+		{
+			UE_LOG(LogInteractML, Warning, TEXT("Unable to recreate unsupported type '%s' in field '%s' of label structure %s'"), *prop->GetClass()->GetName(), *prop->GetName(), *GetDisplayNameText().ToString());
+		}
+
+		prop = prop->Next;
+		iprop++;
+	}
+}
+
 
 
 // EPILOGUE

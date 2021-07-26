@@ -49,13 +49,14 @@ public:
 	
 	//---- operation ----
 	//specialised for dtw, not got shared API of classification or regression algorithms
-	virtual float RunModelInstance(struct FInteractMLParameterSeries* parameters) override;
+	virtual bool RunModelInstance(struct FInteractMLParameterSeries* parameters, TArray<float>& out_values) override;
 	virtual bool TrainModelInstance(class UInteractMLTrainingSet* training_set) override;
 	virtual void ResetModelInstance() override;
 	virtual modelSetFloat* GetModelInstance() const override { /*not compatible with general model base*/ check(false); return nullptr; }
-	
+
+	//model type	
+	virtual bool IsSeries() const { return true; }	//matching against a series of snapshots instead of a single shapshot
 	//each type provides further qualifying extension prefix
-	virtual bool IsSeries() const { return true; }	//matching against a series of snapshots instead of a single shapshot?
 	virtual FString GetSpecificExtensionPrefix() const override { return cExtensionPrefix; }
 	
 
