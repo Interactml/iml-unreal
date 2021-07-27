@@ -145,7 +145,17 @@ bool UInteractMLModel::RunModelInstance(struct FInteractMLParameterCollection* p
 	
 	//run the model
 	modelSetFloat* model = GetModelInstance();
-	std::vector<float> outputs = model->run(model_inputs);
+	std::vector<float> outputs;
+	try
+	{
+		outputs = model->run( model_inputs );
+	}
+	catch(std::exception ex)
+	{
+		//handle?
+		UE_LOG( LogInteractML, Error, TEXT( "Exception trying to run model %s : %s" ), *GetName(), StringCast<TCHAR>( ex.what() ).Get() );
+		return false;
+	}
 
 	//expecting single label?
 	int num_expected = IsDiscrete()?1:LabelCache.GetNumValues();
@@ -193,7 +203,9 @@ bool UInteractMLModel::TrainModelInstance(UInteractMLTrainingSet* training_set)
 		}
 
 		//output look up label values
-		if(training_set->HasCompositeLabels())
+		//continuous label value outputs need to train on composite value list instead of indices
+		//(assuming that composite values are available)
+		if(IsContinuous() && training_set->HasCompositeLabels())
 		{
 			//composite label
 			int label_index = (int)training_example.label;
@@ -209,7 +221,7 @@ bool UInteractMLModel::TrainModelInstance(UInteractMLTrainingSet* training_set)
 		}
 		else
 		{
-			//simple value
+			//simple value OR label index
 			model_example.output.push_back( training_example.label );
 		}
 

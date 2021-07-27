@@ -526,8 +526,8 @@ void UInteractMLBlueprintLibrary::Generic_RunModelComposite(
 		}
 	}
 
-	//report current/last available result
-	if (success)
+	//report current/last available result (if available)
+	if (success && model_state->CurrentResult.Num() > 0)
 	{
 		const FInteractMLLabelCache& label_cache = Model->GetLabelCache();
 
@@ -535,12 +535,12 @@ void UInteractMLBlueprintLibrary::Generic_RunModelComposite(
 		if (Model->IsDiscrete())
 		{
 			//just one, use labels as-is, just index the one needed
-			if (ensure(model_state->CurrentResult.Num() == 1)) //should only be single model output value
+			if(ensure( model_state->CurrentResult.Num() == 1 )) //should only be single model output value
 			{
 				//find label to apply
 				int label_index = (int)model_state->CurrentResult[0];
 				TArray<float> specific_label;
-				if (label_cache.GetLabel(label_index, specific_label))
+				if(label_cache.GetLabel( label_index, specific_label ))
 				{
 					//rebuild struct from this specific label
 					LabelType->RecreateData( specific_label, LabelData, label_cache );

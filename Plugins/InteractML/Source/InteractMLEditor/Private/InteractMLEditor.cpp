@@ -16,6 +16,7 @@
 #include "InteractMLModelActions.h"
 #include "InteractMLStorage.h"
 #include "InteractMLLabelActions.h"
+#include "InteractMLLabelTableActions.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
@@ -90,6 +91,7 @@ void FInteractMLEditorModule::InitAssets()
 	AssetTools.RegisterAssetTypeActions( MakeShareable( new FInteractMLRegressionModelActions(interactml_category) ));
 	AssetTools.RegisterAssetTypeActions( MakeShareable( new FInteractMLDynamicTimewarpModelActions(interactml_category) ));
 	AssetTools.RegisterAssetTypeActions( MakeShareable( new FInteractMLLabelActions(interactml_category) ));
+	AssetTools.RegisterAssetTypeActions( MakeShareable( new FInteractMLLabelTableActions(interactml_category) ));
 	
 	//style setup for asset appearance
 	AssetStyleSet = MakeShareable(new FSlateStyleSet("InteractML"));
@@ -118,6 +120,11 @@ void FInteractMLEditorModule::InitAssets()
 	if (LabelThumbnail)
 	{
 		AssetStyleSet->Set("ClassThumbnail.InteractMLLabel", LabelThumbnail);
+	}
+	FSlateImageBrush* LabelTableThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLLabelTable"), TEXT(".png") ), FVector2D(128.f, 128.f) );
+	if (LabelTableThumbnail)
+	{
+		AssetStyleSet->Set("ClassThumbnail.InteractMLLabelTable", LabelTableThumbnail);
 	}
 	FSlateStyleRegistry::RegisterSlateStyle(*AssetStyleSet);
 }
