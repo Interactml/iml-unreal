@@ -42,7 +42,7 @@ public:
 	EInteractMLRecordingMode Mode;
 
 	//label type (expected outputs)
-	UPROPERTY(EditAnywhere,meta=(Tooltip="Specify composite label type by selecting a Label Type asset that defines the output parameters to train against, leave None for simple numerical output"))
+	UPROPERTY(EditAnywhere,meta=(HideViewOptions,ShowDisplayNames,Tooltip="Specify composite label type by selecting a Label Type asset that defines the output parameters to train against, leave None for simple numerical output"))
 	UInteractMLLabel* LabelType;
 
 private:

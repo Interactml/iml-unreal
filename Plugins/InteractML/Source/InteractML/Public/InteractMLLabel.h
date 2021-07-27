@@ -19,8 +19,8 @@
 // Used for specifying expected output when recording/training and produced as actual output on a running model
 // NOTE: Just a simple specialisation of Blueprint Struct asset type, we want all the functionality/features but don't really need to add much
 //
-UCLASS()
-class INTERACTML_API UInteractMLLabel : public UUserDefinedStruct
+UCLASS(hidecategories=Object, MinimalAPI, BlueprintType)
+class /*INTERACTML_API*/ UInteractMLLabel : public UUserDefinedStruct
 {
 	GENERATED_BODY()
 	

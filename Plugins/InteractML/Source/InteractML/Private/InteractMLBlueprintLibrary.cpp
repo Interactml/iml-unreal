@@ -525,7 +525,7 @@ void UInteractMLBlueprintLibrary::Generic_RunModelComposite(
 			success = Model->RunModel( Parameters.Ptr.Get(), model_state->CurrentResult );
 		}
 	}
-	
+
 	//report current/last available result
 	if (success)
 	{
