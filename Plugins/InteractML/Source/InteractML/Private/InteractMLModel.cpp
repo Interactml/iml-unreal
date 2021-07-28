@@ -119,7 +119,6 @@ void UInteractMLModel::TrainModel(UInteractMLTrainingSet* training_set)
 void UInteractMLModel::ResetModel()
 {
 	ResetModelInstance();
-	LabelCache.Reset();
 	bIsTrained = false;
 }
 
