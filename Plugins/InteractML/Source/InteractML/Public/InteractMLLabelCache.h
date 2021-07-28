@@ -46,8 +46,9 @@ struct INTERACTML_API FInteractMLStringMapping
 	int PropertySlot;
 
 	// list of strings, identified by index
+	// (generally assumed const in nature so stored as FText)
 	UPROPERTY()
-	TArray<FString> Strings;
+	TArray<FText> Strings;
 };
 
 // InteractML Label Cache
@@ -98,13 +99,13 @@ public:
 	float Find(const class UInteractMLLabel* label_type, const void *label_data);
 
 	// look up/cache strings for each string property slot, mapping to an identifying value (for mapping in recognition phase later)
-	float FindString( const FString& string_value, int property_slot );
+	float FindString( const FText& string_value, int property_slot );
 	
 	// get label values for specific label index
 	bool GetLabel(int label_index, TArray<float>& out_values) const;
 
 	// lookup a string previously cached
-	FString GetString(int property_slot, float label_value) const;
+	FText GetString(int property_slot, float label_value) const;
 
 private:
 	

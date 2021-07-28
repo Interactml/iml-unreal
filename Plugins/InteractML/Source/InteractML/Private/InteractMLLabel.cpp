@@ -63,11 +63,18 @@ void UInteractMLLabel::CaptureData( FField* prop, int& iprop, const uint8* in_st
 			const uint8* pdata = in_struct_instance + struct_prop->GetOffset_ForUFunction();
 			CaptureData( struct_prop->Struct->ChildProperties, iprop, pdata, out_float_data, label_cache);
 		}
+		else if (FTextProperty* txt_prop = CastField<FTextProperty>(prop))
+		{
+			const uint8* pdata = in_struct_instance + txt_prop->GetOffset_ForUFunction();
+			const FText& value = txt_prop->GetPropertyValue(pdata);
+			float string_num = label_cache.FindString( value, iprop );
+			out_float_data.Add( string_num );
+		}
 		else if (FStrProperty* str_prop = CastField<FStrProperty>(prop))
 		{
 			const uint8* pdata = in_struct_instance + str_prop->GetOffset_ForUFunction();
 			const FString& value = str_prop->GetPropertyValue(pdata);
-			float string_num = label_cache.FindString( value, iprop );
+			float string_num = label_cache.FindString( FText::FromString( value ), iprop );
 			out_float_data.Add( string_num );
 		}
 		else if(FBoolProperty* bool_prop = CastField<FBoolProperty>( prop ))
@@ -143,6 +150,10 @@ int UInteractMLLabel::CountValues( FField* prop ) const
 			//structures, dig in
 			count += CountValues( struct_prop->Struct->ChildProperties );
 		}
+		else if (FTextProperty* txt_prop = CastField<FTextProperty>(prop))
+		{
+			count++;
+		}
 		else if (FStrProperty* str_prop = CastField<FStrProperty>(prop))
 		{
 			count++;
@@ -217,12 +228,22 @@ void UInteractMLLabel::RecreateData(FField* prop, int& iprop, const TArray<float
 			uint8* pdata = out_struct_instance + struct_prop->GetOffset_ForUFunction();
 			RecreateData(struct_prop->Struct->ChildProperties, iprop, label_values, ivalue, pdata, label_cache);
 		}
+		else if (FTextProperty* txt_prop = CastField<FTextProperty>(prop))
+		{
+			uint8* pdata = out_struct_instance + txt_prop->GetOffset_ForUFunction();
+			//find nearest string
+			int32 value = FMath::RoundToInt(label_values[ivalue]);
+			const FText label_string = label_cache.GetString(iprop, value);
+			//apply
+			txt_prop->SetPropertyValue(pdata, label_string);
+			ivalue++;
+		}
 		else if (FStrProperty* str_prop = CastField<FStrProperty>(prop))
 		{
 			uint8* pdata = out_struct_instance + str_prop->GetOffset_ForUFunction();
 			//find nearest string
 			int32 value = FMath::RoundToInt(label_values[ivalue]);
-			const FString label_string = label_cache.GetString(iprop, value);
+			const FString label_string = label_cache.GetString(iprop, value).ToString();
 			//apply
 			str_prop->SetPropertyValue(pdata, *label_string);
 			ivalue++;

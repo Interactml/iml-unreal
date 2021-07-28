@@ -99,7 +99,7 @@ float FInteractMLLabelCache::Find(const UInteractMLLabel* label_type, const void
 
 // look up/cache strings for each string property slot, mapping to an identifying value (for mapping in recognition phase later)
 //
-float FInteractMLLabelCache::FindString(const FString& string_value, int property_slot)
+float FInteractMLLabelCache::FindString(const FText& string_value, int property_slot)
 {
 	for (int i = 0; i < StringsMap.Num(); i++)
 	{
@@ -109,7 +109,7 @@ float FInteractMLLabelCache::FindString(const FString& string_value, int propert
 			//found map, check strings
 			for (int s = 0; s < string_entry.Strings.Num(); s++)
 			{
-				if (string_entry.Strings[s] == string_value)
+				if (string_entry.Strings[s].EqualTo( string_value ))
 				{
 					//found existing, this is the index to use
 					return (float)s;
@@ -161,14 +161,14 @@ bool FInteractMLLabelCache::GetLabel(int label_index, TArray<float>& out_values)
 
 // get string value cached for specific property slot
 //
-FString FInteractMLLabelCache::GetString(int property_slot, float label_value) const
+FText FInteractMLLabelCache::GetString(int property_slot, float label_value) const
 {
 	for (int s = 0; s < StringsMap.Num(); s++)
 	{
 		if (StringsMap[s].PropertySlot == property_slot)
 		{
 			//yes we have a slot
-			const TArray<FString>& strings = StringsMap[s].Strings;
+			const TArray<FText>& strings = StringsMap[s].Strings;
 			if (strings.Num() > 0)
 			{
 				//resolve string index
@@ -180,7 +180,7 @@ FString FInteractMLLabelCache::GetString(int property_slot, float label_value) c
 	}
 
 	//no string found
-	return TEXT("");
+	return FText();
 }
 
 
