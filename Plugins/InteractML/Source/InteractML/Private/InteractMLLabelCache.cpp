@@ -140,7 +140,9 @@ int FInteractMLLabelCache::GetNumValues() const
 	{
 		return LabelType->GetCaptureCount();
 	}
-	return 0;
+
+	//no type means simple label (one float)
+	return 1;
 }
 
 // get label values for specific label index
