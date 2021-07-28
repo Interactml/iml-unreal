@@ -30,7 +30,7 @@ public:
 	FInteractMLParameterSeries ParameterSeries;
 
 	// last result calculated by running the model
-	float CurrentResult;
+	TArray<float> CurrentResult;
 
 
 	// reset to initial state

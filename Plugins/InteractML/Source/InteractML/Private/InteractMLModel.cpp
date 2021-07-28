@@ -82,21 +82,21 @@ bool UInteractMLModel::SaveJson(FString& json_string) const
 
 
 // run the model against the single provided parameter set
-// returns the label matched against during the run
+// returns the values matched against during the run
 // NOTE: for single match, runs synchronously, i.e. blocks until complete
 //
-float UInteractMLModel::RunModel(FInteractMLParameterCollection* parameters)
+bool UInteractMLModel::RunModel(FInteractMLParameterCollection* parameters, TArray<float>& out_values)
 {
-	return RunModelInstance( parameters );
+	return RunModelInstance( parameters, out_values );
 }
 
 // run the model against the provided series of parameter sets
-// returns the label matched against during the run
+// returns the values matched against during the run
 // NOTE: for series match, runs synchronously, i.e. blocks until complete
 //
-float UInteractMLModel::RunModel(FInteractMLParameterSeries* parameter_series)
+bool UInteractMLModel::RunModel(FInteractMLParameterSeries* parameter_series, TArray<float>& out_values)
 {
-	return RunModelInstance( parameter_series );
+	return RunModelInstance( parameter_series, out_values );
 }
 
 // train the model with the provided training set
@@ -106,6 +106,10 @@ void UInteractMLModel::TrainModel(UInteractMLTrainingSet* training_set)
 {
 	//always reset before training
 	ResetModel();
+
+	//propagate label cache (needed for training)
+	LabelCache.Assign( training_set->GetLabelCache() );
+
 	//train
 	bIsTrained = TrainModelInstance(training_set);
 }
@@ -121,13 +125,13 @@ void UInteractMLModel::ResetModel()
 
 // fallback operation of running a single sample model, can be specialised
 //
-float UInteractMLModel::RunModelInstance(struct FInteractMLParameterCollection* parameters)
+bool UInteractMLModel::RunModelInstance(struct FInteractMLParameterCollection* parameters, TArray<float>& out_values)
 {
 	check(!IsSeries()); //shouldn't be trying to run a series model with single input
 	if (!IsTrained())
 	{
 		UE_LOG(LogInteractML, Warning, TEXT("Running an untrained model: %s"), *GetFilePath());
-		return 0;
+		return false;
 	}
 
 	//convert parameter data to RapidLib form
@@ -140,17 +144,33 @@ float UInteractMLModel::RunModelInstance(struct FInteractMLParameterCollection* 
 	
 	//run the model
 	modelSetFloat* model = GetModelInstance();
-	std::vector<float> outputs = model->run(model_inputs);
+	std::vector<float> outputs;
+	try
+	{
+		outputs = model->run( model_inputs );
+	}
+	catch(std::exception ex)
+	{
+		//handle?
+		UE_LOG( LogInteractML, Error, TEXT( "Exception trying to run model %s : %s" ), *GetName(), StringCast<TCHAR>( ex.what() ).Get() );
+		return false;
+	}
 
-	//expecting single label
-	bool success = outputs.size() == 1;
+	//expecting single label?
+	int num_expected = IsDiscrete()?1:LabelCache.GetNumValues();
+	bool success = outputs.size() == num_expected;
 
 	//result
 	if (success)
 	{
-		return outputs[0];
+		out_values.Reset();
+		for (size_t i = 0; i < outputs.size(); i++)
+		{
+			out_values.Add(outputs[i]);
+		}
+		return true;
 	}
-	return 0.0f;
+	return false;
 }
 
 // fallback operation of training a model, can be specialised
@@ -181,9 +201,28 @@ bool UInteractMLModel::TrainModelInstance(UInteractMLTrainingSet* training_set)
 			}
 		}
 
-		//output (only one label used)
-		float label_output = (float)training_example.label;
-		model_example.output.push_back( label_output );
+		//output look up label values
+		//continuous label value outputs need to train on composite value list instead of indices
+		//(assuming that composite values are available)
+		if(IsContinuous() && training_set->HasCompositeLabels())
+		{
+			//composite label
+			int label_index = (int)training_example.label;
+			TArray<float> label_values;
+			if(!LabelCache.GetLabel( label_index, label_values ))
+			{
+				UE_LOG( LogInteractML, Error, TEXT( "Failed to find label index %i in training set '%s' when training" ), label_index, *training_set->GetName() );
+			}
+			for(int i = 0; i<label_values.Num(); i++)
+			{
+				model_example.output.push_back( label_values[i] );
+			}
+		}
+		else
+		{
+			//simple value OR label index
+			model_example.output.push_back( training_example.label );
+		}
 
 		//add to set
 		model_examples.push_back(model_example);

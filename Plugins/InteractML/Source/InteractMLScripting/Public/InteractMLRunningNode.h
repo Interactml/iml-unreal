@@ -14,6 +14,7 @@
 
 //module
 #include "InteractMLNode.h"
+#include "InteractMLLabel.h"
 #include "InteractMLRunningNode.generated.h"
 
 
@@ -28,7 +29,10 @@ class INTERACTMLSCRIPTING_API UInteractMLRunningNode: public UInteractMLNode
 	GENERATED_BODY()
 
 public:
-
+		//label type (expected outputs)
+		UPROPERTY(EditAnywhere,meta=(Tooltip="Specify composite label type by selecting a Label Type asset that defines the output parameters expected, leave None for simple numerical output"))
+		UInteractMLLabel* LabelType;
+	
 private:
 
 	//specialist
@@ -41,7 +45,7 @@ protected:
 
 	//~ Begin UObject Interface
 	//virtual void Serialize(FArchive& Ar) override;	
-	//virtual void PostEditChangeProperty(struct FPropertyChangedEvent& e) override;
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& e) override;
 	//virtual void PostLoad() override;
 	//~ End UObject Interface
 

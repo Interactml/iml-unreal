@@ -49,6 +49,7 @@ bool UInteractMLTrainingSet::SaveJson(FString& json_string) const
 void UInteractMLTrainingSet::ResetExamples()
 {
 	ClearExamplesCollection(Examples);
+	LabelCache.Reset();
 	ParameterCount = 0;
 }
 
@@ -187,7 +188,7 @@ bool UInteractMLTrainingSet::ClearExamplesCollection(TArray<FInteractMLExample>&
 }
 
 
-// check ready, prep and start recording
+// check ready, prep and start recording - simple label
 //
 bool UInteractMLTrainingSet::BeginRecording(float label)
 {
@@ -197,6 +198,21 @@ bool UInteractMLTrainingSet::BeginRecording(float label)
 
 	return true;
 }
+
+// check ready, prep and start recording - composite label
+//
+bool UInteractMLTrainingSet::BeginRecording(const UInteractMLLabel* label_type, const void* label_data)
+{
+	//associate this label expected output values with a numeric label for lookup later
+	float label = LabelCache.Find(label_type, label_data);
+
+	//reset
+	CurrentRecording.label = label;
+	CurrentRecording.inputSeries.Empty();
+	
+	return true;
+}
+
 
 // submit a parameter set to be accumulated with the current label
 //

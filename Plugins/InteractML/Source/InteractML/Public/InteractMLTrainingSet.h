@@ -11,6 +11,7 @@
 //module
 #include "InteractMLStorage.h"
 #include "InteractMLHelpers.h"
+#include "InteractMLLabelCache.h"
 #include "InteractMLTrainingSet.generated.h"
 
 //general declarations
@@ -66,7 +67,10 @@ class INTERACTML_API UInteractMLTrainingSet
 	//the training data
 	UPROPERTY()
 	TArray<FInteractMLExample> Examples;
-	
+
+	//label information
+	UPROPERTY()
+	FInteractMLLabelCache LabelCache;
 
 	//---- transient/cached state ----
 		
@@ -96,8 +100,12 @@ public:
 	bool IsRecording() const { return RecordingAction.Active(); }
 	bool IsResetting() const { return ResettingAction.Active(); }
 	
+	const FInteractMLLabelCache& GetLabelCache() const { return LabelCache; }
+	bool HasCompositeLabels() const { return LabelCache.LabelType != nullptr; }
+	
 	//---- modification ----
 	bool BeginRecording( float label );
+	bool BeginRecording( const UInteractMLLabel* label_type, const void* label_data );
 	bool RecordParameters( struct FInteractMLParameterCollection* parameters );
 	bool EndRecording();
 

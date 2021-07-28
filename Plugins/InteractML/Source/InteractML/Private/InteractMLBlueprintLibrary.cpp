@@ -14,6 +14,7 @@
 #include "Models/InteractMLDynamicTimeWarpModel.h"
 #include "InteractMLModelState.h"
 #include "InteractMLHelpers.h"
+#include "InteractMLLabel.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
@@ -150,16 +151,17 @@ UInteractMLTrainingSet* UInteractMLBlueprintLibrary::GetTrainingSet(AActor* Acto
 	return training_set;
 }
 
-// training set recording : single sample
-// when recording requested, takes snapshot of parameter data and associates it with the given label and stores it in the training set
+// training set recording : simple label
+// SINGLE: when recording requested, takes snapshot of parameter data and associates it with the given label and stores it in the training set
+// SERIES: when recording is active, accumulates snapshots of parameter data and associates them with the given label and stores it in the training set
 // when finished returns true briefly to signify that new training set data is ready
 // NOTE: state about recording can be held in the training set object even though it's technically shared because it doesn't make
 //       too much sense to be recording using two training nodes at the same time.
-//
-bool UInteractMLBlueprintLibrary::RecordExample(
+bool UInteractMLBlueprintLibrary::RecordExampleSimple(
 	AActor* Actor,
 	UInteractMLTrainingSet* TrainingSet, 
-	FInteractMLParameters Parameters, 
+	FInteractMLParameters Parameters,
+	bool WantSeries,
 	float Label,
 	bool Record,
 	bool Reset,
@@ -174,22 +176,24 @@ bool UInteractMLBlueprintLibrary::RecordExample(
 
 	//recording
 	bool is_finished = false;
+	bool ok = true;
+	bool initial_record = false;
 	if(TrainingSet->RecordingAction.Triggered( Record, NodeID ))
 	{
 		if (Record)
 		{
 			//start recording
-			bool ok = TrainingSet->BeginRecording(Label);
+			ok = TrainingSet->BeginRecording(Label);
 			if (ok)
 			{
 				//record single snapshot upon start
-				ok = TrainingSet->RecordParameters(parameters);
+				initial_record = true;
 			}
 		}
 		else
 		{
 			//stop recording
-			bool ok = TrainingSet->EndRecording();
+			ok = TrainingSet->EndRecording();
 
 			//need to make sure context/module are aware of model use/changes during PIE
 			UInteractMLContext* Context = GetMLContext( Actor );
@@ -197,7 +201,17 @@ bool UInteractMLBlueprintLibrary::RecordExample(
 			Context->SetTrainingSet(NodeID, TrainingSet);
 			
 			//success?
-			is_finished = ok; //briefly return true upon successful trigger
+			is_finished = ok; //briefly return true upon successful end trigger
+		}
+	}
+	
+	//single/continuous recording
+	if (ok)
+	{
+		if (initial_record || (WantSeries && Record))
+		{
+			//perform a sample of the parameters
+			ok = TrainingSet->RecordParameters(parameters);
 		}
 	}
 
@@ -215,58 +229,96 @@ bool UInteractMLBlueprintLibrary::RecordExample(
 	return is_finished;
 }
 
-// training set recording : series of samples
-// when recording is active, accumulates snapshots of parameter data and associates them with the given label and stores it in the training set
+// training set recording : composite label
+// SINGLE: when recording requested, takes snapshot of parameter data and associates it with the given label and stores it in the training set
+// SERIES: when recording is active, accumulates snapshots of parameter data and associates them with the given label and stores it in the training set
 // when finished returns true briefly to signify that new training set data is ready
 // NOTE: state about recording can be held in the training set object even though it's technically shared because it doesn't make
 //       too much sense to be recording using two training nodes at the same time.
-//
-bool UInteractMLBlueprintLibrary::RecordExampleSeries(
-	AActor* Actor, 
-	UInteractMLTrainingSet* TrainingSet, 
-	FInteractMLParameters Parameters, 
-	float Label,
+bool UInteractMLBlueprintLibrary::RecordExampleComposite(
+	AActor* Actor,
+	UInteractMLTrainingSet* TrainingSet,
+	FInteractMLParameters Parameters,
+	bool WantSeries,
+	const UInteractMLLabel* LabelType,
+	const FGenericStruct& LabelData, 	//<-- placeholder for the generic parameter mapped in the thunk function below
 	bool Record,
 	bool Reset,
 	FString NodeID)
 {
-	check(TrainingSet);
+	//placeholder for generic structure binding, never actually called
+	//see Generic_RecordExampleComposite below
+	check(0);
+	return false;
+}
+
+// generic implementation of above
+//
+bool UInteractMLBlueprintLibrary::Generic_RecordExampleComposite(
+	AActor* Actor,
+	UInteractMLTrainingSet* TrainingSet,
+	FInteractMLParameters Parameters,
+	bool WantSeries,
+	const UInteractMLLabel* LabelType,
+	const void* LabelData,	//<-- the generic parameter
+	bool Record,
+	bool Reset,
+	FString NodeID)
+{
+	//NOTE: Code should be identical to RecordExampleSimple above, but passing
+	//NOTE:  LabelType/LabelData instead of Label (float) to RecordingAction.Triggered
+	//NOTE: Other than that they should be kept in sync.
+
+	if(!TrainingSet)
+	{
+		UE_LOG( LogInteractML, Warning, TEXT( "Recording node used with no training set (actor %s)" ), *AActor::GetDebugName( Actor ) );
+		return false;
+	}
 	FInteractMLParameterCollection* parameters = Parameters.Ptr.Get();
 	
-	//recording start/stop
+	//recording
 	bool is_finished = false;
 	bool ok = true;
-	if(TrainingSet->RecordingAction.Triggered( Record, NodeID ))
+	bool initial_record = false;
+	if(TrainingSet->RecordingAction.Triggered( Record, NodeID )) //<-- This line is different to RecordExampleSimple
 	{
-		if(Record)
+		if (Record)
 		{
 			//start recording
-			ok = TrainingSet->BeginRecording(Label);
+			ok = TrainingSet->BeginRecording(LabelType, LabelData);
+			if (ok)
+			{
+				//record single snapshot upon start
+				initial_record = true;
+			}
 		}
 		else
 		{
 			//stop recording
 			ok = TrainingSet->EndRecording();
-
+			
 			//need to make sure context/module are aware of model use/changes during PIE
 			UInteractMLContext* Context = GetMLContext( Actor );
 			check( Context );
 			Context->SetTrainingSet(NodeID, TrainingSet);
 			
 			//success?
-			is_finished = ok; //briefly return true upon successful trigger
+			is_finished = ok; //briefly return true upon successful end trigger
 		}
 	}
-
-	//continuous recording
-	if(Record && ok)
+	
+	//single/continuous recording
+	if (ok)
 	{
-		//record single snapshot upon start
-		ok = TrainingSet->RecordParameters(parameters);
+		if (initial_record || (WantSeries && Record))
+		{
+			//perform a sample of the parameters
+			ok = TrainingSet->RecordParameters(parameters);
+		}
 	}
 	
 	//reset handling
-	if(TrainingSet->ResettingAction.Triggered( Reset, NodeID ))
+	if (TrainingSet->ResettingAction.Triggered( Reset, NodeID ))
 	{
 		if (Reset)
 		{
@@ -320,9 +372,14 @@ UInteractMLModel* UInteractMLBlueprintLibrary::GetModel(AActor* Actor, FString D
 }
 
 
-// model running
+// model running : simple label
 //
-float UInteractMLBlueprintLibrary::RunModel( AActor* Actor, UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID)
+float UInteractMLBlueprintLibrary::RunModelSimple( 
+	AActor* Actor, 
+	UInteractMLModel* Model, 
+	FInteractMLParameters Parameters, 
+	bool Run, 
+	FString NodeID)
 {
 	if (!Model)
 	{
@@ -336,6 +393,7 @@ float UInteractMLBlueprintLibrary::RunModel( AActor* Actor, UInteractMLModel* Mo
 	check( model_state );
 
 	//series/single operation
+	bool success = true;
 	if(Model->IsSeries())
 	{		
 		//-------------- SERIES: accumulate whilst active and run once complete ---------------
@@ -354,10 +412,7 @@ float UInteractMLBlueprintLibrary::RunModel( AActor* Actor, UInteractMLModel* Mo
 			{
 				//just stopped a run
 				//TODO: Do we want to include the last parameter set sent as the run is stopped in the test set?
-				float label = Model->RunModel( &model_state->ParameterSeries );
-
-				//this is now our result
-				model_state->CurrentResult = label;
+				success = Model->RunModel( &model_state->ParameterSeries, model_state->CurrentResult );
 			}
 		}
 		else if(Run)
@@ -373,16 +428,136 @@ float UInteractMLBlueprintLibrary::RunModel( AActor* Actor, UInteractMLModel* Mo
 		//--------------- SINGLE: just repeatedly run against a single parameter set ---------------
 		if (Run)
 		{
-			float label = Model->RunModel( Parameters.Ptr.Get() );
-
-			//this is now our result
-			model_state->CurrentResult = label;
+			success = Model->RunModel( Parameters.Ptr.Get(), model_state->CurrentResult );
 		}
 	}
 
+	
 	//report current/last available result
-	return model_state->CurrentResult;
+	if (success)
+	{
+		if (model_state->CurrentResult.Num() == 1)
+		{
+			return model_state->CurrentResult[0];
+		}
+	}
+	return 0.0f;
 }
+
+// model running : composite label
+//
+void UInteractMLBlueprintLibrary::RunModelComposite( 
+	AActor* Actor, 
+	UInteractMLModel* Model, 
+	FInteractMLParameters Parameters, 
+	bool Run, 
+	FString NodeID,
+	const UInteractMLLabel* LabelType,
+	FGenericStruct& LabelData) 	//<-- placeholder for the generic output parameter mapped in the thunk function below
+{
+	//placeholder for generic structure binding, never actually called
+	//see Generic_RunModelComposite below
+	check(0);
+}
+
+// generic implementation of above
+//
+void UInteractMLBlueprintLibrary::Generic_RunModelComposite(
+	AActor* Actor, 
+	UInteractMLModel* Model, 
+	FInteractMLParameters Parameters, 
+	bool Run, 
+	FString NodeID,
+	const UInteractMLLabel* LabelType,
+	void* LabelData)	//<-- the generic parameter
+{
+	//NOTE: Code should be identical to RunModelSimple above, but passing
+	//NOTE:  LabelType/LabelData instead of returning Label (float)
+	//NOTE: Other than that they should be kept in sync.
+
+	if (!Model)
+	{
+		return;
+	}
+	
+	//need context and state store to run with
+	UInteractMLContext* Context = GetMLContext( Actor );
+	check( Context );
+	FInteractMLModelState* model_state = Context->GetModelState( NodeID ).Get();
+	check( model_state );
+	
+	//series/single operation
+	bool success = true;
+	if(Model->IsSeries())
+	{		
+		//-------------- SERIES: accumulate whilst active and run once complete ---------------
+		
+		//check for transition
+		if (model_state->RunAction.Triggered(Run, NodeID))
+		{
+			//change in run state
+			if (Run)
+			{
+				//just started a run
+				//reset stored series
+				model_state->ParameterSeries.Clear();
+			}
+			else
+			{
+				//just stopped a run
+				//TODO: Do we want to include the last parameter set sent as the run is stopped in the test set?
+				success = Model->RunModel( &model_state->ParameterSeries, model_state->CurrentResult );
+			}
+		}
+		else if(Run)
+		{
+			//still running
+			//record next parameter set
+			model_state->ParameterSeries.Add( Parameters.Ptr.Get() );
+		}
+		
+	}
+	else
+	{
+		//--------------- SINGLE: just repeatedly run against a single parameter set ---------------
+		if (Run)
+		{
+			success = Model->RunModel( Parameters.Ptr.Get(), model_state->CurrentResult );
+		}
+	}
+
+	//report current/last available result (if available)
+	if (success && model_state->CurrentResult.Num() > 0)
+	{
+		const FInteractMLLabelCache& label_cache = Model->GetLabelCache();
+
+		//map results back to output label structure
+		if (Model->IsDiscrete())
+		{
+			//just one, use labels as-is, just index the one needed
+			if(ensure( model_state->CurrentResult.Num() == 1 )) //should only be single model output value
+			{
+				//find label to apply
+				int label_index = (int)model_state->CurrentResult[0];
+				TArray<float> specific_label;
+				if(label_cache.GetLabel( label_index, specific_label ))
+				{
+					//rebuild struct from this specific label
+					LabelType->RecreateData( specific_label, LabelData, label_cache );
+				}
+			}
+		}
+		else
+		{
+			//interpolated multi-value output, they map to each structure member directly
+			LabelType->RecreateData( model_state->CurrentResult, LabelData, label_cache );
+		}
+	}
+}
+
+
+
+
 
 // model training
 //
