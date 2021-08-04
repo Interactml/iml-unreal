@@ -4,16 +4,15 @@
 
 #pragma once
 
-//module
+//unreal
 #include "CoreMinimal.h"
 #include "Modules/ModuleInterface.h"
+#include "Styling/SlateStyle.h"
 
-//unreal
-//#include "Containers/Tickers.h"
-
+//module
+#include "InteractML.h"
 
 // general declarations
-DECLARE_LOG_CATEGORY_EXTERN(LogInteractML, Log, All);
 
 
 // InteractML editor only module
@@ -21,7 +20,9 @@ DECLARE_LOG_CATEGORY_EXTERN(LogInteractML, Log, All);
 class INTERACTMLEDITOR_API FInteractMLEditorModule 
 	: public IModuleInterface
 {
-
+	// asset appearance
+	TSharedPtr<FSlateStyleSet> AssetStyleSet;
+	
 public:
 
 	/** IModuleInterface implementation */
@@ -30,4 +31,15 @@ public:
 
 private:
 
+	// editor module setup/shutdown
+	void InitHooks();
+	void InitAssets();
+	
+	void ShutdownAssets();
+	void ShutdownHooks();
+
+	// global editor event handlers	
+	void OnEndPIE(const bool bIsSimulating);
+	void OnWorldSaved(uint32 SaveFlags, UWorld* World, bool bSuccess);
+	
 };

@@ -1,0 +1,96 @@
+{
+   "metadata" : {
+      "creator" : "Rapid API C++",
+      "inputNames" : [
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2"
+      ],
+      "numInputs" : 2,
+      "numOutputs" : 1,
+      "version" : "v0.1.1"
+   },
+   "modelSet" : [
+      {
+         "examples" : [
+            {
+               "class" : 0,
+               "features" : [ 498.75775146484375, 67.174263000488281 ]
+            },
+            {
+               "class" : 0,
+               "features" : [ 464.3851318359375, -114.73421478271484 ]
+            },
+            {
+               "class" : 0,
+               "features" : [ 464.23471069335938, 2.2483119964599609 ]
+            },
+            {
+               "class" : 1,
+               "features" : [ 61.266792297363281, -371.72442626953125 ]
+            },
+            {
+               "class" : 1,
+               "features" : [ -39.340484619140625, -231.11915588378906 ]
+            },
+            {
+               "class" : 1,
+               "features" : [ -105.08638000488281, -84.299003601074219 ]
+            },
+            {
+               "class" : 2,
+               "features" : [ 69.150398254394531, 415.36773681640625 ]
+            },
+            {
+               "class" : 2,
+               "features" : [ 17.413244247436523, 260.87368774414063 ]
+            },
+            {
+               "class" : 2,
+               "features" : [ 262.92874145507813, 302.50308227539063 ]
+            },
+            {
+               "class" : 3,
+               "features" : [ -177.74195861816406, 27.271440505981445 ]
+            },
+            {
+               "class" : 3,
+               "features" : [ -233.94602966308594, -44.377574920654297 ]
+            },
+            {
+               "class" : 3,
+               "features" : [ -147.17308044433594, -32.275241851806641 ]
+            }
+         ],
+         "inputNames" : [
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2"
+         ],
+         "k" : 1,
+         "modelType" : "kNN Classificiation",
+         "numInputs" : 2,
+         "whichInputs" : [ 0, 1 ]
+      }
+   ]
+}

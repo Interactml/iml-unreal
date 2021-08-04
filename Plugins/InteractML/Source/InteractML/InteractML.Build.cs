@@ -39,6 +39,8 @@ public class InteractML : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
+				"Json", //json types
+				"JsonUtilities", //json object converter
 			}
 			);		
 		

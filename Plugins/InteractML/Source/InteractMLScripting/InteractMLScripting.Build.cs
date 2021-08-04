@@ -24,7 +24,11 @@ public class InteractMLScripting : ModuleRules
 			{
 				//higher level engine modules
 				"Core",
-				"Projects",
+				"Engine",
+				"UnrealEd",
+				"AssetTools",
+				"Kismet",	//for SContentReference
+				"ToolMenus", //for UToolMenu (node context menus)
 
 				// ... add other public dependencies that you statically link with here ...
 				"InteractML"
@@ -36,9 +40,10 @@ public class InteractMLScripting : ModuleRules
 			{			
 				//fundamental unreal modules
 				"CoreUObject",
-				"Engine",
-				"Slate",
 				"SlateCore",
+				"Slate",
+				"BlueprintGraph",	//UK2Node
+				"KismetCompiler",	//FKismetCompilerContext
 			}
 			);		
 		

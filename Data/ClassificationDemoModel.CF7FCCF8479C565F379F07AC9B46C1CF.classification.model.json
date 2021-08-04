@@ -1,0 +1,162 @@
+{
+   "metadata" : {
+      "creator" : "Rapid API C++",
+      "inputNames" : [
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2",
+         "inputs-1",
+         "inputs-2"
+      ],
+      "numInputs" : 2,
+      "numOutputs" : 1,
+      "version" : "v0.1.1"
+   },
+   "modelSet" : [
+      {
+         "examples" : [
+            {
+               "class" : 1,
+               "features" : [ 441.4183349609375, -240.32325744628906 ]
+            },
+            {
+               "class" : 1,
+               "features" : [ 314.1661376953125, -319.64178466796875 ]
+            },
+            {
+               "class" : 1,
+               "features" : [ 123.37211608886719, -211.63615417480469 ]
+            },
+            {
+               "class" : 1,
+               "features" : [ -91.831695556640625, -277.4940185546875 ]
+            },
+            {
+               "class" : 1,
+               "features" : [ -201.27008056640625, -205.00357055664063 ]
+            },
+            {
+               "class" : 2,
+               "features" : [ -141.20590209960938, 78.086578369140625 ]
+            },
+            {
+               "class" : 2,
+               "features" : [ 1.973325252532959, 98.241592407226563 ]
+            },
+            {
+               "class" : 2,
+               "features" : [ 154.46470642089844, 77.099868774414063 ]
+            },
+            {
+               "class" : 2,
+               "features" : [ 289.3856201171875, 18.550512313842773 ]
+            },
+            {
+               "class" : 2,
+               "features" : [ 452.6510009765625, -36.752510070800781 ]
+            },
+            {
+               "class" : 3,
+               "features" : [ 466.74099731445313, 343.59710693359375 ]
+            },
+            {
+               "class" : 3,
+               "features" : [ 329.90872192382813, 270.46737670898438 ]
+            },
+            {
+               "class" : 3,
+               "features" : [ 210.85763549804688, 354.89254760742188 ]
+            },
+            {
+               "class" : 3,
+               "features" : [ 28.308734893798828, 254.23886108398438 ]
+            },
+            {
+               "class" : 3,
+               "features" : [ -50.316722869873047, 383.68069458007813 ]
+            }
+         ],
+         "inputNames" : [
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2",
+            "inputs-1",
+            "inputs-2"
+         ],
+         "k" : 1,
+         "modelType" : "kNN Classificiation",
+         "numInputs" : 2,
+         "whichInputs" : [ 0, 1 ]
+      }
+   ]
+}
