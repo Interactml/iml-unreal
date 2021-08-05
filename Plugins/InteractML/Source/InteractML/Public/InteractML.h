@@ -30,6 +30,10 @@ class INTERACTML_API FInteractMLModule
 	// catalogue of IML objects in use
 	TMap<FString, TWeakObjectPtr<class UInteractMLStorage>> ObjectLookup;
 
+	//tick
+	FTickerDelegate TickDelegate;
+	FDelegateHandle TickDelegateHandle;
+
 public:
 	//systems
 	static FInteractMLModule& Get() { return *s_pModule; }
@@ -60,9 +64,15 @@ public:
 private:
 
 	//setup
+	void InitTick();
 	void InitPaths();
-
+	
+	//update
+	bool Tick(float DeltaTime);
+	void TickTasks(float dt);
+		
 	//shutdown
+	void ShutdownTick();
 	void ShutdownCache();
 	
 };

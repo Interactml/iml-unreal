@@ -45,6 +45,7 @@ void FInteractMLModule::StartupModule()
 	UE_LOG( LogInteractML, Display, TEXT( "Starting InteractML Plugin" ) );
 	s_pModule = this;
 
+	InitTick();
 	InitPaths();
 
 	//testing during development
@@ -60,11 +61,20 @@ void FInteractMLModule::ShutdownModule()
 {
 	UE_LOG( LogInteractML, Display, TEXT( "Stopping InteractML Plugin" ) );
 	
+	ShutdownTick();
 	ShutdownCache();
 
 	s_pModule = nullptr;
 }
 
+
+// start regular module tick callbacks
+//
+void FInteractMLModule::InitTick()
+{
+	TickDelegate = FTickerDelegate::CreateRaw( this, &FInteractMLModule::Tick );
+	TickDelegateHandle = FTicker::GetCoreTicker().AddTicker( TickDelegate );
+}
 
 // resolve and store ML data storage root path
 // To override, add the following to an InteractML section of the Config/DefaultGame.ini
@@ -113,6 +123,13 @@ void FInteractMLModule::InitPaths()
 			}
 		}
 	}
+}
+
+// stop regular module ticks
+//
+void FInteractMLModule::ShutdownTick()
+{
+	FTicker::GetCoreTicker().RemoveTicker(TickDelegateHandle);
 }
 
 // release any tracked objects
@@ -336,16 +353,55 @@ bool FInteractMLModule::GetUnsavedAssets(TArray<UInteractMLStorage*>& changed_as
 	return found_any;
 }
 
+// regular frame ticks
+//
+bool FInteractMLModule::Tick(float DeltaTime)
+{
+	TickTasks( DeltaTime );
+	return true;
+}
+
+struct FTaskQueue
+{
+	TSharedPtr<struct FInteractMLTask> Task;
+	float Time;
+	
+	FTaskQueue(TSharedPtr<struct FInteractMLTask> task, float time = 1.0f)
+	: Task(task), Time(time) {}
+	~FTaskQueue()
+	{
+		UE_LOG(LogInteractML, Display, TEXT("Actually doing the task!"));
+		Task->Run();
+		Task->Apply();
+	}
+};
+TArray<FTaskQueue*> queue;
+
+
 // schedule task to run asynchronously
 //
 void FInteractMLModule::RunTask(TSharedPtr<struct FInteractMLTask> task)
 {
 	//TODO: queue/threading
 	//NOTE: for now just execute synchronously
-	task->Run();
-	task->Apply();
+	queue.Add( new FTaskQueue(task, 5.0f) );
 }
 
+void FInteractMLModule::TickTasks( float dt )
+{
+	for (int i = 0; i < queue.Num(); i++)
+	{
+		if (queue[i])
+		{
+			queue[i]->Time -= dt;
+			if (queue[i]->Time <= 0)
+			{
+				delete queue[i];
+				queue[i] = nullptr;
+			}
+		}
+	}
+}
 
 
 // EPILOGUE
