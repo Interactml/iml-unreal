@@ -11,7 +11,7 @@
 #include "KismetCompiler.h" //FKismetCompilerContext
 #include "K2Node_CallFunction.h" //UK2Node_Function
 #include "Engine/SimpleConstructionScript.h" //USimpleConstructionScript
-#include "BlueprintEditorUtils.h" //MarkBlueprintAsStructurallyModified
+#include "Kismet2/BlueprintEditorUtils.h" //MarkBlueprintAsStructurallyModified
 #include "ToolMenu.h" //UToolMenu
 #include "ScopedTransaction.h" //FScopedTransaction
 

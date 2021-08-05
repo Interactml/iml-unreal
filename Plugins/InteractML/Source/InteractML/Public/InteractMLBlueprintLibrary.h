@@ -7,7 +7,7 @@
 
 //unreal
 #include "CoreMinimal.h"
-#include "SharedPointer.h"
+//#include "SharedPointer.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 //module

@@ -8,9 +8,9 @@
 //unreal
 
 //module
-#include "InteractMLClassificationModel.h"
-#include "InteractMLRegressionModel.h"
-#include "InteractMLDynamicTimewarpModel.h"
+#include "Models/InteractMLClassificationModel.h"
+#include "Models/InteractMLRegressionModel.h"
+#include "Models/InteractMLDynamicTimewarpModel.h"
 
 //module editor
 
