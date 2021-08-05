@@ -34,6 +34,10 @@ class INTERACTML_API FInteractMLModule
 	FTickerDelegate TickDelegate;
 	FDelegateHandle TickDelegateHandle;
 
+	//async support
+	TArray<TSharedPtr<struct FInteractMLTask>>	CompletedTasks;
+	FCriticalSection							CompletedTaskInterlock;
+
 public:
 	//systems
 	static FInteractMLModule& Get() { return *s_pModule; }

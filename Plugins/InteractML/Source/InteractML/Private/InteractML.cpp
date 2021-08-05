@@ -361,48 +361,49 @@ bool FInteractMLModule::Tick(float DeltaTime)
 	return true;
 }
 
-struct FTaskQueue
-{
-	TSharedPtr<struct FInteractMLTask> Task;
-	float Time;
-	
-	FTaskQueue(TSharedPtr<struct FInteractMLTask> task, float time = 1.0f)
-	: Task(task), Time(time) {}
-	~FTaskQueue()
-	{
-		UE_LOG(LogInteractML, Display, TEXT("Actually doing the task!"));
-		Task->Run();
-		Task->Apply();
-	}
-};
-TArray<FTaskQueue*> queue;
-
-
 // schedule task to run asynchronously
 //
-void FInteractMLModule::RunTask(TSharedPtr<struct FInteractMLTask> task)
+void FInteractMLModule::RunTask(TSharedPtr<FInteractMLTask> task)
 {
-	//TODO: queue/threading
-	//NOTE: for now just execute synchronously
-	queue.Add( new FTaskQueue(task, 5.0f) );
+	//dispatch to process on another thread
+	//UE_LOG(LogInteractML, Display, TEXT("Queuing task on thread %08X"), FPlatformTLS::GetCurrentThreadId());
+	auto async_exec = Async(EAsyncExecution::ThreadPool, [=,this]
+		{
+			TSharedPtr<FInteractMLTask> t = task;
+
+			//run the task on background thread
+			//UE_LOG(LogInteractML, Display, TEXT("Running task on thread %08X"), FPlatformTLS::GetCurrentThreadId());
+			t->Run();
+			//UE_LOG(LogInteractML, Display, TEXT("Run task on thread %08X"), FPlatformTLS::GetCurrentThreadId());
+			
+			//queue for result handling
+			CompletedTaskInterlock.Lock();
+			CompletedTasks.Add(t);
+			CompletedTaskInterlock.Unlock();
+		});
 }
 
-void FInteractMLModule::TickTasks( float dt )
+// poll for completed tasks
+//
+void FInteractMLModule::TickTasks(float dt)
 {
-	for (int i = 0; i < queue.Num(); i++)
+	//extract completed tasks
+	TArray<TSharedPtr<struct FInteractMLTask>> Done;
+	CompletedTaskInterlock.Lock();
+	if (CompletedTasks.Num() > 0)
 	{
-		if (queue[i])
-		{
-			queue[i]->Time -= dt;
-			if (queue[i]->Time <= 0)
-			{
-				delete queue[i];
-				queue[i] = nullptr;
-			}
-		}
+		Done = CompletedTasks;
+		CompletedTasks.Empty();
+	}
+	CompletedTaskInterlock.Unlock();
+
+	//dispatch results on main thread
+	for (int i = 0; i < Done.Num(); i++)
+	{
+		//UE_LOG(LogInteractML, Display, TEXT("Applying task on thread %08X"), FPlatformTLS::GetCurrentThreadId());
+		Done[i]->Apply();
 	}
 }
-
 
 // EPILOGUE
 #undef LOCTEXT_NAMESPACE
