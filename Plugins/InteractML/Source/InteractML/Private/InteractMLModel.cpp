@@ -119,7 +119,7 @@ void UInteractMLModel::TrainModel(UInteractMLTrainingSet* training_set)
 
 	//train now, blocking execution until complete
 	TrainingTask = BeginTrainingModel( training_set );
-	UE_LOG( LogInteractML, Display, TEXT( "Training model '%s' synchronously" ), *GetName() );
+	//UE_LOG( LogInteractML, Display, TEXT( "Training model '%s' synchronously" ), *GetName() );
 	TrainingTask->Run();
 	TrainingTask->Apply();
 }
@@ -143,7 +143,7 @@ void UInteractMLModel::TrainModelAsync(UInteractMLTrainingSet* training_set)
 	
 	//train on another thread to run asynchronously	
 	TrainingTask = BeginTrainingModel( training_set );
-	UE_LOG( LogInteractML, Display, TEXT( "Training model '%s' ASYNChronously" ), *GetName() );
+	//UE_LOG( LogInteractML, Display, TEXT( "Training model '%s' ASYNChronously" ), *GetName() );
 	FInteractMLModule::Get().RunTask( TrainingTask );
 }
 
