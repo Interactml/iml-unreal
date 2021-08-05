@@ -74,7 +74,7 @@ FText UInteractMLExternalModelNode::GetNodeTitle(ENodeTitleType::Type TitleType)
 	{
 		case ENodeTitleType::FullTitle:
 			title.Append(TEXT("\n"));
-			title.Append( LOCTEXT("ExternalModelNodeSubTitle", "External Data File").ToString() );
+			title.Append( LOCTEXT("ExternalModelNodeSubTitle", "External model data file").ToString() );
 			break;
 			
 		case ENodeTitleType::MenuTitle:

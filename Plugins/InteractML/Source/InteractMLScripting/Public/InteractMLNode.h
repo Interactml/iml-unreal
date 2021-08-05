@@ -52,6 +52,8 @@ protected:
 	//virtual void ValidateNodeDuringCompilation(class FCompilerResultsLog& MessageLog) const override;
 	//virtual void PostPlacedNewNode();
 	virtual FLinearColor GetNodeTitleColor() const override;
+	virtual FLinearColor GetNodeBodyTintColor() const override;
+	virtual FSlateIcon GetIconAndTint( FLinearColor& OutColor ) const override;
 	//~ End UEdGraphNode Interface
 
 	//~ Begin K2Node Interface

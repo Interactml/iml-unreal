@@ -90,6 +90,11 @@ FText UInteractMLTrainingNode::GetNodeTitle(ENodeTitleType::Type TitleType) cons
 				title.Append(TEXT("\n"));
 				title.Append(LOCTEXT("TrainingNodeSubTitleAsync", "(in the background)").ToString());
 			}
+			else
+			{
+				title.Append(TEXT("\n"));
+				title.Append(LOCTEXT("TrainingNodeSubTitle", "Train a machine learning model").ToString());
+			}
 			break;
 
 		case ENodeTitleType::MenuTitle:
