@@ -72,7 +72,7 @@ FText UInteractMLExternalTrainingSetNode::GetNodeTitle(ENodeTitleType::Type Titl
 	{
 		case ENodeTitleType::FullTitle:
 			title.Append(TEXT("\n"));
-			title.Append( LOCTEXT("ExternalTrainingSetNodeSubTitle", "External Data File").ToString() );
+			title.Append( LOCTEXT("ExternalTrainingSetNodeSubTitle", "External training set data file").ToString() );
 			break;
 
 		case ENodeTitleType::MenuTitle:

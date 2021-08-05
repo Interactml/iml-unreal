@@ -93,9 +93,11 @@ void FInteractMLEditorModule::InitAssets()
 	AssetTools.RegisterAssetTypeActions( MakeShareable( new FInteractMLLabelActions(interactml_category) ));
 	AssetTools.RegisterAssetTypeActions( MakeShareable( new FInteractMLLabelTableActions(interactml_category) ));
 	
-	//style setup for asset appearance
+	//style setup for icons
 	AssetStyleSet = MakeShareable(new FSlateStyleSet("InteractML"));
 	AssetStyleSet->SetContentRoot(ContentDir);
+	
+	//asset icons
 	FSlateImageBrush* TrainingSetThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLTrainingSet"), TEXT(".png") ), FVector2D(128.f, 128.f) );
 	if (TrainingSetThumbnail)
 	{
@@ -126,6 +128,15 @@ void FInteractMLEditorModule::InitAssets()
 	{
 		AssetStyleSet->Set("ClassThumbnail.InteractMLLabelTable", LabelTableThumbnail);
 	}
+
+	//node icons
+	FSlateImageBrush* NodeIcon = new FSlateImageBrush( AssetStyleSet->RootToContentDir( TEXT( "Icons/InteractMLNode_16" ), TEXT( ".png" ) ), FVector2D( 16.f, 16.f ) );
+	if(NodeIcon)
+	{
+		AssetStyleSet->Set( "NodeIcons.Default_16x", NodeIcon );
+	}
+
+	//register for use
 	FSlateStyleRegistry::RegisterSlateStyle(*AssetStyleSet);
 }
 

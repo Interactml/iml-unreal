@@ -273,7 +273,14 @@ FText UInteractMLParameterNode::GetNodeTitle(ENodeTitleType::Type TitleType) con
 			int param_count = CountParameters();
 			int float_count = CountFloats();
 			title.Append(TEXT("\n"));
-			title.Append( FText::Format(LOCTEXT("ParameterNodeSubTitle", "{0} parameter(s) so far ({1} values)"), param_count, float_count ).ToString() );
+			if(param_count > 0)
+			{
+				title.Append( FText::Format( LOCTEXT( "ParameterNodeSubTitleCount", "{0} parameter(s) so far ({1} values)" ), param_count, float_count ).ToString() );
+			}
+			else
+			{
+				title.Append( FText::Format( LOCTEXT( "ParameterNodeSubTitleDesc", "Build a parameter set to record/recognise" ), param_count, float_count ).ToString() );
+			}
 			return FText::FromString(title);
 		}
 

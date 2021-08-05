@@ -46,8 +46,20 @@ FText UInteractMLNode::GetMenuCategory() const
 }
 FLinearColor UInteractMLNode::GetNodeTitleColor() const
 {
-	return InteractMLConstants::NodeTitleColour.ReinterpretAsLinear(); 
+	return InteractMLConstants::NodeTitleColour.ReinterpretAsLinear();
 }
+FLinearColor UInteractMLNode::GetNodeBodyTintColor() const
+{
+	return InteractMLConstants::NodeTitleColour.ReinterpretAsLinear();
+}
+FSlateIcon UInteractMLNode::GetIconAndTint( FLinearColor& OutColor ) const
+{
+	OutColor = FLinearColor::White;
+	static FSlateIcon Icon( "InteractML", "NodeIcons.Default_16x" );
+	return Icon;
+}
+
+
 
 
 // put node in blueprint menu
