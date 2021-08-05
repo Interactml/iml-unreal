@@ -50,9 +50,11 @@ public:
 	//---- operation ----
 	//specialised for dtw, not got shared API of classification or regression algorithms
 	virtual bool RunModelInstance(struct FInteractMLParameterSeries* parameters, TArray<float>& out_values) override;
-	virtual bool TrainModelInstance(class UInteractMLTrainingSet* training_set) override;
 	virtual void ResetModelInstance() override;
 	virtual modelSetFloat* GetModelInstance() const override { /*not compatible with general model base*/ check(false); return nullptr; }
+	//async
+	virtual TSharedPtr<FInteractMLTask> BeginTrainingModel( class UInteractMLTrainingSet* training_set ) override;
+	virtual void DoTrainingModel( TSharedPtr<FInteractMLTask> training_task ) override; //NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
 
 	//model type	
 	virtual bool IsSeries() const { return true; }	//matching against a series of snapshots instead of a single shapshot

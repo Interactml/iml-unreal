@@ -117,9 +117,6 @@ public:
 	// model running : composite label
 	UFUNCTION(BlueprintCallable, CustomThunk, meta=(CustomStructureParam="LabelData"), BlueprintInternalUseOnly)
 	static void RunModelComposite(AActor* Actor, UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID, const UInteractMLLabel* LabelType, FGenericStruct& LabelData);
-	// model training
-	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
-	static bool TrainModel(AActor* Actor, UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID);
 
 	// generic implementation of RunModelComposite
 	//
@@ -149,6 +146,14 @@ public:
 		Generic_RunModelComposite(Actor, Model, *ParametersStructAddr, Run, NodeID, LabelType, LabelDataStructAddr);
 		P_NATIVE_END;
 	}
+	
+	// model training : blocking
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static bool TrainModel(AActor* Actor, UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID);
+	// model training : asynchronous
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static bool TrainModelAsync(AActor* Actor, UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID, bool& Training, bool& Completed );
+
 	
 	///////////////////// UTILITY //////////////////////
 

@@ -10,8 +10,6 @@
 //module
 #include "InteractMLHelpers.h"
 #include "InteractMLParameters.h"
-//#include "InteractMLModelState.generated.h"
-
 
 //general declarations
 
@@ -29,9 +27,11 @@ public:
 	// parameter sample accumulation
 	FInteractMLParameterSeries ParameterSeries;
 
+	// currently running the model asynchronously
+	TSharedPtr<struct FInteractMLTask> Task;
+
 	// last result calculated by running the model
 	TArray<float> CurrentResult;
-
 
 	// reset to initial state
 	void Reset();

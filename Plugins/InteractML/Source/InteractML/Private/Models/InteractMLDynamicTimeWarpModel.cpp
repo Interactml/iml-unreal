@@ -10,6 +10,7 @@
 #include "InteractML.h"
 #include "InteractMLTrainingSet.h"
 #include "InteractMLParameters.h"
+#include "InteractMLTask.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
@@ -78,30 +79,32 @@ bool UInteractMLDynamicTimeWarpModel::RunModelInstance(struct FInteractMLParamet
 	return false;
 }
 
-// handle DTW training
+
+// preparation for training dtw model
+// NOTE: not async training, as it's just a copy, saves processing/passing state to task object
 //
-bool UInteractMLDynamicTimeWarpModel::TrainModelInstance(class UInteractMLTrainingSet* training_set)
+TSharedPtr<FInteractMLTask> UInteractMLDynamicTimeWarpModel::BeginTrainingModel(UInteractMLTrainingSet* training_set)
 {
+	//create training task
+	TSharedPtr<FInteractMLTask> task = MakeShareable( new FInteractMLTask( this, EInteractMLTaskType::Train ) );
+
 	//we keep a copy of our training set
 	Examples = training_set->GetExamples();
+
+	//gather and load new training state into model
+	task->bSuccess = ApplyExamples();	
 	
-	//gather and load new training state into model when it is loaded from storage
-	bool success = ApplyExamples();
-	bIsTrained = success;
-	
-	//we have new state to save
-	if (success)
-	{
-		MarkUnsavedData();
-	}
-	
-	//result
-	if(!success)
-	{
-		UE_LOG(LogInteractML, Error, TEXT("Training failed: %s"), *GetFilePath() );
-	}
-	return success;
+	return task;
 }
+
+// nothing to do for DTW training
+// NOTE: Multithreaded call, only train in context of the training task state or known thread-safe calls
+//
+void UInteractMLDynamicTimeWarpModel::DoTrainingModel( TSharedPtr<FInteractMLTask> training_task )
+{
+	//nothing to do, training happens in Begin (since it's just a simple copy op)
+}
+
 
 // init on demand, clear, reset
 //

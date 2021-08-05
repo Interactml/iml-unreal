@@ -13,6 +13,7 @@
 #include "InteractMLStorage.h"
 #include "InteractMLTrainingSet.h"
 #include "InteractMLModel.h"
+#include "InteractMLTask.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
@@ -335,6 +336,15 @@ bool FInteractMLModule::GetUnsavedAssets(TArray<UInteractMLStorage*>& changed_as
 	return found_any;
 }
 
+// schedule task to run asynchronously
+//
+void FInteractMLModule::RunTask(TSharedPtr<struct FInteractMLTask> task)
+{
+	//TODO: queue/threading
+	//NOTE: for now just execute synchronously
+	task->Run();
+	task->Apply();
+}
 
 
 

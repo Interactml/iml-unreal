@@ -49,6 +49,9 @@ public:
 	//ml objects : inform of any obtained from direct asset references here as we need to synchronise with path based ones
 	void SetTrainingSet( class UInteractMLTrainingSet* training_set );
 	void SetModel( class UInteractMLModel* model );
+
+	//async execution
+	void RunTask( TSharedPtr<struct FInteractMLTask> task );
 	
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;

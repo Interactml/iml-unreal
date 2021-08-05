@@ -556,10 +556,7 @@ void UInteractMLBlueprintLibrary::Generic_RunModelComposite(
 }
 
 
-
-
-
-// model training
+// model training : blocking
 //
 bool UInteractMLBlueprintLibrary::TrainModel( AActor* Actor, UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID )
 {
@@ -568,7 +565,7 @@ bool UInteractMLBlueprintLibrary::TrainModel( AActor* Actor, UInteractMLModel* M
 		bool changed = false;
 
 		//training state changed?
-		if(Model->TrainingAction.Triggered(Train, NodeID))
+		if(Model->TrainingRequest.Triggered(Train, NodeID))
 		{
 			//activated/deactivated?
 			if (Train)
@@ -580,7 +577,7 @@ bool UInteractMLBlueprintLibrary::TrainModel( AActor* Actor, UInteractMLModel* M
 		}
 		
 		//reset state changed?
-		if(Model->ResetAction.Triggered(Reset,NodeID))
+		if(Model->ResetRequest.Triggered(Reset,NodeID))
 		{
 			//activated/deactivated?
 			if (Reset)
@@ -608,6 +605,60 @@ bool UInteractMLBlueprintLibrary::TrainModel( AActor* Actor, UInteractMLModel* M
 	return false;
 }
 
+// model training : asynchronous
+//
+bool UInteractMLBlueprintLibrary::TrainModelAsync( AActor* Actor, UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID, bool& Training, bool& Completed )
+{
+	if (!Model)
+	{
+		//no model, nothing to do	
+		Training = false;
+		Completed = false;
+		return false;
+	}
+
+	bool notify_context = false;
+	
+	//training state changed?
+	if(Model->TrainingRequest.Triggered(Train, NodeID))
+	{
+		//activated/deactivated?
+		if (Train)
+		{
+			//trigger start of training when Train bool transitions to true
+			Model->TrainModelAsync( TrainingSet );
+			notify_context = true;
+		}
+	}
+	
+	//reset state changed?
+	if(Model->ResetRequest.Triggered(Reset,NodeID))
+	{
+		//activated/deactivated?
+		if (Reset)
+		{
+			//trigger reset when Reset transitions to true
+			Model->ResetModel();
+			
+			//explicitly count this as new data
+			Model->MarkUnsavedData();
+			notify_context = true;
+		}
+	}
+	
+	//need to make sure context/module are aware of model use/changes during PIE
+	if (notify_context)
+	{	
+		UInteractMLContext* Context = GetMLContext( Actor );
+		check( Context );
+		Context->SetModel(NodeID, Model);
+	}
+
+	//current status
+	Training = Model->IsTraining();
+	Completed = Model->CheckJustCompleted();
+	return Model->IsTrained();
+}
 
 
 ///////////////////// UTILITY //////////////////////
