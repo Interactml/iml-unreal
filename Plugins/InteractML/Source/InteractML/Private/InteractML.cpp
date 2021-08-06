@@ -21,6 +21,10 @@ DEFINE_LOG_CATEGORY(LogInteractML);
 
 // CONSTANTS & MACROS
 
+//enable/disable multi-threaded operation (assuming nodes are set to use it)
+#define INTERACTML_ALLOW_MULTITHREADING		1
+
+
 // default location of ML data in a project, overridable in game ini files
 const TCHAR* c_DefaultDataDirectoryName = TEXT("../Data");
 
@@ -62,6 +66,7 @@ void FInteractMLModule::ShutdownModule()
 	UE_LOG( LogInteractML, Display, TEXT( "Stopping InteractML Plugin" ) );
 	
 	ShutdownTick();
+	ShutdownTasks();
 	ShutdownCache();
 
 	s_pModule = nullptr;
@@ -129,7 +134,42 @@ void FInteractMLModule::InitPaths()
 //
 void FInteractMLModule::ShutdownTick()
 {
-	FTicker::GetCoreTicker().RemoveTicker(TickDelegateHandle);
+	FTicker::GetCoreTicker().RemoveTicker( TickDelegateHandle );
+}
+
+// clean up any outstanding tasks that may still be running
+//
+void FInteractMLModule::ShutdownTasks()
+{
+	//cancel any tasks
+	{
+		FScopeLock lock( &CompletedTaskInterlock );
+		for(int i = 0; i < PendingTasks.Num(); i++)
+		{
+			PendingTasks[i]->Cancel();
+		}
+		for(int i = 0; i < CompletedTasks.Num(); i++)
+		{
+			CompletedTasks[i]->Cancel();
+		}
+	}
+
+	//wait for completion
+	while(true)
+	{
+		//check for active tasks
+		{
+			FScopeLock lock( &CompletedTaskInterlock );
+			if(PendingTasks.Num() == 0 && CompletedTasks.Num() == 0)
+			{
+				break;
+			}
+		}
+
+		//pump task processing
+		TickTasks( 0.1f );
+		FPlatformProcess::Sleep( 0.01f );
+	}
 }
 
 // release any tracked objects
@@ -361,26 +401,52 @@ bool FInteractMLModule::Tick(float DeltaTime)
 	return true;
 }
 
+DECLARE_CYCLE_STAT( TEXT( "Run InteractML Task" ), STAT_RunInteractMLTask, STATGROUP_ThreadPoolAsyncTasks );
+
 // schedule task to run asynchronously
 //
-void FInteractMLModule::RunTask(TSharedPtr<FInteractMLTask> task)
+void FInteractMLModule::RunTask(FInteractMLTask::Ptr task)
 {
+	//mark pending
+	{
+		FScopeLock lock( &CompletedTaskInterlock );
+		check( !PendingTasks.Contains( task ) );
+		PendingTasks.Add( task );
+	}
+
+#if INTERACTML_ALLOW_MULTITHREADING
+	//Multithreading : ENABLED
 	//dispatch to process on another thread
 	//UE_LOG(LogInteractML, Display, TEXT("Queuing task on thread %08X"), FPlatformTLS::GetCurrentThreadId());
-	auto async_exec = Async(EAsyncExecution::ThreadPool, [=,this]
+	auto async_exec = Async(EAsyncExecution::ThreadPool, [&,task] () mutable //default pass by ref (class members, e.g. CompletedTask, passed by ref to allow modifications), task explicitly passed by value to prevent release during handover, mutable needed so task ptr isn't const inside lambda.
 		{
-			TSharedPtr<FInteractMLTask> t = task;
+			SCOPE_CYCLE_COUNTER( STAT_RunInteractMLTask );
 
-			//run the task on background thread
-			//UE_LOG(LogInteractML, Display, TEXT("Running task on thread %08X"), FPlatformTLS::GetCurrentThreadId());
-			t->Run();
-			//UE_LOG(LogInteractML, Display, TEXT("Run task on thread %08X"), FPlatformTLS::GetCurrentThreadId());
-			
+			//run the task on background thread (if not cancelled)
+			if(!task->bCancelled)
+			{
+				//UE_LOG(LogInteractML, Display, TEXT("Running task on thread %08X"), FPlatformTLS::GetCurrentThreadId());
+				task->Run();
+				//UE_LOG(LogInteractML, Display, TEXT("Run task on thread %08X"), FPlatformTLS::GetCurrentThreadId());
+			}
+
 			//queue for result handling
-			CompletedTaskInterlock.Lock();
-			CompletedTasks.Add(t);
-			CompletedTaskInterlock.Unlock();
+			{
+				FScopeLock lock( &CompletedTaskInterlock );
+				check( PendingTasks.Contains( task ) );
+				PendingTasks.RemoveSingle( task );
+				check( !CompletedTasks.Contains( task ) );
+				CompletedTasks.Add( task );
+			}
 		});
+#else
+	//Multithreading : DISABLED
+	//run the task now, blocking
+	//UE_LOG( LogInteractML, Display, TEXT( "Running task on thread %08X" ), FPlatformTLS::GetCurrentThreadId() );
+	task->Run();
+	//UE_LOG( LogInteractML, Display, TEXT( "Run task on thread %08X" ), FPlatformTLS::GetCurrentThreadId() );
+	CompletedTasks.Add( task );
+#endif
 }
 
 // poll for completed tasks
@@ -388,7 +454,7 @@ void FInteractMLModule::RunTask(TSharedPtr<FInteractMLTask> task)
 void FInteractMLModule::TickTasks(float dt)
 {
 	//extract completed tasks
-	TArray<TSharedPtr<struct FInteractMLTask>> Done;
+	TArray<FInteractMLTask::Ptr> Done;
 	CompletedTaskInterlock.Lock();
 	if (CompletedTasks.Num() > 0)
 	{
@@ -400,8 +466,12 @@ void FInteractMLModule::TickTasks(float dt)
 	//dispatch results on main thread
 	for (int i = 0; i < Done.Num(); i++)
 	{
-		//UE_LOG(LogInteractML, Display, TEXT("Applying task on thread %08X"), FPlatformTLS::GetCurrentThreadId());
-		Done[i]->Apply();
+		//still ok?
+		if(!Done[i]->bCancelled)
+		{
+			//UE_LOG(LogInteractML, Display, TEXT("Applying task on thread %08X"), FPlatformTLS::GetCurrentThreadId());
+			Done[i]->Apply();
+		}
 	}
 }
 

@@ -15,6 +15,7 @@ using modelSetFloat = modelSet<float>;
 #include "InteractMLStorage.h"
 #include "InteractMLHelpers.h"
 #include "InteractMLLabelCache.h"
+#include "InteractMLTask.h"
 #include "InteractMLModel.generated.h"
 
 //general declarations
@@ -40,6 +41,9 @@ class INTERACTML_API UInteractMLModel
 	
 	//---- transient/cached state ----
 
+	//task currently running this model (used to spot concurrency requests)
+	TArray<FInteractMLTask::Ptr> RunTasks;
+
 protected:
 	bool bIsTrained;
 
@@ -49,7 +53,7 @@ public:
 	FNodeActionInterlock ResetRequest;		//node currently resetting this model
 
 	//tracking of internal status
-	TSharedPtr<struct FInteractMLTask> TrainingTask; //currently active training task (NOTE: training task is tracked in model as can only be one training operation active at a time, running is tracked externally as there can be multiple active at once)
+	FInteractMLTask::Ptr TrainingTask; //currently active training task (NOTE: training task is tracked in model as can only be one training operation active at a time, running is tracked externally as there can be multiple active at once)
 	mutable bool bTrainingCompleted;				 //node just finished training asynchronously (only stays true until checked)
 	
 	//---- constants ----
@@ -66,12 +70,12 @@ public:
 	//---- operation ----
 	bool RunModel( struct FInteractMLParameterCollection* parameters, TArray<float>& output );			//single sample
 	bool RunModel( struct FInteractMLParameterSeries* parameter_series, TArray<float>& output );		//series of samples
-	TSharedPtr<FInteractMLTask> RunModelAsync( struct FInteractMLParameterCollection* parameters );		//single sample
-	TSharedPtr<FInteractMLTask> RunModelAsync( struct FInteractMLParameterSeries* parameter_series );	//series of samples
+	FInteractMLTask::Ptr RunModelAsync( struct FInteractMLParameterCollection* parameters );		//single sample
+	FInteractMLTask::Ptr RunModelAsync( struct FInteractMLParameterSeries* parameter_series );	//series of samples
 	void TrainModel(class UInteractMLTrainingSet* training_set);
 	void TrainModelAsync(class UInteractMLTrainingSet* training_set);
 	void ResetModel();
-	void HandleCompletedTask( TSharedPtr<FInteractMLTask> task );
+	void HandleCompletedTask( FInteractMLTask::Ptr task );
 	
 	//---- persistence ----
 	virtual void Create() override; //nothing to load, created a new one
@@ -83,6 +87,7 @@ public:
 	//type of model
 	virtual bool IsSeries() const { return false; }	//matching against a series of snapshots instead of a single shapshot?
 	virtual bool IsContinuous() const { return false; }	//produces interpolated outputs instead of discreet values?
+	virtual bool CanRunConcurrently() const { return false; } //can we run this model concurrently? (default to no, algorithms known to be thread-safe can return true)
 	// each type provides qualifying extension prefix
 	virtual FString GetExtensionPrefix() const override { return GetSpecificExtensionPrefix() + cExtensionPrefix; }
 	//each type provides further qualifying extension prefix
@@ -98,14 +103,17 @@ protected:
 	virtual modelSetFloat* GetModelInstance() const { check(false); return nullptr; } //must override (where applicable to default implementation provided here)
 	//async
 	friend struct FInteractMLTask;
-	virtual TSharedPtr<FInteractMLTask> BeginTrainingModel( class UInteractMLTrainingSet* training_set );
-	virtual void DoTrainingModel( TSharedPtr<FInteractMLTask> train_task ); //NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
-	virtual void EndTrainingModel( TSharedPtr<FInteractMLTask> train_task );
-	virtual TSharedPtr<FInteractMLTask> BeginRunningModel( struct FInteractMLParameterCollection* parameters );
-	virtual TSharedPtr<FInteractMLTask> BeginRunningModel( struct FInteractMLParameterSeries* parameter_series ) { check(false); return 0; }
-	virtual void DoRunningModel( TSharedPtr<FInteractMLTask> run_task ); //NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
-	virtual void EndRunningModel( TSharedPtr<FInteractMLTask> run_task );
-	
+	virtual FInteractMLTask::Ptr BeginTrainingModel( class UInteractMLTrainingSet* training_set );
+	virtual void DoTrainingModel( FInteractMLTask::Ptr train_task ); //NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
+	virtual void EndTrainingModel( FInteractMLTask::Ptr train_task );
+	virtual FInteractMLTask::Ptr BeginRunningModel( struct FInteractMLParameterCollection* parameters );
+	virtual FInteractMLTask::Ptr BeginRunningModel( struct FInteractMLParameterSeries* parameter_series ) { check(false); return 0; }
+	virtual void DoRunningModel( FInteractMLTask::Ptr run_task ); //NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
+	virtual void EndRunningModel( FInteractMLTask::Ptr run_task );	
+	//tracking of tasks running this model
+	bool CheckAddTask(FInteractMLTask::Ptr task);	//returns true if you are allowed to run this task
+	void CheckRemoveTask(FInteractMLTask::Ptr task);
+
 private:
 	
 };

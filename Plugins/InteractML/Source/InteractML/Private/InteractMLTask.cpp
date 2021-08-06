@@ -8,6 +8,7 @@
 
 //module
 #include "InteractML.h"
+#include "InteractMLModel.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
@@ -15,6 +16,7 @@
 // CONSTANTS & MACROS
 
 // LOCAL CLASSES & TYPES
+
 
 
 //main operation (on background thread)

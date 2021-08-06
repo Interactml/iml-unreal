@@ -89,7 +89,7 @@ bool UInteractMLModel::SaveJson(FString& json_string) const
 //
 bool UInteractMLModel::RunModel(FInteractMLParameterCollection* parameters, TArray<float>& outputs)
 {
-	TSharedPtr<FInteractMLTask> task = BeginRunningModel( parameters );
+	FInteractMLTask::Ptr task = BeginRunningModel( parameters );
 	//train now, blocking execution until complete
 	UE_LOG( LogInteractML, Display, TEXT( "Running model '%s' synchronously" ), *GetName() );
 	task->Run();
@@ -105,7 +105,7 @@ bool UInteractMLModel::RunModel(FInteractMLParameterCollection* parameters, TArr
 //
 bool UInteractMLModel::RunModel(FInteractMLParameterSeries* parameter_series, TArray<float>& outputs )
 {
-	TSharedPtr<FInteractMLTask> task = BeginRunningModel( parameter_series );
+	FInteractMLTask::Ptr task = BeginRunningModel( parameter_series );
 	//train now, blocking execution until complete
 	UE_LOG( LogInteractML, Display, TEXT( "Running model '%s' synchronously" ), *GetName() );
 	task->Run();
@@ -118,17 +118,33 @@ bool UInteractMLModel::RunModel(FInteractMLParameterSeries* parameter_series, TA
 // run the model against the single provided parameter set
 // NOTE: for single match, runs asynchronously, i.e. no results until task completes
 //
-TSharedPtr<FInteractMLTask>  UInteractMLModel::RunModelAsync(FInteractMLParameterCollection* parameters)
+FInteractMLTask::Ptr UInteractMLModel::RunModelAsync(FInteractMLParameterCollection* parameters)
 {
-	return BeginRunningModel( parameters );
+	FInteractMLTask::Ptr task = BeginRunningModel(parameters);
+	if (CheckAddTask(task))
+	{
+		return task;
+	}
+
+	//can't run concurrently
+	UE_LOG(LogInteractML, Error, TEXT("Unable to run model %s concurrently because the RapidLib library doesn't support it yet for %s."), *GetName(), *GetClass()->GetName() );
+	return nullptr;
 }
 
 // run the model against the provided series of parameter sets
 // NOTE: for series match, runs asynchronously, i.e. no results until task completes
 //
-TSharedPtr<FInteractMLTask>  UInteractMLModel::RunModelAsync(FInteractMLParameterSeries* parameter_series)
+FInteractMLTask::Ptr UInteractMLModel::RunModelAsync(FInteractMLParameterSeries* parameter_series)
 {
-	return BeginRunningModel( parameter_series );
+	FInteractMLTask::Ptr task = BeginRunningModel(parameter_series);
+	if (CheckAddTask(task))
+	{
+		return task;
+	}
+	
+	//can't run concurrently
+	UE_LOG(LogInteractML, Error, TEXT("Unable to run model %s concurrently because the RapidLib library doesn't support it yet for %s."), *GetName(), *GetClass()->GetName() );
+	return nullptr;
 }
 
 // train the model with the provided training set
@@ -195,10 +211,10 @@ void UInteractMLModel::ResetModel()
 
 // fallback preparation for training a model, can be specialised
 //
-TSharedPtr<FInteractMLTask> UInteractMLModel::BeginTrainingModel(UInteractMLTrainingSet* training_set)
+FInteractMLTask::Ptr UInteractMLModel::BeginTrainingModel(UInteractMLTrainingSet* training_set)
 {
 	//create training task
-	TSharedPtr<FInteractMLTask> task = MakeShareable( new FInteractMLTask( this, EInteractMLTaskType::Train ) );
+	FInteractMLTask::Ptr task = MakeShareable( new FInteractMLTask( this, EInteractMLTaskType::Train ) );
 
 	//gather
 	const TArray<FInteractMLExample>& training_examples = training_set->GetExamples();
@@ -259,7 +275,7 @@ TSharedPtr<FInteractMLTask> UInteractMLModel::BeginTrainingModel(UInteractMLTrai
 // do actual training of the model
 // NOTE: Multithreaded call, only train in context of the training task state or known thread-safe calls
 //
-void UInteractMLModel::DoTrainingModel( TSharedPtr<FInteractMLTask> training_task )
+void UInteractMLModel::DoTrainingModel( FInteractMLTask::Ptr training_task )
 {
 	//train the model
 	modelSetFloat* model = GetModelInstance();
@@ -267,7 +283,7 @@ void UInteractMLModel::DoTrainingModel( TSharedPtr<FInteractMLTask> training_tas
 }
 
 // handle results of training
-void UInteractMLModel::EndTrainingModel( TSharedPtr<FInteractMLTask> training_task )
+void UInteractMLModel::EndTrainingModel( FInteractMLTask::Ptr training_task )
 {
 	//done
 	check(training_task == TrainingTask);
@@ -290,7 +306,7 @@ void UInteractMLModel::EndTrainingModel( TSharedPtr<FInteractMLTask> training_ta
 
 // fallback operation of running a single sample model, can be specialised
 //
-TSharedPtr<FInteractMLTask> UInteractMLModel::BeginRunningModel(struct FInteractMLParameterCollection* parameters)
+FInteractMLTask::Ptr UInteractMLModel::BeginRunningModel(struct FInteractMLParameterCollection* parameters)
 {
 	check(!IsSeries()); //shouldn't be trying to run a series model with single input
 	if (!IsTrained())
@@ -300,7 +316,7 @@ TSharedPtr<FInteractMLTask> UInteractMLModel::BeginRunningModel(struct FInteract
 	}
 
 	//create running task
-	TSharedPtr<FInteractMLTask> task = MakeShareable(new FInteractMLTask(this, EInteractMLTaskType::Run));
+	FInteractMLTask::Ptr task = MakeShareable(new FInteractMLTask(this, EInteractMLTaskType::Run));
 
 	//convert parameter data to RapidLib form
 	for (int iparam = 0; iparam < parameters->Values.Num(); iparam++)
@@ -318,7 +334,7 @@ TSharedPtr<FInteractMLTask> UInteractMLModel::BeginRunningModel(struct FInteract
 // fallback operation of running a single sample model, can be specialised
 // NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
 //
-void UInteractMLModel::DoRunningModel(TSharedPtr<FInteractMLTask> run_task)
+void UInteractMLModel::DoRunningModel(FInteractMLTask::Ptr run_task)
 {
 	//run the model
 	modelSetFloat* model = GetModelInstance();
@@ -345,7 +361,7 @@ void UInteractMLModel::DoRunningModel(TSharedPtr<FInteractMLTask> run_task)
 
 // handle results of running model
 //
-void UInteractMLModel::EndRunningModel( TSharedPtr<FInteractMLTask> run_task )
+void UInteractMLModel::EndRunningModel( FInteractMLTask::Ptr run_task )
 {
 	//expecting single label?
 	int num_expected = IsDiscrete()?1:LabelCache.GetNumValues();
@@ -357,9 +373,34 @@ void UInteractMLModel::EndRunningModel( TSharedPtr<FInteractMLTask> run_task )
 	{
 		run_task->Context->StopRunning(run_task);
 	}
+
+	//done running this model
+	CheckRemoveTask(run_task);
+}
+
+// track model use: record this task as currently running this model
+// returns true if you are allowed to run this task
+//
+bool UInteractMLModel::CheckAddTask(FInteractMLTask::Ptr task)
+{
+	//check concurency allowed
+	if (RunTasks.Num() > 0			//(already running?)
+		&& !CanRunConcurrently())	//(but not allowed!)
+	{
+		return false;
+	}
+	
+	RunTasks.AddUnique(task);
+	return true;
+}
+
+// track model use: clear record of this task running this model
+//
+void UInteractMLModel::CheckRemoveTask(FInteractMLTask::Ptr task)
+{
+	RunTasks.Remove(task);
 }
 
 
 // EPILOGUE
 #undef LOCTEXT_NAMESPACE
-

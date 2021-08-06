@@ -9,7 +9,10 @@
 
 //module
 #include "InteractMLHelpers.h"
-#include "InteractMLModel.h"
+
+//rapidlib
+#include "modelSet.h"
+using modelSetFloat = modelSet<float>;
 
 //general declarations
 
@@ -26,8 +29,11 @@ enum class EInteractMLTaskType
 // Can be dispatched off to other threads to run asynchronously if needed
 // Monolithic (rather then inheritance hierarchy) to make handling of results simpler
 //
-struct FInteractMLTask : public TSharedFromThis<FInteractMLTask>
+struct FInteractMLTask : public TSharedFromThis<FInteractMLTask,ESPMode::ThreadSafe>
 {
+	//pointers to tasks need to be thread safe, use this typedef
+	typedef TSharedPtr<FInteractMLTask, ESPMode::ThreadSafe> Ptr;
+
 	//////////////// INPUT //////////////
 
 	//type of operation
@@ -50,6 +56,9 @@ struct FInteractMLTask : public TSharedFromThis<FInteractMLTask>
 
 	//////////////// OUTPUT //////////////
 
+	//flag as cancelled
+	volatile bool bCancelled;
+
 	//successful operation?
 	bool bSuccess;
 
@@ -62,6 +71,9 @@ struct FInteractMLTask : public TSharedFromThis<FInteractMLTask>
 	FInteractMLTask(UInteractMLModel* model, EInteractMLTaskType action)
 		: Type(action)
 		, Model(model)
+		, Context(nullptr)
+		, bCancelled( false )
+		, bSuccess(false)
 	{
 	}
 	
@@ -70,5 +82,8 @@ struct FInteractMLTask : public TSharedFromThis<FInteractMLTask>
 
 	//apply results (on main thread)
 	void Apply();
+
+	//mark for cancel
+	void Cancel() { bCancelled = true; }
 
 };

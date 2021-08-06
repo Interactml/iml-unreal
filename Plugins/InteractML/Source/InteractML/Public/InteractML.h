@@ -7,6 +7,7 @@
 //module
 #include "CoreMinimal.h"
 #include "Modules/ModuleInterface.h"
+#include "InteractMLTask.h"
 
 //unreal
 //#include "Containers/Tickers.h"
@@ -35,8 +36,9 @@ class INTERACTML_API FInteractMLModule
 	FDelegateHandle TickDelegateHandle;
 
 	//async support
-	TArray<TSharedPtr<struct FInteractMLTask>>	CompletedTasks;
-	FCriticalSection							CompletedTaskInterlock;
+	TArray<FInteractMLTask::Ptr>	PendingTasks;
+	TArray<FInteractMLTask::Ptr>	CompletedTasks;
+	FCriticalSection				CompletedTaskInterlock;
 
 public:
 	//systems
@@ -59,7 +61,7 @@ public:
 	void SetModel( class UInteractMLModel* model );
 
 	//async execution
-	void RunTask( TSharedPtr<struct FInteractMLTask> task );
+	void RunTask( FInteractMLTask::Ptr task );
 	
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
@@ -78,5 +80,7 @@ private:
 	//shutdown
 	void ShutdownTick();
 	void ShutdownCache();
+	void ShutdownTasks();
+
 	
 };

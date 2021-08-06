@@ -84,7 +84,7 @@ bool UInteractMLDynamicTimeWarpModel::RunModelInstance(struct FInteractMLParamet
 
 // prepare for DTW running
 //
-TSharedPtr<FInteractMLTask> UInteractMLDynamicTimeWarpModel::BeginRunningModel(struct FInteractMLParameterSeries* parameter_series)
+FInteractMLTask::Ptr UInteractMLDynamicTimeWarpModel::BeginRunningModel(struct FInteractMLParameterSeries* parameter_series)
 {
 	//check
 	check(IsSeries()); //shouldn't be trying to run a series model with single input
@@ -95,7 +95,7 @@ TSharedPtr<FInteractMLTask> UInteractMLDynamicTimeWarpModel::BeginRunningModel(s
 	}
 
 	//create running task
-	TSharedPtr<FInteractMLTask> task = MakeShareable(new FInteractMLTask(this, EInteractMLTaskType::Run));
+	FInteractMLTask::Ptr task = MakeShareable(new FInteractMLTask(this, EInteractMLTaskType::Run));
 
 	//convert to RapidLib form
 	int num_samples = parameter_series->Num();
@@ -118,16 +118,13 @@ TSharedPtr<FInteractMLTask> UInteractMLDynamicTimeWarpModel::BeginRunningModel(s
 		}
 	}
 
-	//ensure model will be available during execution
-	check(GetModelInstance());
-
 	return task;
 }
 
 // run the DTW model
 // NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
 //
-void UInteractMLDynamicTimeWarpModel::DoRunningModel( TSharedPtr<FInteractMLTask> run_task )
+void UInteractMLDynamicTimeWarpModel::DoRunningModel( FInteractMLTask::Ptr run_task )
 {	
 	//don't run on 0 samples (actually crashes the model)
 	if(run_task->InputSeries.size() > 0)
@@ -155,10 +152,10 @@ void UInteractMLDynamicTimeWarpModel::DoRunningModel( TSharedPtr<FInteractMLTask
 // preparation for training dtw model
 // NOTE: not async training, as it's just a copy, saves processing/passing state to task object
 //
-TSharedPtr<FInteractMLTask> UInteractMLDynamicTimeWarpModel::BeginTrainingModel(UInteractMLTrainingSet* training_set)
+FInteractMLTask::Ptr UInteractMLDynamicTimeWarpModel::BeginTrainingModel(UInteractMLTrainingSet* training_set)
 {
 	//create training task
-	TSharedPtr<FInteractMLTask> task = MakeShareable( new FInteractMLTask( this, EInteractMLTaskType::Train ) );
+	FInteractMLTask::Ptr task = MakeShareable( new FInteractMLTask( this, EInteractMLTaskType::Train ) );
 
 	//we keep a copy of our training set
 	Examples = training_set->GetExamples();
@@ -172,7 +169,7 @@ TSharedPtr<FInteractMLTask> UInteractMLDynamicTimeWarpModel::BeginTrainingModel(
 // nothing to do for DTW training
 // NOTE: Multithreaded call, only train in context of the training task state or known thread-safe calls
 //
-void UInteractMLDynamicTimeWarpModel::DoTrainingModel( TSharedPtr<FInteractMLTask> training_task )
+void UInteractMLDynamicTimeWarpModel::DoTrainingModel( FInteractMLTask::Ptr training_task )
 {
 	//nothing to do, training happens in Begin (since it's just a simple copy op)
 }

@@ -58,10 +58,10 @@ protected:
 	virtual void ResetModelInstance() override;
 	virtual modelSetFloat* GetModelInstance() const override { /*not compatible with general model base*/ check(false); return nullptr; }
 	//async
-	virtual TSharedPtr<FInteractMLTask> BeginTrainingModel( class UInteractMLTrainingSet* training_set ) override;
-	virtual void DoTrainingModel( TSharedPtr<FInteractMLTask> training_task ) override; //NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
-	virtual TSharedPtr<FInteractMLTask> BeginRunningModel(struct FInteractMLParameterSeries* parameter_series) override;
-	virtual void DoRunningModel( TSharedPtr<FInteractMLTask> run_task ) override; //NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
+	virtual FInteractMLTask::Ptr BeginTrainingModel( class UInteractMLTrainingSet* training_set ) override;
+	virtual void DoTrainingModel( FInteractMLTask::Ptr training_task ) override; //NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
+	virtual FInteractMLTask::Ptr BeginRunningModel(struct FInteractMLParameterSeries* parameter_series) override;
+	virtual void DoRunningModel( FInteractMLTask::Ptr run_task ) override; //NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
 	
 
 

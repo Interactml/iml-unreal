@@ -120,7 +120,9 @@ public:
 	// model running : composite label
 	UFUNCTION(BlueprintCallable, CustomThunk, meta=(CustomStructureParam="LabelData"), BlueprintInternalUseOnly)
 	static void RunModelComposite(AActor* Actor, UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID, const UInteractMLLabel* LabelType, FGenericStruct& LabelData);
-
+	UFUNCTION(BlueprintCallable, CustomThunk, meta=(CustomStructureParam="LabelData"), BlueprintInternalUseOnly)
+	static void RunModelCompositeAsync(AActor* Actor, UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID, const UInteractMLLabel* LabelType, FGenericStruct& LabelData, bool& Running, bool& Completed);
+	
 	// generic implementation of RunModelComposite
 	//
 	static void Generic_RunModelComposite(AActor* Actor, UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID, const UInteractMLLabel* LabelType, void* LabelData);
@@ -150,6 +152,39 @@ public:
 		P_NATIVE_END;
 	}
 	
+	// generic implementation of RunModelCompositeAsync
+	//
+	static void Generic_RunModelCompositeAsync(AActor* Actor, UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID, const UInteractMLLabel* LabelType, void* LabelData, bool& Running, bool& Completed);
+	/** Based on UInteractMLBlueprintLibrary::execRunModelComposite */
+	//AActor* Actor, 
+	//UInteractMLModel* Model, 
+	//FInteractMLParameters Parameters, 
+	//bool Run, 
+	//FString NodeID, 
+	//const UInteractMLLabel* LabelType, 
+	//FGenericStruct& LabelData,
+	//bool& Running,
+	//bool& Completed);
+	DECLARE_FUNCTION(execRunModelCompositeAsync)
+	{
+		P_GET_OBJECT(AActor, Actor);
+		P_GET_OBJECT(UInteractMLModel, Model);
+		Stack.StepCompiledIn<FStructProperty>(NULL); //P_GET_PROPERTY(FInteractMLParameters, Parameters); - dont' need named prop entry, structs passed via pointer
+		FInteractMLParameters* ParametersStructAddr = (FInteractMLParameters*)Stack.MostRecentPropertyAddress;
+		P_GET_PROPERTY(FBoolProperty, Run);
+		P_GET_PROPERTY(FStrProperty, NodeID);
+		P_GET_OBJECT(UInteractMLLabel, LabelType);
+		Stack.StepCompiledIn<FStructProperty>(NULL); //P_GET_PROPERTY(FStructProperty, LabelData); - dont' need named prop entry, structs passed via pointer
+		void* LabelDataStructAddr = Stack.MostRecentPropertyAddress;
+		P_GET_UBOOL_REF(Out_Running);
+		P_GET_UBOOL_REF(Out_Completed);
+		P_FINISH;
+		
+		P_NATIVE_BEGIN;
+		Generic_RunModelCompositeAsync(Actor, Model, *ParametersStructAddr, Run, NodeID, LabelType, LabelDataStructAddr, Out_Running, Out_Completed);
+		P_NATIVE_END;
+	}	
+
 	// model training : blocking
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
 	static bool TrainModel(AActor* Actor, UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID);

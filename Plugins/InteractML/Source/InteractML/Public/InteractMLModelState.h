@@ -10,6 +10,7 @@
 //module
 #include "InteractMLHelpers.h"
 #include "InteractMLParameters.h"
+#include "InteractMLTask.h"
 
 //general declarations
 
@@ -28,7 +29,7 @@ public:
 	FInteractMLParameterSeries ParameterSeries;
 
 	// currently running the model asynchronously
-	TSharedPtr<struct FInteractMLTask> Task;
+	FInteractMLTask::Ptr Task;
 
 	// completion flag (true until checked)
 	mutable bool bCompleted;
@@ -40,10 +41,10 @@ public:
 	void Reset();
 
 	// async handling : a run is starting
-	void StartRunning(TSharedPtr<FInteractMLTask> run_task);
+	void StartRunning(FInteractMLTask::Ptr run_task);
 
 	// async handling : a run has stopped
-	void StopRunning(TSharedPtr<FInteractMLTask> run_task);
+	void StopRunning(FInteractMLTask::Ptr run_task);
 
 	// currently running a model (async)
 	bool IsRunning() const { return Task.IsValid(); }
