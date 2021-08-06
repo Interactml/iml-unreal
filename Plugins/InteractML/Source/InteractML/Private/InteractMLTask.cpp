@@ -27,7 +27,7 @@ void FInteractMLTask::Run()
 			Model->DoTrainingModel( AsShared() );
 			break;
 		case EInteractMLTaskType::Run:
-			//Model->DoRunningModel( AsShared() );
+			Model->DoRunningModel( AsShared() );
 			break;
 		default:
 			break;
@@ -43,7 +43,7 @@ void FInteractMLTask::Apply()
 			Model->EndTrainingModel( AsShared() );
 			break;
 		case EInteractMLTaskType::Run:
-			//Model->EndRunningModel( AsShared() );
+			Model->EndRunningModel( AsShared() );
 			break;
 		default:
 			break;

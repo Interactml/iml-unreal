@@ -22,6 +22,7 @@ FString UInteractMLDynamicTimeWarpModel::cExtensionPrefix(TEXT(".dtw"));
 
 // LOCAL CLASSES & TYPES
 
+#if 0 //old
 // handle DTW running
 //
 bool UInteractMLDynamicTimeWarpModel::RunModelInstance(struct FInteractMLParameterSeries* parameter_series, TArray<float>& out_values)
@@ -77,6 +78,77 @@ bool UInteractMLDynamicTimeWarpModel::RunModelInstance(struct FInteractMLParamet
 	}
 
 	return false;
+}
+#endif
+
+
+// prepare for DTW running
+//
+TSharedPtr<FInteractMLTask> UInteractMLDynamicTimeWarpModel::BeginRunningModel(struct FInteractMLParameterSeries* parameter_series)
+{
+	//check
+	check(IsSeries()); //shouldn't be trying to run a series model with single input
+	if (!IsTrained())
+	{
+		UE_LOG(LogInteractML, Warning, TEXT("Running an untrained model: %s"), *GetFilePath());
+		return nullptr;
+	}
+
+	//create running task
+	TSharedPtr<FInteractMLTask> task = MakeShareable(new FInteractMLTask(this, EInteractMLTaskType::Run));
+
+	//convert to RapidLib form
+	int num_samples = parameter_series->Num();
+	for (int isamples = 0; isamples < num_samples; isamples++)
+	{
+		//emplace new collection for snapshot values (avoid copy after populating)
+		task->InputSeries.push_back(std::vector<float>());
+		std::vector<float>& model_input_parameters = task->InputSeries.back();
+
+		//incoming snapshot
+		const FInteractMLParameterCollection* parameters = parameter_series->GetSample(isamples);
+
+		//fill them in
+		int num_values = parameters->Values.Num();
+		model_input_parameters.reserve(num_values); //only realloc once
+		for (int i = 0; i < num_values; i++)
+		{
+			float value = parameters->Values[i];
+			model_input_parameters.push_back(value);
+		}
+	}
+
+	//ensure model will be available during execution
+	check(GetModelInstance());
+
+	return task;
+}
+
+// run the DTW model
+// NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
+//
+void UInteractMLDynamicTimeWarpModel::DoRunningModel( TSharedPtr<FInteractMLTask> run_task )
+{	
+	//don't run on 0 samples (actually crashes the model)
+	if(run_task->InputSeries.size() > 0)
+	{
+		//with the accumulated input parameter series we can now run the model
+		std::string label_text = Model->run( run_task->InputSeries );
+		
+		//interpret label
+		bool success = label_text.size() > 0;
+		if(success)
+		{
+			//interpret result
+			float label = FCStringAnsi::Atof( label_text.c_str() );
+			
+			run_task->Outputs.Reset();
+			run_task->Outputs.Add(label);
+			run_task->bSuccess = true;
+		}
+	}
+	
+	run_task->bSuccess = true;
 }
 
 

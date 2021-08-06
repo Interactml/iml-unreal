@@ -30,9 +30,24 @@ public:
 	// currently running the model asynchronously
 	TSharedPtr<struct FInteractMLTask> Task;
 
+	// completion flag (true until checked)
+	mutable bool bCompleted;
+
 	// last result calculated by running the model
 	TArray<float> CurrentResult;
 
 	// reset to initial state
 	void Reset();
+
+	// async handling : a run is starting
+	void StartRunning(TSharedPtr<FInteractMLTask> run_task);
+
+	// async handling : a run has stopped
+	void StopRunning(TSharedPtr<FInteractMLTask> run_task);
+
+	// currently running a model (async)
+	bool IsRunning() const { return Task.IsValid(); }
+
+	// completed running a model?
+	bool CheckCompleted() const { bool completed = bCompleted; bCompleted = false; return completed; }
 };

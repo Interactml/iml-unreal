@@ -111,9 +111,12 @@ public:
 	// model access
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
 	static UInteractMLModel* GetModel(AActor* Actor, FString DataPath, EInteractMLModelType ModelType, FString NodeID, bool& IsTrained);
+
 	// model running : simple label
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
 	static float RunModelSimple(AActor* Actor, UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID);
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static float RunModelSimpleAsync(AActor* Actor, UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID, bool& Running, bool& Completed);
 	// model running : composite label
 	UFUNCTION(BlueprintCallable, CustomThunk, meta=(CustomStructureParam="LabelData"), BlueprintInternalUseOnly)
 	static void RunModelComposite(AActor* Actor, UInteractMLModel* Model, FInteractMLParameters Parameters, bool Run, FString NodeID, const UInteractMLLabel* LabelType, FGenericStruct& LabelData);

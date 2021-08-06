@@ -372,7 +372,7 @@ UInteractMLModel* UInteractMLBlueprintLibrary::GetModel(AActor* Actor, FString D
 }
 
 
-// model running : simple label
+// model running : simple label, blocking
 //
 float UInteractMLBlueprintLibrary::RunModelSimple( 
 	AActor* Actor, 
@@ -431,7 +431,6 @@ float UInteractMLBlueprintLibrary::RunModelSimple(
 			success = Model->RunModel( Parameters.Ptr.Get(), model_state->CurrentResult );
 		}
 	}
-
 	
 	//report current/last available result
 	if (success)
@@ -443,6 +442,89 @@ float UInteractMLBlueprintLibrary::RunModelSimple(
 	}
 	return 0.0f;
 }
+
+// model running : simple label, async
+//
+float UInteractMLBlueprintLibrary::RunModelSimpleAsync( 
+	AActor* Actor, 
+	UInteractMLModel* Model, 
+	FInteractMLParameters Parameters, 
+	bool Run, 
+	FString NodeID,
+	bool& Running,
+	bool& Completed)
+{
+	if (!Model)
+	{
+		//no model, nothing to do
+		Running = false;
+		Completed = false;
+		return 0;
+	}
+	
+	//need context and state store to run with
+	UInteractMLContext* Context = GetMLContext( Actor );
+	check( Context );
+	FInteractMLModelState* model_state = Context->GetModelState( NodeID ).Get();
+	check( model_state );
+
+	//monitor for completion (before state checks which may want to retrigger this frame)
+	bool just_completed = model_state->CheckCompleted();	//(only check once as this resets on query)
+	//run complete? - new output will be available from the model state
+		
+	//series/single operation
+	if(Model->IsSeries())
+	{		
+		//-------------- SERIES: accumulate whilst active and run once complete ---------------
+		
+		//check for transition
+		if (model_state->RunAction.Triggered(Run, NodeID))
+		{
+			//change in run state
+			if (Run)
+			{
+				//just started a run
+				//reset stored series
+				model_state->ParameterSeries.Clear();
+			}
+			else
+			{
+				//just stopped a run
+				//TODO: Do we want to include the last parameter set sent as the run is stopped in the test set?
+				TSharedPtr<FInteractMLTask> run_task = Model->RunModelAsync( &model_state->ParameterSeries );
+				model_state->StartRunning(run_task);
+			}
+		}
+		else if(Run)
+		{
+			//still running
+			//record next parameter set
+			model_state->ParameterSeries.Add( Parameters.Ptr.Get() );
+		}
+	}
+	else
+	{
+		//--------------- SINGLE: just repeatedly run (retrigger) against a single parameter set ---------------
+		if (Run && !model_state->IsRunning())
+		{
+			TSharedPtr<FInteractMLTask> run_task = Model->RunModelAsync( Parameters.Ptr.Get() );
+			model_state->StartRunning(run_task);
+		}
+	}
+
+	//report status
+	Running = model_state->IsRunning();
+	Completed = just_completed;
+
+	//report new/current/last available result
+	if (model_state->CurrentResult.Num() == 1)
+	{
+		return model_state->CurrentResult[0];
+	}
+	return 0.0f;
+}
+
+
 
 // model running : composite label
 //

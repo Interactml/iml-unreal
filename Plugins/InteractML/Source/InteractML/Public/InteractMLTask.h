@@ -36,15 +36,24 @@ struct FInteractMLTask : public TSharedFromThis<FInteractMLTask>
 	//model to operate on
 	class UInteractMLModel* Model;
 
+	//model state that running operates in the context of
+	class FInteractMLModelState* Context;
+
 	//training input
 	std::vector<trainingExampleFloat> Examples;
+
+	//run inputs (single sampling)
+	std::vector<float> Inputs;
+
+	//run inputs (series sampling)
+	std::vector<std::vector<float>> InputSeries;
 
 	//////////////// OUTPUT //////////////
 
 	//successful operation?
 	bool bSuccess;
 
-	//output values)
+	//run output values
 	TArray<float> Outputs;	
 
 

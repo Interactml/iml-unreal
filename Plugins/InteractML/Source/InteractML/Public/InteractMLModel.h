@@ -64,8 +64,10 @@ public:
 	const FInteractMLLabelCache& GetLabelCache() const { return LabelCache; }
 	
 	//---- operation ----
-	bool RunModel( struct FInteractMLParameterCollection* parameters, TArray<float>& out_values );		//single sample
-	bool RunModel( struct FInteractMLParameterSeries* parameter_series, TArray<float>& out_values );	//series of samples
+	bool RunModel( struct FInteractMLParameterCollection* parameters, TArray<float>& output );			//single sample
+	bool RunModel( struct FInteractMLParameterSeries* parameter_series, TArray<float>& output );		//series of samples
+	TSharedPtr<FInteractMLTask> RunModelAsync( struct FInteractMLParameterCollection* parameters );		//single sample
+	TSharedPtr<FInteractMLTask> RunModelAsync( struct FInteractMLParameterSeries* parameter_series );	//series of samples
 	void TrainModel(class UInteractMLTrainingSet* training_set);
 	void TrainModelAsync(class UInteractMLTrainingSet* training_set);
 	void ResetModel();
@@ -75,6 +77,8 @@ public:
 	virtual void Create() override; //nothing to load, created a new one
 	virtual bool LoadJson(const FString& json_string) override;
 	virtual bool SaveJson(FString& json_string) const override;
+
+	//---- access ----
 	
 	//type of model
 	virtual bool IsSeries() const { return false; }	//matching against a series of snapshots instead of a single shapshot?
@@ -83,22 +87,24 @@ public:
 	virtual FString GetExtensionPrefix() const override { return GetSpecificExtensionPrefix() + cExtensionPrefix; }
 	//each type provides further qualifying extension prefix
 	virtual FString GetSpecificExtensionPrefix() const { check(false); return ""; }
-
+	
 	//derived
 	bool IsSingle() const { return !IsSeries(); }	//matching against a single snapshot of samples instead of a series?
 	bool IsDiscrete() const { return !IsContinuous(); } //produces discrete value outputs instead of interpolated?
 	
 protected:
 	//---- per model type specialisations ----
-	virtual bool RunModelInstance(struct FInteractMLParameterCollection* parameters, TArray<float>& out_values);
-	virtual bool RunModelInstance(struct FInteractMLParameterSeries* parameter_series, TArray<float>& out_values) { check(false); return 0; }
 	virtual void ResetModelInstance() { check(false); } //must override
-	virtual modelSetFloat* GetModelInstance() const { check(false); return nullptr; } //must override
+	virtual modelSetFloat* GetModelInstance() const { check(false); return nullptr; } //must override (where applicable to default implementation provided here)
 	//async
 	friend struct FInteractMLTask;
 	virtual TSharedPtr<FInteractMLTask> BeginTrainingModel( class UInteractMLTrainingSet* training_set );
-	virtual void DoTrainingModel( TSharedPtr<FInteractMLTask> training_task ); //NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
-	virtual void EndTrainingModel( TSharedPtr<FInteractMLTask> training_task );
+	virtual void DoTrainingModel( TSharedPtr<FInteractMLTask> train_task ); //NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
+	virtual void EndTrainingModel( TSharedPtr<FInteractMLTask> train_task );
+	virtual TSharedPtr<FInteractMLTask> BeginRunningModel( struct FInteractMLParameterCollection* parameters );
+	virtual TSharedPtr<FInteractMLTask> BeginRunningModel( struct FInteractMLParameterSeries* parameter_series ) { check(false); return 0; }
+	virtual void DoRunningModel( TSharedPtr<FInteractMLTask> run_task ); //NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
+	virtual void EndRunningModel( TSharedPtr<FInteractMLTask> run_task );
 	
 private:
 	

@@ -11,6 +11,7 @@
 #include "InteractMLParameters.h"
 #include "InteractMLTrainingSet.h"
 #include "InteractMLTask.h"
+#include "InteractMLModelState.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
@@ -86,18 +87,48 @@ bool UInteractMLModel::SaveJson(FString& json_string) const
 // returns the values matched against during the run
 // NOTE: for single match, runs synchronously, i.e. blocks until complete
 //
-bool UInteractMLModel::RunModel(FInteractMLParameterCollection* parameters, TArray<float>& out_values)
+bool UInteractMLModel::RunModel(FInteractMLParameterCollection* parameters, TArray<float>& outputs)
 {
-	return RunModelInstance( parameters, out_values );
+	TSharedPtr<FInteractMLTask> task = BeginRunningModel( parameters );
+	//train now, blocking execution until complete
+	UE_LOG( LogInteractML, Display, TEXT( "Running model '%s' synchronously" ), *GetName() );
+	task->Run();
+	task->Apply();
+	//results
+	outputs = task->Outputs;
+	return task->bSuccess;
 }
 
 // run the model against the provided series of parameter sets
 // returns the values matched against during the run
 // NOTE: for series match, runs synchronously, i.e. blocks until complete
 //
-bool UInteractMLModel::RunModel(FInteractMLParameterSeries* parameter_series, TArray<float>& out_values)
+bool UInteractMLModel::RunModel(FInteractMLParameterSeries* parameter_series, TArray<float>& outputs )
 {
-	return RunModelInstance( parameter_series, out_values );
+	TSharedPtr<FInteractMLTask> task = BeginRunningModel( parameter_series );
+	//train now, blocking execution until complete
+	UE_LOG( LogInteractML, Display, TEXT( "Running model '%s' synchronously" ), *GetName() );
+	task->Run();
+	task->Apply();
+	//results
+	outputs = task->Outputs;
+	return task->bSuccess;
+}
+
+// run the model against the single provided parameter set
+// NOTE: for single match, runs asynchronously, i.e. no results until task completes
+//
+TSharedPtr<FInteractMLTask>  UInteractMLModel::RunModelAsync(FInteractMLParameterCollection* parameters)
+{
+	return BeginRunningModel( parameters );
+}
+
+// run the model against the provided series of parameter sets
+// NOTE: for series match, runs asynchronously, i.e. no results until task completes
+//
+TSharedPtr<FInteractMLTask>  UInteractMLModel::RunModelAsync(FInteractMLParameterSeries* parameter_series)
+{
+	return BeginRunningModel( parameter_series );
 }
 
 // train the model with the provided training set
@@ -257,56 +288,77 @@ void UInteractMLModel::EndTrainingModel( TSharedPtr<FInteractMLTask> training_ta
 	}
 }
 
-
 // fallback operation of running a single sample model, can be specialised
 //
-bool UInteractMLModel::RunModelInstance(struct FInteractMLParameterCollection* parameters, TArray<float>& out_values)
+TSharedPtr<FInteractMLTask> UInteractMLModel::BeginRunningModel(struct FInteractMLParameterCollection* parameters)
 {
 	check(!IsSeries()); //shouldn't be trying to run a series model with single input
 	if (!IsTrained())
 	{
 		UE_LOG(LogInteractML, Warning, TEXT("Running an untrained model: %s"), *GetFilePath());
-		return false;
+		return nullptr;
 	}
-	
+
+	//create running task
+	TSharedPtr<FInteractMLTask> task = MakeShareable(new FInteractMLTask(this, EInteractMLTaskType::Run));
+
 	//convert parameter data to RapidLib form
-	std::vector<float> model_inputs;
 	for (int iparam = 0; iparam < parameters->Values.Num(); iparam++)
 	{
 		float value = parameters->Values[iparam];
-		model_inputs.push_back(value);
+		task->Inputs.push_back(value);
 	}
-	
+
+	//ensure model will be available during execution
+	check(GetModelInstance());
+
+	return task;
+}
+
+// fallback operation of running a single sample model, can be specialised
+// NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
+//
+void UInteractMLModel::DoRunningModel(TSharedPtr<FInteractMLTask> run_task)
+{
 	//run the model
 	modelSetFloat* model = GetModelInstance();
-	std::vector<float> outputs;
+	check(model);
 	try
 	{
-		outputs = model->run( model_inputs );
+		//run
+		std::vector<float> outputs;
+		outputs = model->run(run_task->Inputs);
+
+		//transfer out
+		run_task->Outputs.Reset(outputs.size());
+		for (size_t i = 0; i < outputs.size(); i++)
+		{
+			run_task->Outputs.Add(outputs[i]);
+		}
 	}
 	catch(std::exception ex)
 	{
 		//handle?
-		UE_LOG( LogInteractML, Error, TEXT( "Exception trying to run model %s : %s" ), *GetName(), StringCast<TCHAR>( ex.what() ).Get() );
-		return false;
+		UE_LOG(LogInteractML, Error, TEXT("Exception trying to run model %s : %s"), *GetName(), StringCast<TCHAR>(ex.what()).Get());
 	}
-	
+}
+
+// handle results of running model
+//
+void UInteractMLModel::EndRunningModel( TSharedPtr<FInteractMLTask> run_task )
+{
 	//expecting single label?
 	int num_expected = IsDiscrete()?1:LabelCache.GetNumValues();
-	bool success = outputs.size() == num_expected;
-	
-	//result
-	if (success)
+	run_task->bSuccess = run_task->Outputs.Num()==num_expected;
+
+	//dispatch completed task to node context it started on
+	//places results into context for lib fn to read
+	if(run_task->Context) //(not used for sync operation)
 	{
-		out_values.Reset();
-		for (size_t i = 0; i < outputs.size(); i++)
-		{
-			out_values.Add(outputs[i]);
-		}
-		return true;
+		run_task->Context->StopRunning(run_task);
 	}
-	return false;
 }
+
 
 // EPILOGUE
 #undef LOCTEXT_NAMESPACE
