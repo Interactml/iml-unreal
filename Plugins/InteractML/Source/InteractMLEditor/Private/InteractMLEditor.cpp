@@ -27,6 +27,7 @@ DEFINE_LOG_CATEGORY(LogInteractML);
 // LOCAL CLASSES & TYPES
 
 // GLOBAL STATE
+class FInteractMLEditorModule* FInteractMLEditorModule::EditorModule = nullptr;
 
 // CLASS STATE
 
@@ -36,10 +37,13 @@ DEFINE_LOG_CATEGORY(LogInteractML);
 //
 void FInteractMLEditorModule::StartupModule()
 {
+	EditorModule = this;
+
 	UE_LOG( LogInteractML, Display, TEXT( "Starting InteractML Plugin - Editor Module" ) );
 
 	InitHooks();
 	InitAssets();
+	InitExtensibility();
 }
 
 
@@ -54,6 +58,7 @@ void FInteractMLEditorModule::ShutdownModule()
 
 	ShutdownHooks();
 	ShutdownAssets();
+	ShutdownExtensibility();
 }
 
 
@@ -151,6 +156,22 @@ void FInteractMLEditorModule::ShutdownAssets()
 }
 
 
+
+// setup extensibility systems for extending editor and building custom panels
+//
+void FInteractMLEditorModule::InitExtensibility()
+{
+	//MenuExtensibilityManager = MakeShareable(new FExtensibilityManager);
+	ToolBarExtensibilityManager = MakeShareable(new FExtensibilityManager);
+	
+}
+// clean up
+//
+void FInteractMLEditorModule::ShutdownExtensibility()
+{
+	//MenuExtensibilityManager.Reset();
+	ToolBarExtensibilityManager.Reset();
+}
 
 
 // play in editor has stopped.  an opportunity to propertly flag any unsaved state as dirty
