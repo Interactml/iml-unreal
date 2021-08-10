@@ -495,7 +495,9 @@ float UInteractMLBlueprintLibrary::RunModelSimpleAsync(
 				model_state->StartRunning(run_task);
 			}
 		}
-		else if(Run)
+		
+		//accumulate
+		if(Run)
 		{
 			//still running
 			//record next parameter set
@@ -713,7 +715,9 @@ void UInteractMLBlueprintLibrary::Generic_RunModelCompositeAsync(
 				model_state->StartRunning(run_task);
 			}
 		}
-		else if(Run)
+		
+		//accumulate
+		if(Run)
 		{
 			//still running
 			//record next parameter set
