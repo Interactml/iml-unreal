@@ -79,6 +79,9 @@ class INTERACTML_API UInteractMLTrainingSet
 
 	// how many parameters in each sample (0 if unknown)
 	int ParameterCount;
+
+	// how many distinct labels?
+	int LabelCount;
 	
 	// accumulator for current active recording session
 	FInteractMLExample CurrentRecording;
@@ -97,6 +100,11 @@ public:
 	//---- access ----
 	bool HasExamples() const { return Examples.Num()>0; }
 	const TArray<FInteractMLExample>& GetExamples() const { return Examples; }
+	bool IsSingleSamples() const { return SampleMode == EInteractMLSampleMode::Single; }
+	bool IsSeriesSamples() const { return SampleMode == EInteractMLSampleMode::Series; }
+	int GetParameterCount() const { return ParameterCount; }
+	int GetLabelCount() const { return LabelCount; }
+	//interaction
 	bool IsRecording() const { return RecordingAction.Active(); }
 	bool IsResetting() const { return ResettingAction.Active(); }
 	

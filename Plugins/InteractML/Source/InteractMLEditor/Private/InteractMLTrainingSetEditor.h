@@ -24,6 +24,9 @@ struct FTrainingSetTreeItem : public TSharedFromThis<FTrainingSetTreeItem>
 	//the model we are the view model for
 	TWeakObjectPtr<class UInteractMLTrainingSet> Examples;
 
+	//specific example in the training set, the label and example we represent
+	int ExampleIndex;
+
 	//parent item in hierarchy
 	FTrainingSetTreeItem* Parent;	//(not TSharedPtr as existence is implied, don't want loops)
 	int IndexInParent;
@@ -37,17 +40,25 @@ struct FTrainingSetTreeItem : public TSharedFromThis<FTrainingSetTreeItem>
 		, Parent( nullptr )
 		, IndexInParent( 0 )
 	{}
-	FTrainingSetTreeItem( UInteractMLTrainingSet* pexamples, FTrainingSetTreeItem::Ptr parent, int index_in_parent )
+	FTrainingSetTreeItem( UInteractMLTrainingSet* pexamples, int example_index, FTrainingSetTreeItem::Ptr parent=nullptr, int index_in_parent=0 )
 		: Examples( pexamples )
+		, ExampleIndex( example_index )
 		, Parent( parent.Get() )
 		, IndexInParent( index_in_parent )
 	{}
 
 	//access
-	FString GetName() const;
+	int GetNumber() const;
+	FString GetLabel() const;
 	bool IsDimmed() const { return false; }
 	const FSlateBrush* GetIcon(bool is_open) const;
-		
+	int GetSamples() const;
+	FText GetDurationText() const;
+	FText GetSessionText() const;
+	FText GetUser() const;
+
+	
+
 	//editing
 	UObject* GetExamples();
 	void Sync(class UInteractMLTrainingSet* proot );
@@ -144,6 +155,7 @@ private:
 	TSharedRef<SVerticalBox> CreateTrainingSetHierarchyUI();
 	void ExtendToolbar(TSharedPtr<FExtender> Extender);	
 	void FillToolbar(FToolBarBuilder& ToolbarBuilder);
+	TSharedRef<SWidget> CreateInfoField(FText name, FText value, FText tooltip, float max_text_width=75.0f);
 
 	//idle/deferred updates
 	bool Tick(float DeltaTime);
@@ -195,22 +207,45 @@ public:
 	//static info
 	struct ColumnTypes
 	{	
-		static const FName& Example()
+		static const FName& Group()
 		{
-			static FName PathCol("Example");
-			return PathCol;
+			static FName Col("Group");
+			return Col;
+		}		
+		static const FName& Number()
+		{
+			static FName Col("Number");
+			return Col;
+		}	
+		static const FName& Label()
+		{
+			static FName Col("Label");
+			return Col;
 		}
-		
-		static FName& Count()
+		static const FName& Samples()
 		{
-			static FName TypeCol("Count");
-			return TypeCol;
+			static FName Col("Samples");
+			return Col;
 		}
-		
-		static FName& Timestamp()
+		static const FName& Duration()
 		{
-			static FName AssetCol("Timestamp");
-			return AssetCol;
+			static FName Col("Duration");
+			return Col;
+		}
+		static const FName& Session()
+		{
+			static FName Col("Session");
+			return Col;
+		}
+		static const FName& User()
+		{
+			static FName Col("User");
+			return Col;
+		}
+		static const FName& Notes()
+		{
+			static FName Col("Notes");
+			return Col;
 		}
 	};
 
@@ -375,7 +410,6 @@ private:
 	UObject* GetRowResource( FTrainingSetTreeItem::Ptr item ) const;
 	void SetRowResource( UObject* new_value, FTrainingSetTreeItem::Ptr item );
 	FText GetRowName( FTrainingSetTreeItem::Ptr item ) const;
-	FText GetRowType( FTrainingSetTreeItem::Ptr item ) const;
 	const FSlateBrush* GetRowIcon( FTrainingSetTreeItem::Ptr item ) const;
 	FSlateColor GetRowColourAndOpacity( FTrainingSetTreeItem::Ptr item ) const;
 

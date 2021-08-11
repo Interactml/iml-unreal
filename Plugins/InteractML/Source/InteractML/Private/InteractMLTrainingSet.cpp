@@ -63,6 +63,7 @@ void UInteractMLTrainingSet::ExtractCharacteristics()
 	//reset
 	SampleMode = EInteractMLSampleMode::Unknown;
 	ParameterCount = 0;
+	TSet<float> Labels;
 
 	//scan examples
 	int min_sample_count = MAX_int32;
@@ -88,7 +89,13 @@ void UInteractMLTrainingSet::ExtractCharacteristics()
 			min_param_count = FMath::Min(min_param_count, param_count );
 			max_param_count = FMath::Max(max_param_count, param_count );
 		}
+
+		//labels
+		Labels.Add(example.label);
 	}
+
+	//distinct labels
+	LabelCount = Labels.Num();
 
 	//results
 	bool invalid = false;
@@ -264,19 +271,8 @@ bool UInteractMLTrainingSet::EndRecording()
 		//flag as dirty
 		MarkUnsavedData();
 
-		//can we determine sample size?
-		if (SampleMode == EInteractMLSampleMode::Unknown)
-		{
-			//TODO: does series detection need to be more robust? (would need to explicitly pass in the mode)
-			if (CurrentRecording.inputSeries.Num() == 1)
-			{
-				SampleMode = EInteractMLSampleMode::Single;
-			}
-			else
-			{
-				SampleMode = EInteractMLSampleMode::Series;
-			}
-		}
+		//re-eval state to cache some stats/info
+		ExtractCharacteristics();
 	}
 	
 	//done

@@ -36,6 +36,7 @@ public:
 
 	// systems access
 	static class FInteractMLEditorModule* GetModule() { return EditorModule; }
+	static TSharedPtr<FSlateStyleSet> GetStyle() { return EditorModule->AssetStyleSet; }
 	
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;

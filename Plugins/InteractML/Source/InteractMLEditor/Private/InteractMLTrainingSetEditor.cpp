@@ -12,6 +12,7 @@
 #include "Widgets/Input/SSearchBox.h"
 #include "Widgets/Layout/SScrollBar.h"
 #include "Widgets/Layout/SScrollBox.h"
+#include "Widgets/Layout/SScaleBox.h"
 #include "WorkflowOrientedApp/SContentReference.h"
 #include "DragAndDrop/AssetDragDropOp.h"
 #include "SAssetDropTarget.h"
@@ -20,6 +21,7 @@
 //module
 #include "InteractMLTrainingSet.h"
 #include "InteractMLEditor.h"
+#include "InteractMLLabel.h"
 
 #define LOCTEXT_NAMESPACE "InteractML"
 
@@ -34,20 +36,27 @@ const FName FTrainingSetEditor::TrainingSetHierarchyTabId("InteractMLTrainingSet
 //////////////////////////////////////////////////////////////////////////
 // FTrainingSetTreeItem
 
-FString FTrainingSetTreeItem::GetName() const
+int FTrainingSetTreeItem::GetNumber() const
+{
+	return ExampleIndex+1; //1 based display
+}
+
+FString FTrainingSetTreeItem::GetLabel() const
 {
 	UInteractMLTrainingSet* pexamples = Examples.Get();
-	if(pexamples)
+	if (pexamples)
 	{
-		return pexamples->GetName();
+		const FInteractMLExample& example = pexamples->GetExamples()[ExampleIndex];
+		return FString::FromInt( (int)example.label );
 	}
-	
-	return TEXT("???");
+
+	return TEXT("");
 }
 
 const FSlateBrush* FTrainingSetTreeItem::GetIcon( bool is_open ) const
 {
 	UInteractMLTrainingSet* pexamples = Examples.Get();
+#if 0
 	if(pexamples)
 	{
 		FName icon_name;
@@ -61,9 +70,45 @@ const FSlateBrush* FTrainingSetTreeItem::GetIcon( bool is_open ) const
 			return picon;
 		}
 	}
-
-	return FEditorStyle::GetBrush("ClassIcon.BoxComponent");
+#endif
+	return FInteractMLEditorModule::GetStyle()->GetBrush("TreeViewIcons.SingleExample_16x");
 }
+
+int FTrainingSetTreeItem::GetSamples() const
+{
+	UInteractMLTrainingSet* pexamples = Examples.Get();
+	if (pexamples)
+	{
+		const FInteractMLExample& example = pexamples->GetExamples()[ExampleIndex];
+		return example.inputSeries.Num();
+	}
+	
+	return 0;
+}
+FText FTrainingSetTreeItem::GetDurationText() const
+{
+	UInteractMLTrainingSet* pexamples = Examples.Get();
+	if (pexamples && pexamples->IsSeriesSamples())
+	{
+		//duration of the series of samples
+		const FInteractMLExample& example = pexamples->GetExamples()[ExampleIndex];
+		float duration = (float)example.inputSeries.Num() / 60.0f;	//TODO: actual duration, for now assume 60FPS
+		return FText::Format(LOCTEXT("TrainingSetSeriesDurationFormat", "{0}"), FText::FromString(FString::Printf(TEXT("%.3f"), duration)));
+	}
+	
+	return FText::FromString( "0" );
+}
+FText FTrainingSetTreeItem::GetSessionText() const
+{
+	return FText::FromString("11/8/21 10:05:42");
+}
+FText FTrainingSetTreeItem::GetUser() const
+{
+	return FText::FromString("sswain");
+}
+
+
+
 
 // update our whole hierarchy to match the provided resource list
 //
@@ -107,7 +152,7 @@ void FTrainingSetTreeItem::Sort()
 	{
 		FORCEINLINE bool operator()(const FTrainingSetTreeItem::Ptr A, const FTrainingSetTreeItem::Ptr B) const
 		{
-			return A->GetName().Compare( B->GetName() ) < 0;
+			return 0;// A->GetName().Compare(B->GetName()) < 0;
 		}
 	} lexical_compare;
 
@@ -355,10 +400,15 @@ void FTrainingSetEditor::RebuildEntryViewModel( bool track_item_instead_of_entry
 	{
 		TreeRoot.Empty();
 
-//		ResourcesRoot = MakeShareable( new FTrainingSetTreeItem() );
-//		TreeRoot.Add( ResourcesRoot );
+		UInteractMLTrainingSet* pexamples = GetEditableExamples();
+		const TArray<FInteractMLExample>& examples = pexamples->GetExamples();
+		for (int iexample = 0; iexample < examples.Num(); iexample++)
+		{
+			const FInteractMLExample& example = examples[iexample];
+			TreeRoot.Add(MakeShareable(new FTrainingSetTreeItem(pexamples, iexample)));
+		}
 	}
-
+	
 #if 0
 	//store selection state
 	if(SelectedItem.IsValid())
@@ -377,10 +427,7 @@ void FTrainingSetEditor::RebuildEntryViewModel( bool track_item_instead_of_entry
 	SetSelection( FTrainingSetTreeItem::Ptr() ); //clear actual selection for rebuild
 	
 	//incremental update
-	UInteractMLTrainingSet* pres_list = GetEditableExamples();
-	ResourcesRoot->Sync( pres_list->Resources );
-	ReferencesRoot->Sync( pres_list->References );
-	MissingRoot->SyncMissing( FInteractMLModule::GetModule()->GetMissingAssets(), ResourcesRoot->GetName() );
+	UInteractMLTrainingSet* pexamples = GetEditableExamples();
 #endif
 	RefreshTreeview();
 }
@@ -552,11 +599,148 @@ void FTrainingSetEditor::OnHierarchyTabActivated(TSharedRef<SDockTab> tab, ETabA
 {
 }
 
+//text access helpers
+static FText GetExampleModeText(UInteractMLTrainingSet* pexamples)
+{
+	if (pexamples->IsSingleSamples())
+	{
+		return LOCTEXT("TrainingSetModeDescSingle", "Single");
+	}
+	else if (pexamples->IsSeriesSamples())
+	{
+		return LOCTEXT("TrainingSetModeDescSeries", "Series");
+	}
+	else
+	{
+		return LOCTEXT("TrainingSetModeDescUnknown", "N/A");
+	}
+}
+static FText GetLabelTypeText(UInteractMLTrainingSet* pexamples)
+{
+	const class UInteractMLLabel* label_type = pexamples->GetLabelCache().LabelType;
+	if (label_type)
+	{
+		return FText::FromString( label_type->GetName() );
+	}
+	else
+	{
+		return LOCTEXT("TrainingSetLabelTypeSimpleDesc", "Simple (number)");
+	}
+}
+static FText GetExampleModeTooltip(UInteractMLTrainingSet* pexamples)
+{
+	if (pexamples->IsSingleSamples())
+	{
+		return LOCTEXT("TrainingSetModeTooltipSingle", "A single parameter snapshot is recorded with each example");
+	}
+	else if (pexamples->IsSeriesSamples())
+	{
+		return LOCTEXT("TrainingSetModeTooltipSeries", "A series of parameter snapshots are recorded for each example, usually over time");
+	}
+	else
+	{
+		return LOCTEXT("TrainingSetModeTooltipUnknown", "No examples recorded, mode unknown");
+	}
+}
+static FText GetExampleParametersTooltip(UInteractMLTrainingSet* pexamples)
+{
+	return LOCTEXT("TrainingSetParametersTooltip", "The number of numerical values derived from the live parameters recorded with each sample");
+}
+static FText GetExampleLabelCountTooltip(UInteractMLTrainingSet* pexamples)
+{
+	return LOCTEXT("TrainingSetLabelCountTooltip", "The number of distinct labels (output states) that examples have been recorded for");
+}
+static FText GetExampleLabelTypeTooltip(UInteractMLTrainingSet* pexamples)
+{
+	const class UInteractMLLabel* label_type = pexamples->GetLabelCache().LabelType;
+	if (label_type)
+	{
+		return LOCTEXT("TrainingSetLabelTypeSimpleDesc", "Label is a specific composite type, comprising of one or more assorted data types, see asset for details");
+	}
+	else
+	{
+		return LOCTEXT("TrainingSetLabelTypeSimpleDesc", "Label is a single numerical (float) value");
+	}
+}
+
+
+
 // hierarchy UI creation
 //
 TSharedRef<SVerticalBox> FTrainingSetEditor::CreateTrainingSetHierarchyUI()
 {
+	UInteractMLTrainingSet* pexamples = GetEditableExamples();
+
 	return SNew(SVerticalBox)
+		// training set information
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			SNew(SBorder)
+			.Padding(FMargin(3))
+			.BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
+			[
+				SNew(SVerticalBox)
+				+ SVerticalBox::Slot()
+				.AutoHeight()
+				.Padding(5, 2, 5, 2)
+				.VAlign( VAlign_Center )
+				[
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot()
+					.AutoWidth()
+					[
+						SNew(SScaleBox)
+						.StretchDirection(EStretchDirection::DownOnly)
+						.VAlign( VAlign_Center )
+						[
+							SNew(SImage)
+							.Image(	FInteractMLEditorModule::GetStyle()->GetBrush("MiscIcons.TrainingSet_16x") )
+						]
+					]
+					+ SHorizontalBox::Slot()
+					.Padding(4,0,0,0)
+					.FillWidth(1.0f)
+					[
+						SNew(STextBlock)
+						.Text( FText::FromString( pexamples->GetName() ) )
+						.Font(FCoreStyle::GetDefaultFontStyle("Normal", 16))
+					]
+				]
+				+ SVerticalBox::Slot()
+				.AutoHeight()
+				[
+					SNew(SHorizontalBox)
+					+SHorizontalBox::Slot()
+					.MaxWidth(180.0f)
+					[
+						CreateInfoField(LOCTEXT("TrainingSetModeLabel", "Sample Mode"), GetExampleModeText( pexamples ), GetExampleModeTooltip( pexamples ))
+					]
+					+SHorizontalBox::Slot()
+					.FillWidth(1.0f)
+					[
+						CreateInfoField(LOCTEXT("TrainingSetParametersLabel", "Parameters"), FText::FromString( FString::FromInt( pexamples->GetParameterCount() ) ), GetExampleParametersTooltip( pexamples ), 500.0f)
+					]
+				]
+				+ SVerticalBox::Slot()
+				.AutoHeight()
+				[
+					SNew(SHorizontalBox)
+					+SHorizontalBox::Slot()
+					.MaxWidth(180.0f)
+					[
+						CreateInfoField(LOCTEXT("TrainingSetLabelCountLabel", "Labels"), FText::FromString( FString::FromInt( pexamples->GetLabelCount() ) ), GetExampleLabelCountTooltip( pexamples ))
+					]
+					+SHorizontalBox::Slot()
+					.FillWidth(1.0f)
+					[
+						CreateInfoField(LOCTEXT("TrainingSetLabelTypeLabel", "Label Type"), GetLabelTypeText( pexamples ), GetExampleLabelTypeTooltip( pexamples ), 500.0f )
+					]
+				]
+			]
+		]
+
+		//examples table
 		+ SVerticalBox::Slot()
 		.FillHeight(1.0f)
 		[
@@ -576,25 +760,82 @@ TSharedRef<SVerticalBox> FTrainingSetEditor::CreateTrainingSetHierarchyUI()
 			.HeaderRow
 			(
 				SNew(SHeaderRow)
-				+ SHeaderRow::Column( STrainingSetTreeView::ColumnTypes::Example() )
-				.FillWidth(0.4f)
+				+ SHeaderRow::Column( STrainingSetTreeView::ColumnTypes::Group() )
+				.FillWidth(0.05f)
 				[
-					SNew(STextBlock).Text( LOCTEXT("TrainingSetExampleColumnTitle","Example") )
+					SNew(STextBlock).Text( LOCTEXT("TrainingSetGroupColumnTitle","") )
 					.Margin(4.0f)
 				]
-				+ SHeaderRow::Column( STrainingSetTreeView::ColumnTypes::Count() )
+				+ SHeaderRow::Column( STrainingSetTreeView::ColumnTypes::Number() )
+				.FillWidth(0.05f)
+				[
+					SNew(STextBlock).Text( LOCTEXT("TrainingSetGroupNumberTitle","#") )
+					.Margin(4.0f)
+				]
+				+ SHeaderRow::Column( STrainingSetTreeView::ColumnTypes::Label() )
+				.FillWidth(0.1f)
+				[
+					SNew(STextBlock).Text( LOCTEXT("TrainingSetGroupLabelTitle","Label") )
+					.Margin(4.0f)
+				]
+				+ SHeaderRow::Column( STrainingSetTreeView::ColumnTypes::Samples() )
+				.FillWidth(0.05f)
+				[
+					SNew(STextBlock).Text( LOCTEXT("TrainingSetGroupSamplesTitle","Samples") )
+					.Margin(4.0f)
+				]
+				+ SHeaderRow::Column( STrainingSetTreeView::ColumnTypes::Duration() )
+				.FillWidth(0.05f)
+				[
+					SNew(STextBlock).Text( LOCTEXT("TrainingSetGroupDurationTitle","Duration") )
+					.Margin(4.0f)
+				]
+#if 0 //not used yet
+				+ SHeaderRow::Column( STrainingSetTreeView::ColumnTypes::Session() )
+				.FillWidth(0.1f)
+				[
+					SNew(STextBlock).Text( LOCTEXT("TrainingSetGroupSessionTitle","Session") )
+					.Margin(4.0f)
+				]
+				+ SHeaderRow::Column( STrainingSetTreeView::ColumnTypes::User() )
+				.FillWidth(0.1f)
+				[
+					SNew(STextBlock).Text( LOCTEXT("TrainingSetGroupUserTitle","User") )
+					.Margin(4.0f)
+				]
+#endif
+				+ SHeaderRow::Column( STrainingSetTreeView::ColumnTypes::Notes() )
 				.FillWidth(0.2f)
 				[
-					SNew(STextBlock).Text( LOCTEXT("TrainingSetCountColumnTitle", "Count" ) )
-					.Margin(4.0f)
-				]
-				+ SHeaderRow::Column( STrainingSetTreeView::ColumnTypes::Timestamp() )
-				.FillWidth(0.4f)
-				[
-					SNew(STextBlock).Text( LOCTEXT("TrainingSetTimestampColumnTitle", "Timestamp" ) )
+					SNew(STextBlock).Text( LOCTEXT("TrainingSetGroupNotesTitle","Notes") )
 					.Margin(4.0f)
 				]
 			)
+		];
+}
+
+// build a name/value property display item
+//
+TSharedRef<SWidget> FTrainingSetEditor::CreateInfoField(FText name, FText value, FText tooltip, float max_text_width)
+{
+	return SNew(SHorizontalBox)
+		+ SHorizontalBox::Slot()
+		.Padding(5, 2, 5, 2)
+		.MaxWidth(95.0f)
+		.VAlign( VAlign_Center )
+		[
+			SNew(STextBlock)
+			.Text(FText::Format(LOCTEXT("TrainingSetInfoLabelFormat", "{0}:"), { name }))
+			.ToolTipText(tooltip)
+		]
+		+ SHorizontalBox::Slot()
+		.MaxWidth(max_text_width)
+		.VAlign( VAlign_Center )
+		[
+			SNew(STextBlock)
+			.Text( value )
+			.Font(FCoreStyle::GetDefaultFontStyle("Bold", 9))
+			.ToolTipText(tooltip)
 		];
 }
 
@@ -715,7 +956,7 @@ void FTrainingSetDragDrop::Construct()
 {
 	FDecoratedDragDropOp::Construct();
 
-	CurrentHoverText = FText::FromString( Item->GetName() );
+	CurrentHoverText = FText::FromString( Item->GetLabel() );
 	CurrentIconBrush = Item->GetIcon( false );
 	SetDecoratorVisibility( true );
 }
@@ -941,7 +1182,7 @@ FReply STrainingSetTreeRow::OnDrop(const FGeometry& MyGeometry, const FDragDropE
 		FTrainingSetDragDrop* psource = (FTrainingSetDragDrop*)op.Get();
 		if(psource)
 		{
-			UE_LOG(LogInteractML,Display,TEXT("DROPPED ITEM '%s' ONTO '%s'"), *psource->Item->GetName(), *pdestination_item->GetName() );
+			UE_LOG(LogInteractML,Display,TEXT("DROPPED ITEM '%s' ONTO '%s'"), *psource->Item->GetLabel(), *pdestination_item->GetLabel() );
 		}
 	}
 	return FReply::Handled();
@@ -951,14 +1192,7 @@ FReply STrainingSetTreeRow::OnDrop(const FGeometry& MyGeometry, const FDragDropE
 //
 FText STrainingSetTreeRow::GetRowName( FTrainingSetTreeItem::Ptr item ) const
 {
-	return FText::FromString( item->GetName() );
-}
-
-// Row accessor handler: get type
-//
-FText STrainingSetTreeRow::GetRowType( FTrainingSetTreeItem::Ptr item ) const
-{
-	return FText::FromString("Hello");
+	return FText::FromString( TEXT("") );
 }
 
 // Row accessor handler: get icon
@@ -972,14 +1206,13 @@ const FSlateBrush* STrainingSetTreeRow::GetRowIcon( FTrainingSetTreeItem::Ptr it
 //
 FSlateColor STrainingSetTreeRow::GetRowColourAndOpacity( FTrainingSetTreeItem::Ptr item ) const
 {
-	TSharedPtr<FTrainingSetEditor> res_list_editor = TrainingSetEditorWeak.Pin();
-	if(item->IsDimmed() && item!=res_list_editor->SelectedItem)	//(interferes with selection row highlight)
+	if(item->Examples->IsSingleSamples())
 	{
-		return FSlateColor::UseSubduedForeground(); //like in scene outliner
+		return FSlateColor::UseSubduedForeground(); //dim columns not used by single sample recordings
 	}
 	else
 	{
-		//TODO: work out why this causes icons to go black on selected rows
+		//normal appearance when series recording
 		return FSlateColor::UseForeground();
 	}	
 }
@@ -1015,8 +1248,8 @@ TSharedRef<SWidget> STrainingSetTreeRow::GenerateWidgetForColumn( const FName& C
 	}
 
 	//------------------------------------------------------------------------
-	// names and path
-	if( ColumnName == STrainingSetTreeView::ColumnTypes::Example() )
+	// grouping label, icon and hierarchy
+	if( ColumnName == STrainingSetTreeView::ColumnTypes::Group() )
 	{
 		TSharedPtr<FTrainingSetEditor> plisteditor = TrainingSetEditorWeak.Pin();
 
@@ -1024,7 +1257,7 @@ TSharedRef<SWidget> STrainingSetTreeRow::GenerateWidgetForColumn( const FName& C
 		TSharedPtr<SInlineEditableTextBlock> InlineTextBlock = SNew(SInlineEditableTextBlock)
 			.Text(this, &STrainingSetTreeRow::GetRowName, ItemPtr )
 //			.HighlightText( SceneOutliner.GetFilterHighlightText() )
-			.ColorAndOpacity(this, &STrainingSetTreeRow::GetRowColourAndOpacity, ItemPtr);
+//			.ColorAndOpacity(this, &STrainingSetTreeRow::GetRowColourAndOpacity, ItemPtr);
 //			.OnTextCommitted(this, &STrainingSetTreeRow::OnItemLabelCommitted, ItemPtr)
 //			.OnVerifyTextChanged(this, &STrainingSetTreeRow::OnVerifyItemLabelChange, ItemPtr)
 //			.IsSelected(FIsSelected::CreateSP(&InRow, &STrainingSetTreeRow::IsSelectedExclusively))
@@ -1036,6 +1269,7 @@ TSharedRef<SWidget> STrainingSetTreeRow::GenerateWidgetForColumn( const FName& C
 //		{
 //			ItemPtr->RenameRequestEvent.BindSP( InlineTextBlock.Get(), &SInlineEditableTextBlock::EnterEditingMode );
 //		}			
+			;
 
 		// The first column gets the tree expansion arrow for this row
 		auto ui =
@@ -1064,7 +1298,6 @@ TSharedRef<SWidget> STrainingSetTreeRow::GenerateWidgetForColumn( const FName& C
 					[
 						SNew(SImage)
 						.Image(this, &STrainingSetTreeRow::GetRowIcon, ItemPtr )
-						.ColorAndOpacity(this, &STrainingSetTreeRow::GetRowColourAndOpacity, ItemPtr )
 					]
 					+SHorizontalBox::Slot()
 					.Padding(6,0,0,0)
@@ -1074,7 +1307,6 @@ TSharedRef<SWidget> STrainingSetTreeRow::GenerateWidgetForColumn( const FName& C
 						InlineTextBlock.ToSharedRef()
 //						SNew( STextBlock )
 //						.Text( this, &STrainingSetTreeRow::GetRowName, ItemPtr )
-//						.ColorAndOpacity(this, &STrainingSetTreeRow::GetRowColourAndOpacity, ItemPtr )
 					]
 				]
 			];
@@ -1082,33 +1314,103 @@ TSharedRef<SWidget> STrainingSetTreeRow::GenerateWidgetForColumn( const FName& C
 			return ui;
 	}
 	//------------------------------------------------------------------------
-	// type
-	else if( ColumnName == STrainingSetTreeView::ColumnTypes::Count() )
+	// number
+	else if( ColumnName == STrainingSetTreeView::ColumnTypes::Number() )
 	{
-		// The second column displays the resource type
+		// The second column displays the number for the item
 		return
 			SNew( SHorizontalBox )
 			+SHorizontalBox::Slot()
 			.VAlign(VAlign_Center)
 			[
 				SNew( STextBlock )
-				.Text( FText::FromString("42") )
-				.ColorAndOpacity( FSlateColor::UseSubduedForeground() )	//like in scene outliner
+				.Text( FText::FromString( FString::FromInt( ItemPtr->GetNumber() ) ) )
 			];
 	}	
 	//------------------------------------------------------------------------
-	// asset information for this resource
-	else if( ColumnName == STrainingSetTreeView::ColumnTypes::Timestamp())
+	// label
+	else if( ColumnName == STrainingSetTreeView::ColumnTypes::Label())
 	{
-		// The second column displays the resource type
+		// The third column displays the label for this example
 		return
 			SNew( SHorizontalBox )
 			+SHorizontalBox::Slot()
 			.VAlign(VAlign_Center)
 			[
 				SNew( STextBlock )
-				.Text( FText::FromString("0:00:00") )
-				.ColorAndOpacity( FSlateColor::UseSubduedForeground() )	//like in scene outliner
+				.Text( FText::FromString( ItemPtr->GetLabel() ) )
+			];
+	}
+	//------------------------------------------------------------------------
+	// Samples
+	else if( ColumnName == STrainingSetTreeView::ColumnTypes::Samples())
+	{
+		// This column show sample count (only applicable to Series recording)
+		return
+			SNew( SHorizontalBox )
+			+SHorizontalBox::Slot()
+			.VAlign(VAlign_Center)
+			[
+				SNew( STextBlock )
+				.Text( FText::FromString( FString::FromInt( ItemPtr->GetSamples() ) ) )
+				.ColorAndOpacity(this, &STrainingSetTreeRow::GetRowColourAndOpacity, ItemPtr)
+		];
+	}
+	//------------------------------------------------------------------------
+	// Duration
+	else if( ColumnName == STrainingSetTreeView::ColumnTypes::Duration())
+	{
+		// This column show recording duration time (only applicable to Series recording)
+		return
+			SNew( SHorizontalBox )
+			+SHorizontalBox::Slot()
+			.VAlign(VAlign_Center)
+			[
+				SNew( STextBlock )
+				.Text( ItemPtr->GetDurationText() )
+				.ColorAndOpacity(this, &STrainingSetTreeRow::GetRowColourAndOpacity, ItemPtr)
+			];
+	}
+	//------------------------------------------------------------------------
+	// Session
+	else if( ColumnName == STrainingSetTreeView::ColumnTypes::Session())
+	{
+		// This column show session recording timestamp
+		return
+			SNew( SHorizontalBox )
+			+SHorizontalBox::Slot()
+			.VAlign(VAlign_Center)
+			[
+				SNew( STextBlock )
+				.Text( ItemPtr->GetSessionText() )
+			];
+	}
+	//------------------------------------------------------------------------
+	// User
+	else if( ColumnName == STrainingSetTreeView::ColumnTypes::User())
+	{
+		// This column shows the user who recorded this
+		return
+			SNew( SHorizontalBox )
+			+SHorizontalBox::Slot()
+			.VAlign(VAlign_Center)
+			[
+				SNew( STextBlock )
+				.Text( ItemPtr->GetUser() )
+			];
+	}
+	//------------------------------------------------------------------------
+	// Notes
+	else if( ColumnName == STrainingSetTreeView::ColumnTypes::Notes())
+	{
+		// This column shows any notes attached
+		return
+			SNew( SHorizontalBox )
+			+SHorizontalBox::Slot()
+			.VAlign(VAlign_Center)
+			[
+				SNew( STextBlock )
+				.Text( FText::FromString("") )
 			];
 	}
 	else

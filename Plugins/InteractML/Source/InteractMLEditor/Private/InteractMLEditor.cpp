@@ -141,6 +141,20 @@ void FInteractMLEditorModule::InitAssets()
 		AssetStyleSet->Set( "NodeIcons.Default_16x", NodeIcon );
 	}
 
+	//treeview icons
+	FSlateImageBrush* TreeIcon_SingleExample = new FSlateImageBrush( AssetStyleSet->RootToContentDir( TEXT( "Icons/ExampleSingle_16" ), TEXT( ".png" ) ), FVector2D( 16.f, 16.f ) );
+	if(TreeIcon_SingleExample)
+	{
+		AssetStyleSet->Set( "TreeViewIcons.SingleExample_16x", TreeIcon_SingleExample );
+	}
+
+	//misc icons
+	FSlateImageBrush* MiscIcon_TrainingSet_Small = new FSlateImageBrush( AssetStyleSet->RootToContentDir( TEXT( "Icons/InteractMLTrainingSet_16" ), TEXT( ".png" ) ), FVector2D( 16.f, 16.f ) );
+	if(MiscIcon_TrainingSet_Small)
+	{
+		AssetStyleSet->Set( "MiscIcons.TrainingSet_16x", MiscIcon_TrainingSet_Small );
+	}
+	
 	//register for use
 	FSlateStyleRegistry::RegisterSlateStyle(*AssetStyleSet);
 }
