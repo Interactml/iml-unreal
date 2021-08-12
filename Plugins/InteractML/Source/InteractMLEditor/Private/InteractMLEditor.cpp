@@ -103,32 +103,32 @@ void FInteractMLEditorModule::InitAssets()
 	AssetStyleSet->SetContentRoot(ContentDir);
 	
 	//asset icons
-	FSlateImageBrush* TrainingSetThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLTrainingSet"), TEXT(".png") ), FVector2D(128.f, 128.f) );
+	FSlateImageBrush* TrainingSetThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLTrainingSet_128"), TEXT(".png") ), FVector2D(128.f, 128.f) );
 	if (TrainingSetThumbnail)
 	{
 		AssetStyleSet->Set("ClassThumbnail.InteractMLTrainingSet", TrainingSetThumbnail);
 	}
-	FSlateImageBrush* ClassificationThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLClassification"), TEXT(".png") ), FVector2D(128.f, 128.f) );
+	FSlateImageBrush* ClassificationThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLClassification_128"), TEXT(".png") ), FVector2D(128.f, 128.f) );
 	if (ClassificationThumbnail)
 	{
 		AssetStyleSet->Set("ClassThumbnail.InteractMLClassificationModel", ClassificationThumbnail);
 	}
-	FSlateImageBrush* RegressionThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLRegression"), TEXT(".png") ), FVector2D(128.f, 128.f) );
+	FSlateImageBrush* RegressionThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLRegression_128"), TEXT(".png") ), FVector2D(128.f, 128.f) );
 	if (RegressionThumbnail)
 	{
 		AssetStyleSet->Set("ClassThumbnail.InteractMLRegressionModel", RegressionThumbnail);
 	}
-	FSlateImageBrush* DTWThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLDynamicTimewarp"), TEXT(".png") ), FVector2D(128.f, 128.f) );
+	FSlateImageBrush* DTWThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLDynamicTimewarp_128"), TEXT(".png") ), FVector2D(128.f, 128.f) );
 	if (DTWThumbnail)
 	{
 		AssetStyleSet->Set("ClassThumbnail.InteractMLDynamicTimewarpModel", DTWThumbnail);
 	}
-	FSlateImageBrush* LabelThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLLabel"), TEXT(".png") ), FVector2D(128.f, 128.f) );
+	FSlateImageBrush* LabelThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLLabel_128"), TEXT(".png") ), FVector2D(128.f, 128.f) );
 	if (LabelThumbnail)
 	{
 		AssetStyleSet->Set("ClassThumbnail.InteractMLLabel", LabelThumbnail);
 	}
-	FSlateImageBrush* LabelTableThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLLabelTable"), TEXT(".png") ), FVector2D(128.f, 128.f) );
+	FSlateImageBrush* LabelTableThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLLabelTable_128"), TEXT(".png") ), FVector2D(128.f, 128.f) );
 	if (LabelTableThumbnail)
 	{
 		AssetStyleSet->Set("ClassThumbnail.InteractMLLabelTable", LabelTableThumbnail);
@@ -142,7 +142,7 @@ void FInteractMLEditorModule::InitAssets()
 	}
 
 	//treeview icons
-	FSlateImageBrush* TreeIcon_SingleExample = new FSlateImageBrush( AssetStyleSet->RootToContentDir( TEXT( "Icons/ExampleSingle_16" ), TEXT( ".png" ) ), FVector2D( 16.f, 16.f ) );
+	FSlateImageBrush* TreeIcon_SingleExample = new FSlateImageBrush( AssetStyleSet->RootToContentDir( TEXT( "Icons/InteractMLExampleSingle_16" ), TEXT( ".png" ) ), FVector2D( 16.f, 16.f ) );
 	if(TreeIcon_SingleExample)
 	{
 		AssetStyleSet->Set( "TreeViewIcons.SingleExample_16x", TreeIcon_SingleExample );
@@ -153,6 +153,18 @@ void FInteractMLEditorModule::InitAssets()
 	if(MiscIcon_TrainingSet_Small)
 	{
 		AssetStyleSet->Set( "MiscIcons.TrainingSet_16x", MiscIcon_TrainingSet_Small );
+	}
+
+	//toolbar icons
+	FSlateImageBrush* ToolbarIcon_Delete = new FSlateImageBrush( AssetStyleSet->RootToContentDir( TEXT( "Icons/InteractMLDelete_40" ), TEXT( ".png" ) ), FVector2D( 40.f, 40.f ) );
+	if(ToolbarIcon_Delete)
+	{
+		AssetStyleSet->Set( "ToolbarIcons.Delete_40x", ToolbarIcon_Delete );
+	}
+	FSlateImageBrush* ToolbarIcon_Reset = new FSlateImageBrush( AssetStyleSet->RootToContentDir( TEXT( "Icons/InteractMLReset_40" ), TEXT( ".png" ) ), FVector2D( 40.f, 40.f ) );
+	if(ToolbarIcon_Reset)
+	{
+		AssetStyleSet->Set( "ToolbarIcons.Reset_40x", ToolbarIcon_Reset );
 	}
 	
 	//register for use
