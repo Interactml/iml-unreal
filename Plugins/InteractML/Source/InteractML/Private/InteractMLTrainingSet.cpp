@@ -6,6 +6,7 @@
 
 //unreal
 #include "JsonObjectConverter.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 //module
 #include "InteractML.h"
@@ -229,15 +230,36 @@ bool UInteractMLTrainingSet::ClearExamplesCollection(TArray<FInteractMLExample>&
 	return true;
 }
 
+// prep current recording state for accumulation, etc
+//
+void UInteractMLTrainingSet::NewRecordingSession( float label_number )
+{
+	//reset state/accumulation
+	CurrentRecording.label = label_number;
+	CurrentRecording.inputSeries.Empty();
+
+	//find id for new example
+	int max_id = -1;
+	for (int i = 0; i < Examples.Num(); i++)
+	{
+		max_id = FMath::Max(max_id, Examples[i].ID);
+	}
+	CurrentRecording.ID = max_id + 1;	
+	
+	//session info
+	CurrentRecording.Session = FDateTime::Now().ToString();
+	CurrentRecording.User = UKismetSystemLibrary::GetPlatformUserName();
+
+	//start recording timer
+	CurrentRecording.Duration = 0;
+	RecordingStart = FDateTime::Now();
+}
 
 // check ready, prep and start recording - simple label
 //
 bool UInteractMLTrainingSet::BeginRecording(float label)
 {
-	//reset
-	CurrentRecording.label = label;
-	CurrentRecording.inputSeries.Empty();
-
+	NewRecordingSession( label );
 	return true;
 }
 
@@ -247,11 +269,7 @@ bool UInteractMLTrainingSet::BeginRecording(const UInteractMLLabel* label_type, 
 {
 	//associate this label expected output values with a numeric label for lookup later
 	float label = LabelCache.Find(label_type, label_data);
-
-	//reset
-	CurrentRecording.label = label;
-	CurrentRecording.inputSeries.Empty();
-	
+	NewRecordingSession( label );
 	return true;
 }
 
@@ -299,13 +317,9 @@ bool UInteractMLTrainingSet::EndRecording()
 	//any data added?
 	if (CurrentRecording.inputSeries.Num() > 0)
 	{
-		//find id for it
-		int max_id = -1;
-		for (int i = 0; i < Examples.Num(); i++)
-		{
-			max_id = FMath::Max(max_id, Examples[i].ID);
-		}
-		CurrentRecording.ID = max_id + 1;
+		//timing
+		FTimespan elapsed = FDateTime::Now()-RecordingStart;
+		CurrentRecording.Duration = elapsed.GetTotalSeconds();
 
 		//move finished recording into the example set
 		Examples.Add( CurrentRecording );
@@ -315,7 +329,7 @@ bool UInteractMLTrainingSet::EndRecording()
 		MarkUnsavedData();
 
 		//re-eval state to cache some stats/info
-		ExtractCharacteristics();
+		RefreshDerivedState();
 	}
 	
 	//done

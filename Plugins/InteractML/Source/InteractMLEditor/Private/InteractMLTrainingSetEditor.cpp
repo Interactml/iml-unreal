@@ -98,19 +98,39 @@ FText FTrainingSetTreeItem::GetDurationText() const
 	{
 		//duration of the series of samples
 		const FInteractMLExample& example = pexamples->GetExamples()[ExampleIndex];
-		float duration = (float)example.inputSeries.Num() / 60.0f;	//TODO: actual duration, for now assume 60FPS
-		return FText::Format(LOCTEXT("TrainingSetSeriesDurationFormat", "{0}"), FText::FromString(FString::Printf(TEXT("%.3f"), duration)));
+		float duration = 0;
+		if (example.Duration != 0)
+		{
+			return FText::Format(LOCTEXT("TrainingSetSeriesDurationFormat", "{0}"), FText::FromString(FString::Printf(TEXT("%.3f"), example.Duration )));
+		}
+		else
+		{
+			float approx_duration = (float)example.inputSeries.Num() / 60.0f;	//assume 60FPS to give rough duration
+			return FText::Format(LOCTEXT("TrainingSetSeriesDurationApproxFormat", "~{0}"), FText::FromString(FString::Printf(TEXT("%.3f"), approx_duration )));
+		}
 	}
 	
-	return FText::FromString( "0" );
+	return FText();
 }
 FText FTrainingSetTreeItem::GetSessionText() const
 {
-	return FText::FromString("11/8/21 10:05:42");
+	UInteractMLTrainingSet* pexamples = Examples.Get();
+	if (pexamples)
+	{
+		const FInteractMLExample& example = pexamples->GetExamples()[ExampleIndex];
+		return FText::FromString(example.Session);
+	}
+	return FText();
 }
 FText FTrainingSetTreeItem::GetUser() const
 {
-	return FText::FromString("sswain");
+	UInteractMLTrainingSet* pexamples = Examples.Get();
+	if (pexamples)
+	{
+		const FInteractMLExample& example = pexamples->GetExamples()[ExampleIndex];
+		return FText::FromString(example.User);
+	}
+	return FText();
 }
 
 
@@ -993,7 +1013,6 @@ TSharedRef<SVerticalBox> FTrainingSetEditor::CreateTrainingSetHierarchyUI()
 					SNew(STextBlock).Text( LOCTEXT("TrainingSetGroupDurationTitle","Duration") )
 					.Margin(4.0f)
 				]
-#if 0 //not used yet
 				+ SHeaderRow::Column( STrainingSetTreeView::ColumnTypes::Session() )
 				.FillWidth(0.1f)
 				[
@@ -1006,7 +1025,6 @@ TSharedRef<SVerticalBox> FTrainingSetEditor::CreateTrainingSetHierarchyUI()
 					SNew(STextBlock).Text( LOCTEXT("TrainingSetGroupUserTitle","User") )
 					.Margin(4.0f)
 				]
-#endif
 				+ SHeaderRow::Column( STrainingSetTreeView::ColumnTypes::Notes() )
 				.FillWidth(0.2f)
 				[

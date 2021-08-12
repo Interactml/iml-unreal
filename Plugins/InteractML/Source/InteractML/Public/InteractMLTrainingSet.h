@@ -46,6 +46,20 @@ struct INTERACTML_API FInteractMLExample
 	//samples in this example (1 for single mode, potentially >1 for series)
 	UPROPERTY()
 	TArray<FInteractMLSample> inputSeries;
+
+	//additional info
+
+	//the timestamp of the recording session
+	UPROPERTY()
+	FString Session;
+
+	//the name of the user that recorded this
+	UPROPERTY()
+	FString User;
+
+	//duration of recording (for series)
+	UPROPERTY()
+	float Duration;
 };
 
 // recording/storage/sampling mode, are samples a single parameter set or a series?
@@ -91,6 +105,9 @@ class INTERACTML_API UInteractMLTrainingSet
 	
 	// accumulator for current active recording session
 	FInteractMLExample CurrentRecording;
+
+	// tracking duration of recording
+	FDateTime RecordingStart;
 	
 public:
 	FNodeActionInterlock RecordingAction; // are we currently recording, and which node is doing it? (might be only true for a single frame if Single sample mode)
@@ -160,5 +177,6 @@ private:
 	void ValidateExamples();
 	void RefreshDerivedState();
 	void ExtractCharacteristics();
-
+	void NewRecordingSession( float label_number );
+	
 };
