@@ -755,7 +755,7 @@ static FText GetLabelTypeText(UInteractMLTrainingSet* pexamples)
 	}
 	else
 	{
-		return LOCTEXT("TrainingSetLabelTypeSimpleDesc", "Simple (number)");
+		return LOCTEXT("TrainingSetLabelTypeSimpleDescription", "Number");
 	}
 }
 static FText GetExampleCountTooltip(UInteractMLTrainingSet* pexamples)
@@ -790,11 +790,11 @@ static FText GetExampleLabelTypeTooltip(UInteractMLTrainingSet* pexamples)
 	const class UInteractMLLabel* label_type = pexamples->GetLabelCache().LabelType;
 	if (label_type)
 	{
-		return LOCTEXT("TrainingSetLabelTypeSimpleDesc", "Label is a specific composite type, comprising of one or more assorted data types, see asset for details");
+		return LOCTEXT("TrainingSetLabelTypeCompositeTooltip", "Label is a specific composite type, comprising of one or more assorted data types, see asset for details");
 	}
 	else
 	{
-		return LOCTEXT("TrainingSetLabelTypeSimpleDesc", "Label is a single numerical (float) value");
+		return LOCTEXT("TrainingSetLabelTypeSimpleTooltip", "Label is a single numerical (float) value");
 	}
 }
 
@@ -991,7 +991,8 @@ TSharedRef<SWidget> FTrainingSetEditor::CreateInfoField(FText name, UInteractMLT
 	return SNew(SHorizontalBox)
 		+ SHorizontalBox::Slot()
 		.Padding(5, 2, 5, 2)
-		.MaxWidth(100.0f)
+		.FillWidth(3.0f)
+		.MaxWidth(85.0f)
 		.VAlign( VAlign_Center )
 		[
 			SNew(STextBlock)
@@ -999,6 +1000,7 @@ TSharedRef<SWidget> FTrainingSetEditor::CreateInfoField(FText name, UInteractMLT
 			.ToolTipText(tooltip)
 		]
 		+ SHorizontalBox::Slot()
+		.FillWidth(1.0f)
 		.MaxWidth( max_text_width )
 		.VAlign( VAlign_Center )
 		[

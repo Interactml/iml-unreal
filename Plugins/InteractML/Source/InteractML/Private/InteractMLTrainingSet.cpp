@@ -51,7 +51,10 @@ void UInteractMLTrainingSet::ResetExamples()
 {
 	ClearExamplesCollection(Examples);
 	LabelCache.Reset();
+
 	ParameterCount = 0;
+	LabelCount = 0;
+	SampleMode = EInteractMLSampleMode::Unknown;
 }
 
 // post load we can look at the data to determine:
