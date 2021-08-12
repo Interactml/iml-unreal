@@ -104,6 +104,7 @@ public:
 	
 
 	//---- access ----
+	bool HasBeenReset() const { return !HasExamples() && SampleMode==EInteractMLSampleMode::Unknown && ParameterCount==0 && LabelCount==0; }
 	bool HasExamples() const { return Examples.Num()>0; }
 	const TArray<FInteractMLExample>& GetExamples() const { return Examples; }
 	bool IsSingleSamples() const { return SampleMode == EInteractMLSampleMode::Single; }
@@ -135,6 +136,10 @@ public:
 	virtual bool SaveJson(FString& json_string) const override;
 	// End UInteractMLStorage overrides
 	
+	// Begin UObject overrides
+	virtual void PostEditUndo() override;
+	// End UObject overrides
+	
 	//---- blueprint access ----
 	//How many examples have been recorded into this training set
 	UFUNCTION(BlueprintPure,Category="InteractML",meta=(CompactNodeTitle="Example Count"))
@@ -153,6 +158,7 @@ private:
 
 	void ResetExamples();
 	void ValidateExamples();
+	void RefreshDerivedState();
 	void ExtractCharacteristics();
 
 };

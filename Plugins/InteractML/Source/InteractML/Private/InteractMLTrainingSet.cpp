@@ -28,9 +28,9 @@ bool UInteractMLTrainingSet::LoadJson(const FString& json_string)
 	if (LoadExamplesFromJson(json_string, Examples))
 	{
 		//post-load analysis/fixups
-		ValidateExamples();		
-		ExtractCharacteristics();
-			
+		ValidateExamples();
+		RefreshDerivedState();
+		
 		return true;		
 	}
 	
@@ -43,6 +43,20 @@ bool UInteractMLTrainingSet::LoadJson(const FString& json_string)
 bool UInteractMLTrainingSet::SaveJson(FString& json_string) const
 {
 	return SaveExamplesToJson(Examples, json_string);
+}
+
+// undo/redo change
+//
+void UInteractMLTrainingSet::PostEditUndo()
+{
+	RefreshDerivedState();
+}
+
+// ensure anything transient but based on object state is up to date
+//
+void UInteractMLTrainingSet::RefreshDerivedState()
+{
+	ExtractCharacteristics();
 }
 
 // empty out any example state
@@ -346,6 +360,10 @@ bool UInteractMLTrainingSet::RemoveExample(int example_id, FInteractMLExample* o
 
 		//remove
 		Examples.RemoveAt(example_index);
+
+		//ensure state up to date
+		RefreshDerivedState();
+		
 		return true;
 	}
 
