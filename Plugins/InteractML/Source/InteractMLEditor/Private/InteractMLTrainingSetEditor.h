@@ -178,8 +178,11 @@ private:
 	//editing via ui
 	bool CheckDeleteAllowed() const;
 	void OnDeleteClicked();
-	bool DeleteSelectedExamples();
+	bool CheckResetAllowed() const;
+	void OnResetClicked();
 	//void ShowAssetTypeContextMenu();
+	//edit handlers
+	bool DeleteSelectedExamples();
 	bool CanDeleteItem( FTrainingSetTreeItem* item ) const;
 	bool IsItemValidDragSource( FTrainingSetTreeItem* item ) const;
 

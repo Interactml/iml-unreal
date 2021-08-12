@@ -308,14 +308,25 @@ void FTrainingSetEditor::FillToolbar(FToolBarBuilder& ToolbarBuilder)
 {
 	ToolbarBuilder.BeginSection("TrainingSetCommands");
 	{
+		//delete
 		ToolbarBuilder.AddToolBarButton(
 			FUIAction(
 				FExecuteAction::CreateSP(this, &FTrainingSetEditor::OnDeleteClicked),
 				FCanExecuteAction::CreateSP(this, &FTrainingSetEditor::CheckDeleteAllowed)),
 			NAME_None,
-			LOCTEXT("TrainingSetDeleteExampleText", "Delete"),
+			LOCTEXT("TrainingSetDeleteExampleButton", "Delete"),
 			LOCTEXT("TrainingSetDeleteExampleToolTip", "Delete the currently selected example(s) from the training set"),
-			FSlateIcon(FEditorStyle::GetStyleSetName(), "DataTableEditor.Remove"));
+			FSlateIcon( "InteractML", "ToolbarIcons.Delete_40x") );
+
+		//reset
+		ToolbarBuilder.AddToolBarButton(
+			FUIAction(
+			FExecuteAction::CreateSP(this, &FTrainingSetEditor::OnResetClicked),
+			FCanExecuteAction::CreateSP(this, &FTrainingSetEditor::CheckResetAllowed)),
+			NAME_None,
+			LOCTEXT("TrainingSetResetButton", "Reset"),
+			LOCTEXT("TrainingSetResetToolTip", "Fully reset this training set, deletes all examples"),
+			FSlateIcon( "InteractML", "ToolbarIcons.Reset_40x") );
 	}
 	ToolbarBuilder.EndSection();
 }
@@ -387,6 +398,28 @@ void FTrainingSetEditor::OnDeleteClicked()
 		ptraining_set->RemoveExample(example_id);
 	}
 
+	RebuildEntryViewModel();
+}
+
+// can we currently reset the training set?
+bool FTrainingSetEditor::CheckResetAllowed() const
+{
+	return !GetEditableExamples()->HasBeenReset();
+}
+
+// reset the currently selected examples
+//
+void FTrainingSetEditor::OnResetClicked()
+{
+	UInteractMLTrainingSet* ptraining_set = GetEditableExamples();
+	
+	//undoable transaction
+	const FScopedTransaction edit_reset(LOCTEXT("TrainingSetResetOperation","Resetting Training Set"));
+	ptraining_set->Modify();
+	
+	//do delete
+	ptraining_set->ResetTrainingSet();
+	
 	RebuildEntryViewModel();
 }
 
