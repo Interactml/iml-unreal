@@ -35,9 +35,15 @@ struct INTERACTML_API FInteractMLExample
 {
 	GENERATED_BODY()
 		
+	//each recorded example has an unique ID that is maintained and never repeated (within its training set)
+	UPROPERTY()
+	int ID=0;
+
+	//the label this examples recorded parameters are to be associated with
 	UPROPERTY()
 	float label;
 
+	//samples in this example (1 for single mode, potentially >1 for series)
 	UPROPERTY()
 	TArray<FInteractMLSample> inputSeries;
 };
@@ -116,8 +122,10 @@ public:
 	bool BeginRecording( const UInteractMLLabel* label_type, const void* label_data );
 	bool RecordParameters( struct FInteractMLParameterCollection* parameters );
 	bool EndRecording();
-
 	void ResetTrainingSet();
+
+	//---- editing ----
+	bool RemoveExample( int example_id, FInteractMLExample* out_removed_example=nullptr );
 	
 	//each type provides qualifying extension prefix
 	virtual FString GetExtensionPrefix() const { return cExtensionPrefix; }
@@ -144,6 +152,7 @@ public:
 private:
 
 	void ResetExamples();
+	void ValidateExamples();
 	void ExtractCharacteristics();
 
 };

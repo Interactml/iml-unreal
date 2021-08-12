@@ -27,7 +27,8 @@ bool UInteractMLTrainingSet::LoadJson(const FString& json_string)
 {
 	if (LoadExamplesFromJson(json_string, Examples))
 	{
-		//post-load analysis
+		//post-load analysis/fixups
+		ValidateExamples();		
 		ExtractCharacteristics();
 			
 		return true;		
@@ -133,6 +134,23 @@ void UInteractMLTrainingSet::ExtractCharacteristics()
 	}
 }
 
+// validate data, apply any fixups/upgrades needed
+//
+void UInteractMLTrainingSet::ValidateExamples()
+{
+	//ensure ID's are assigned (upgrade old data)
+	if (Examples.Num() >= 2) //(need at least 2 to check this)
+	{
+		if (Examples[0].ID == Examples[1].ID) //defaults
+		{
+			//assign them
+			for (int i = 0; i < Examples.Num(); i++)
+			{
+				Examples[i].ID = i;
+			}
+		}
+	}
+}
 
 // re-usable load function
 //
@@ -264,6 +282,14 @@ bool UInteractMLTrainingSet::EndRecording()
 	//any data added?
 	if (CurrentRecording.inputSeries.Num() > 0)
 	{
+		//find id for it
+		int max_id = -1;
+		for (int i = 0; i < Examples.Num(); i++)
+		{
+			max_id = FMath::Max(max_id, Examples[i].ID);
+		}
+		CurrentRecording.ID = max_id + 1;
+
 		//move finished recording into the example set
 		Examples.Add( CurrentRecording );
 		success = true;
@@ -288,6 +314,43 @@ void UInteractMLTrainingSet::ResetTrainingSet()
 	ResetExamples();
 	MarkUnsavedData();
 }
+
+//////////////////////// editing //////////////////////////////
+
+// remove an example by ID
+//
+bool UInteractMLTrainingSet::RemoveExample(int example_id, FInteractMLExample* out_removed_example )
+{
+	//find example
+	int example_index = -1;
+	for (int i = 0; i < Examples.Num(); i++)
+	{
+		if (Examples[i].ID == example_id)
+		{
+			example_index = i;
+			break;
+		}
+	}
+
+	//remove
+	if (example_index != -1)
+	{
+		//copy out
+		if (out_removed_example)
+		{
+			*out_removed_example = Examples[example_index];
+		}
+
+		//remove
+		Examples.RemoveAt(example_index);
+		return true;
+	}
+
+	return false;
+}
+
+
+
 
 //////////////////////// blueprint access /////////////////////////
 

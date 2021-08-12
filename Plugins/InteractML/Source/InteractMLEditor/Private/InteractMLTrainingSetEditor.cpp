@@ -36,9 +36,15 @@ const FName FTrainingSetEditor::TrainingSetHierarchyTabId("InteractMLTrainingSet
 //////////////////////////////////////////////////////////////////////////
 // FTrainingSetTreeItem
 
-int FTrainingSetTreeItem::GetNumber() const
+//ctor
+//
+FTrainingSetTreeItem::FTrainingSetTreeItem( UInteractMLTrainingSet* pexamples, int example_index, FTrainingSetTreeItem::Ptr parent, int index_in_parent )
+	: Examples( pexamples )
+	, ExampleIndex( example_index )
+	, Parent( parent.Get() )
+	, IndexInParent(index_in_parent)
 {
-	return ExampleIndex+1; //1 based display
+	ExampleID = pexamples->GetExamples()[example_index].ID;
 }
 
 FString FTrainingSetTreeItem::GetLabel() const
@@ -304,14 +310,14 @@ void FTrainingSetEditor::FillToolbar(FToolBarBuilder& ToolbarBuilder)
 	{
 		ToolbarBuilder.AddToolBarButton(
 			FUIAction(
-				FExecuteAction::CreateSP(this, &FTrainingSetEditor::OnRemoveItemClicked),
-				FCanExecuteAction::CreateSP(this, &FTrainingSetEditor::CheckRemoveItemAllowed)),
+				FExecuteAction::CreateSP(this, &FTrainingSetEditor::OnDeleteClicked),
+				FCanExecuteAction::CreateSP(this, &FTrainingSetEditor::CheckDeleteAllowed)),
 			NAME_None,
-			LOCTEXT("RemoveTrainingSetExampleText", "Remove"),
-			LOCTEXT("RemoveTrainingSetExampleToolTip", "Remove the currently selected training set entry from the examples"),
+			LOCTEXT("TrainingSetDeleteExampleText", "Delete"),
+			LOCTEXT("TrainingSetDeleteExampleToolTip", "Delete the currently selected example(s) from the training set"),
 			FSlateIcon(FEditorStyle::GetStyleSetName(), "DataTableEditor.Remove"));
 	}
-	ToolbarBuilder.EndSection();	
+	ToolbarBuilder.EndSection();
 }
 
 // regular updates
@@ -319,118 +325,243 @@ void FTrainingSetEditor::FillToolbar(FToolBarBuilder& ToolbarBuilder)
 //
 bool FTrainingSetEditor::Tick(float DeltaTime)
 {
-#if 0
-	//deferred selection (by entry)
-	if(DeferredSelectionEntry.IsValid())
-	{
-		//find and apply
-		FTrainingSetTreeItem::Ptr found = FindHierarchyEntry( DeferredSelectionEntry.Get() );
-		if(found.IsValid())
-		{
-			SetSelection( found );
-		}
-
-		//done
-		DeferredSelectionEntry.Reset();
-	}
-	//deferred selection (by item)
-	if(DeferredSelectionItem.IsValid())
-	{
-		SetSelection( DeferredSelectionItem );
-		DeferredSelectionItem.Reset();
-	}
-
-	//sync details panel with our selected item
-	const TArray<TWeakObjectPtr<UObject>>& cur_sel = DetailsView->GetSelectedObjects();
-	int num_selected = cur_sel.Num();
-	int num_wanted = (SelectedItem.IsValid() && SelectedItem->Resource.IsValid())?1:0;
-	if(num_selected!=num_wanted 
-		|| (num_selected>0 && cur_sel[0]!=SelectedItem->Resource)
-		|| bForceApplySelection)
-	{
-		bForceApplySelection = false;
-
-		//change selected item
-		if(num_wanted>0)
-		{
-			DetailsView->SetObject( SelectedItem->Resource.Get() );
-		}
-		else
-		{
-			DetailsView->SetObject( nullptr );
-		}
-		DetailsView->ForceRefresh();
-
-		//treeview too
-		TreeView->SetSelection( SelectedItem );
-	}
-#endif
+	TrackChanges();
 
 	return true; //keep on tickin
 }
 
-
-// can we currently remove an item?
-bool FTrainingSetEditor::CheckRemoveItemAllowed() const
+// any changes, need a refresh?
+//
+void FTrainingSetEditor::TrackChanges()
 {
-	return SelectedItem.IsValid(); //can only remove if user has selected something
-//		&& SelectedItem!=ResourcesRoot;  //can never remove the roots
+	UInteractMLTrainingSet* pexamples = GetEditableExamples();
+	if (pexamples)
+	{
+		int then = PrevExampleCount;
+		int now = pexamples->GetExampleCount();
+		if (then != now)
+		{
+			//need a rebuild
+			bool new_examples = now > then;
+			RebuildEntryViewModel( new_examples );
+		}
+	}
+}
+
+// can we currently delete the selected example(s)?
+bool FTrainingSetEditor::CheckDeleteAllowed() const
+{
+	if (SelectedItems.Num()==0)
+	{
+		return false;
+	}
+
+	for (int i = 0; i < SelectedItems.Num(); i++)
+	{
+		if (!CanDeleteItem( SelectedItems[i].Get() ))
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 
-// remove the currently selected entry in the hierarchy
+// delete the currently selected examples
 //
-void FTrainingSetEditor::OnRemoveItemClicked()
+void FTrainingSetEditor::OnDeleteClicked()
 {
-#if 0
-	FResourceListEditorTreeItem::Ptr current_item = SelectedItem;
-	if(current_item)
+	UInteractMLTrainingSet* ptraining_set = GetEditableExamples();
+
+	//undoable transaction
+	const FScopedTransaction edit_delete(LOCTEXT("TrainingSetDeleteOperation","Deleting Examples"));
+	ptraining_set->Modify();
+
+	//do delete
+	for (int i = 0; i < SelectedItems.Num(); i++)
 	{
-		RemoveEntry( current_item->Parent->AsShared(), current_item->IndexInParent );
+		UE_LOG(LogInteractML, Display, TEXT("Deleting example #%i from Training Set '%s'"), SelectedItems[i]->GetExampleID(), *GetEditableExamples()->GetName());
+
+		int example_id = SelectedItems[i]->GetExampleID();
+		ptraining_set->RemoveExample(example_id);
 	}
-#endif	
+
+	RebuildEntryViewModel();
 }
 
 // refresh internal representation of current resource list state
 //
-void FTrainingSetEditor::RebuildEntryViewModel( bool track_item_instead_of_entry )
+void FTrainingSetEditor::RebuildEntryViewModel( bool select_latest_example )
 {
-	//should always only be root
-	if(TreeRoot.Num()!=3)
+	//remember selection details
+	TArray<int> selected_ids;
+	for (int i = 0; i < SelectedItems.Num(); i++)
 	{
-		TreeRoot.Empty();
+		selected_ids.Add(SelectedItems[i]->GetExampleID());
+	}
+	int first_selected_index = -1;
+	for (int i = 0; i < TreeRoots.Num(); i++)
+	{
+		if (selected_ids.Contains(TreeRoots[i]->GetExampleID()))
+		{
+			first_selected_index = i;
+			break;
+		}
+	}
 
-		UInteractMLTrainingSet* pexamples = GetEditableExamples();
-		const TArray<FInteractMLExample>& examples = pexamples->GetExamples();
-		for (int iexample = 0; iexample < examples.Num(); iexample++)
-		{
-			const FInteractMLExample& example = examples[iexample];
-			TreeRoot.Add(MakeShareable(new FTrainingSetTreeItem(pexamples, iexample)));
-		}
-	}
-	
-#if 0
-	//store selection state
-	if(SelectedItem.IsValid())
-	{
-		if(track_item_instead_of_entry)
-		{
-			DeferredSelect( SelectedItem );
-		}
-		else
-		{
-			TWeakObjectPtr<UInteractMLTrainingSet> selected_entry = SelectedItem.Get()->Resource;
-			DeferredSelect( selected_entry );
-		}
-		bForceApplySelection = true; //likely re-applying same object, need force to update details and toolbar		
-	}
-	SetSelection( FTrainingSetTreeItem::Ptr() ); //clear actual selection for rebuild
-	
-	//incremental update
+	//rebuild
+	TreeRoots.Empty();
+
 	UInteractMLTrainingSet* pexamples = GetEditableExamples();
-#endif
+	const TArray<FInteractMLExample>& examples = pexamples->GetExamples();
+
+	//populate with flat table of examples
+	int most_recent_id = 0;
+	int most_recent_index = 0;
+	for (int iexample = 0; iexample < examples.Num(); iexample++)
+	{
+		//each example is wrapped by a standard row object
+		const FInteractMLExample& example = examples[iexample];
+		FTrainingSetTreeItem* new_item = new FTrainingSetTreeItem(pexamples, iexample);
+		TreeRoots.Add( MakeShareable(new_item) );
+
+		//track most recent
+		if (new_item->ExampleID > most_recent_id)
+		{
+			most_recent_id = new_item->ExampleID;
+			most_recent_index = iexample;
+		}
+	}
+
+	//restore selection
+	TArray<FTrainingSetTreeItem::Ptr> items_to_select;
+	if (select_latest_example)
+	{
+		//want most recently added
+		FTrainingSetTreeItem::Ptr item = FindTreeItemByIndex( most_recent_index );
+		if (item.IsValid())
+		{
+			items_to_select.Add(item);
+		}
+	}
+	else
+	{
+		//attempt to restore previously selected elements
+		int restored = 0;
+		for (int id : selected_ids)
+		{
+			FTrainingSetTreeItem::Ptr item = FindTreeItemByExampleID(id);
+			if (item.IsValid())
+			{
+				items_to_select.Add(item);
+				restored++;
+			}
+		}
+		//if none (e.g. deleted) then at least try to select similar location in table
+		if (restored == 0)
+		{
+			FTrainingSetTreeItem::Ptr item = FindTreeItemByIndex(first_selected_index);
+			if (item.IsValid())
+			{
+				items_to_select.Add(item);
+			}
+		}
+	}
+	//apply
+	TreeView->ClearSelection();
+	TreeView->SetItemSelection(items_to_select, true);
+	if(select_latest_example && items_to_select.Num()>0)
+	{
+		TreeView->RequestScrollIntoView( items_to_select[0] );
+	}
+	
+	//apply to UI
 	RefreshTreeview();
+
+	//up to date
+	PrevExampleCount = pexamples->GetExampleCount();
 }
+
+// recursive search of all items for item with this example id
+//
+FTrainingSetTreeItem::Ptr FTrainingSetEditor::FindTreeItemByExampleID(int example_id)
+{
+	for (int i = 0; i < TreeRoots.Num(); i++)
+	{
+		FTrainingSetTreeItem::Ptr p = FindTreeItemByExampleID(TreeRoots[i], example_id);
+		if (p.IsValid())
+		{
+			return p;
+		}
+	}
+	return nullptr;
+}
+
+// recursive search for item with this example id
+//
+FTrainingSetTreeItem::Ptr FTrainingSetEditor::FindTreeItemByExampleID(FTrainingSetTreeItem::Ptr p, int example_id)
+{
+	//check me
+	if (p->GetExampleID() == example_id)
+	{
+		return p;
+	}
+
+	//recurse to children
+	for (int i = 0; i < p->Children.Num(); i++)
+	{
+		FTrainingSetTreeItem::Ptr q = FindTreeItemByExampleID(p->Children[i], example_id);
+		if (q.IsValid())
+		{
+			return q;
+		}
+	}
+
+	return nullptr;
+}
+
+// recursive search of all items for item with this index
+//
+FTrainingSetTreeItem::Ptr FTrainingSetEditor::FindTreeItemByIndex(int example_index)
+{
+	int current_index = 0;
+	for (int i = 0; i < TreeRoots.Num(); i++)
+	{
+		FTrainingSetTreeItem::Ptr p = FindTreeItemByIndex(TreeRoots[i], example_index, current_index);
+		if (p.IsValid())
+		{
+			return p;
+		}
+	}
+	return nullptr;
+}
+
+// recursive search for item with this specific index
+//
+FTrainingSetTreeItem::Ptr FTrainingSetEditor::FindTreeItemByIndex(FTrainingSetTreeItem::Ptr p, int example_index, int& current_index)
+{
+	//check me
+	if(current_index == example_index)
+	{
+		return p;
+	}
+	
+	//it's not me, maybe next
+	current_index++;
+	
+	//recurse to children
+	for (int i = 0; i < p->Children.Num(); i++)
+	{
+		FTrainingSetTreeItem::Ptr q = FindTreeItemByIndex(p->Children[i], example_index, current_index);
+		if (q.IsValid())
+		{
+			return q;
+		}
+	}
+	return nullptr;
+}
+
 
 // update Slate-side when our viewmodel has chnaged
 //
@@ -627,6 +758,10 @@ static FText GetLabelTypeText(UInteractMLTrainingSet* pexamples)
 		return LOCTEXT("TrainingSetLabelTypeSimpleDesc", "Simple (number)");
 	}
 }
+static FText GetExampleCountTooltip(UInteractMLTrainingSet* pexamples)
+{
+	return LOCTEXT("TrainingSetExampleCountTooltip", "Number of examples recorded into this training set");
+}
 static FText GetExampleModeTooltip(UInteractMLTrainingSet* pexamples)
 {
 	if (pexamples->IsSingleSamples())
@@ -663,6 +798,25 @@ static FText GetExampleLabelTypeTooltip(UInteractMLTrainingSet* pexamples)
 	}
 }
 
+// parameterically access the above property info (so they are dynamic)
+//
+FText FTrainingSetEditor::GetPropertyText(UInteractMLTrainingSet* pexamples, EInteractMLTrainingSetProperty property_type) const
+{
+	switch (property_type)
+	{
+		case EInteractMLTrainingSetProperty::ExampleCount:
+			return FText::FromString(FString::FromInt(pexamples->GetExamples().Num()));
+		case EInteractMLTrainingSetProperty::SampleMode:
+			return GetExampleModeText(pexamples);
+		case EInteractMLTrainingSetProperty::LabelCount:
+			return FText::FromString(FString::FromInt(pexamples->GetLabelCount()));
+		case EInteractMLTrainingSetProperty::ParameterCount:
+			return FText::FromString(FString::FromInt(pexamples->GetParameterCount()));
+		case EInteractMLTrainingSetProperty::LabelType:
+			return GetLabelTypeText(pexamples);
+	}
+	return FText::FromString("");
+}
 
 
 // hierarchy UI creation
@@ -680,6 +834,7 @@ TSharedRef<SVerticalBox> FTrainingSetEditor::CreateTrainingSetHierarchyUI()
 			.Padding(FMargin(3))
 			.BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
 			[
+				//(icon) Training Set Name
 				SNew(SVerticalBox)
 				+ SVerticalBox::Slot()
 				.AutoHeight()
@@ -711,30 +866,45 @@ TSharedRef<SVerticalBox> FTrainingSetEditor::CreateTrainingSetHierarchyUI()
 				.AutoHeight()
 				[
 					SNew(SHorizontalBox)
+					//Example Count
 					+SHorizontalBox::Slot()
 					.MaxWidth(180.0f)
 					[
-						CreateInfoField(LOCTEXT("TrainingSetModeLabel", "Sample Mode"), GetExampleModeText( pexamples ), GetExampleModeTooltip( pexamples ))
+						CreateInfoField(LOCTEXT("TrainingSetExampleCountLabel", "Examples"), pexamples, EInteractMLTrainingSetProperty::ExampleCount, GetExampleCountTooltip( pexamples ))
 					]
+					//Sample Mode
 					+SHorizontalBox::Slot()
 					.FillWidth(1.0f)
 					[
-						CreateInfoField(LOCTEXT("TrainingSetParametersLabel", "Parameters"), FText::FromString( FString::FromInt( pexamples->GetParameterCount() ) ), GetExampleParametersTooltip( pexamples ), 500.0f)
+						CreateInfoField(LOCTEXT("TrainingSetModeLabel", "Sample Mode"), pexamples, EInteractMLTrainingSetProperty::SampleMode, GetExampleModeTooltip( pexamples ), 500.0f)
 					]
 				]
 				+ SVerticalBox::Slot()
 				.AutoHeight()
 				[
 					SNew(SHorizontalBox)
+					//Label Count
 					+SHorizontalBox::Slot()
 					.MaxWidth(180.0f)
 					[
-						CreateInfoField(LOCTEXT("TrainingSetLabelCountLabel", "Labels"), FText::FromString( FString::FromInt( pexamples->GetLabelCount() ) ), GetExampleLabelCountTooltip( pexamples ))
+						CreateInfoField(LOCTEXT("TrainingSetLabelCountLabel", "Labels"), pexamples, EInteractMLTrainingSetProperty::LabelCount, GetExampleLabelCountTooltip( pexamples ))
 					]
+					//Parameter Count
 					+SHorizontalBox::Slot()
 					.FillWidth(1.0f)
 					[
-						CreateInfoField(LOCTEXT("TrainingSetLabelTypeLabel", "Label Type"), GetLabelTypeText( pexamples ), GetExampleLabelTypeTooltip( pexamples ), 500.0f )
+						CreateInfoField(LOCTEXT("TrainingSetParametersLabel", "Parameters"), pexamples, EInteractMLTrainingSetProperty::ParameterCount, GetExampleParametersTooltip( pexamples ), 500.0f)
+					]
+				]
+				+ SVerticalBox::Slot()
+				.AutoHeight()
+				[
+					SNew(SHorizontalBox)
+					//Label Type
+					+SHorizontalBox::Slot()
+					.FillWidth(1.0f)
+					[
+						CreateInfoField(LOCTEXT("TrainingSetLabelTypeLabel", "Label Type"), pexamples, EInteractMLTrainingSetProperty::LabelType, GetExampleLabelTypeTooltip( pexamples ), 1000.0f )
 					]
 				]
 			]
@@ -745,12 +915,12 @@ TSharedRef<SVerticalBox> FTrainingSetEditor::CreateTrainingSetHierarchyUI()
 		.FillHeight(1.0f)
 		[
 			SAssignNew(TreeView, STrainingSetTreeView, SharedThis(this))
-			.TreeItemsSource(&TreeRoot)
+			.TreeItemsSource(&TreeRoots)
 			.OnGenerateRow(this, &FTrainingSetEditor::GenerateTreeRow)
 //			.OnItemScrolledIntoView(TreeView, &STrainingSetTreeView::OnTreeItemScrolledIntoView)
 			.ItemHeight(21)
 //			.SelectionMode(InArgs._SelectionMode)
-//			.OnSelectionChanged(this, &FTrainingSetEditor::OnTreeViewSelect)
+			.OnSelectionChanged(this, &FTrainingSetEditor::OnTreeViewSelect)
 //			.OnExpansionChanged(this, &SPathView::TreeExpansionChanged)
 			.OnGetChildren(this, &FTrainingSetEditor::GetChildrenForTree)
 //			.OnSetExpansionRecursive(this, &SPathView::SetTreeItemExpansionRecursive)
@@ -816,12 +986,12 @@ TSharedRef<SVerticalBox> FTrainingSetEditor::CreateTrainingSetHierarchyUI()
 
 // build a name/value property display item
 //
-TSharedRef<SWidget> FTrainingSetEditor::CreateInfoField(FText name, FText value, FText tooltip, float max_text_width)
+TSharedRef<SWidget> FTrainingSetEditor::CreateInfoField(FText name, UInteractMLTrainingSet* pexamples, EInteractMLTrainingSetProperty property_type, FText tooltip, float max_text_width)
 {
 	return SNew(SHorizontalBox)
 		+ SHorizontalBox::Slot()
 		.Padding(5, 2, 5, 2)
-		.MaxWidth(95.0f)
+		.MaxWidth(100.0f)
 		.VAlign( VAlign_Center )
 		[
 			SNew(STextBlock)
@@ -829,11 +999,11 @@ TSharedRef<SWidget> FTrainingSetEditor::CreateInfoField(FText name, FText value,
 			.ToolTipText(tooltip)
 		]
 		+ SHorizontalBox::Slot()
-		.MaxWidth(max_text_width)
+		.MaxWidth( max_text_width )
 		.VAlign( VAlign_Center )
 		[
 			SNew(STextBlock)
-			.Text( value )
+			.Text_Raw( this, &FTrainingSetEditor::GetPropertyText, pexamples, property_type )
 			.Font(FCoreStyle::GetDefaultFontStyle("Bold", 9))
 			.ToolTipText(tooltip)
 		];
@@ -852,22 +1022,15 @@ TSharedPtr<SWidget> FTrainingSetEditor::GenerateTreeContextMenu()
 //
 void FTrainingSetEditor::OnTreeViewSelect( FTrainingSetTreeItem::Ptr Item, ESelectInfo::Type SelectInfo )
 {
-	SetSelection( Item );
-}
-
-// update our editor local selection state, show in Details tab
-//
-void FTrainingSetEditor::SetSelection( FTrainingSetTreeItem::Ptr Item )
-{
-	SelectedItem = Item;
+	//refresh selected item list
+	TreeView->GetSelectedItems(SelectedItems);
 }
 
 // is user allowed to delete this item?
 //
 bool FTrainingSetEditor::CanDeleteItem( FTrainingSetTreeItem* item ) const
 {
-	//can delete any normal resource entry, not root though
-	return false;
+	return item!=nullptr;
 }
 	
 // can we start a drag and drop operation from this item?
@@ -919,25 +1082,12 @@ FReply STrainingSetTreeView::OnKeyDown( const FGeometry& MyGeometry, const FKeyE
 	TSharedPtr<FTrainingSetEditor> training_set_editor = TrainingSetEditorWeak.Pin();
 	if(training_set_editor.IsValid())
 	{		
-#if 0
-		//delete/bs to remove entries	
+		//delete/bs to delete entries	
 		if ( InKeyEvent.GetKey() == EKeys::Delete || InKeyEvent.GetKey() == EKeys::BackSpace )
 		{
-			FTrainingSetTreeItem::Ptr item = training_set_editor.IsValid()?training_set_editor->SelectedItem:nullptr;
-			if (item.IsValid())
-			{
-				if(training_set_editor->CanDeleteItem( item.Get() ))
-				{
-					//pass to editor to perform delete
-					training_set_editor->RemoveEntry( item->Parent->AsShared(), item->IndexInParent );
-				}
-				
-				return FReply::Handled();
-			}
-			
+			training_set_editor->OnDeleteClicked();
 			return FReply::Handled();
 		}
-#endif
 	}
 
 	return STreeView<TSharedPtr<FTrainingSetTreeItem>>::OnKeyDown( MyGeometry, InKeyEvent );
@@ -1324,7 +1474,7 @@ TSharedRef<SWidget> STrainingSetTreeRow::GenerateWidgetForColumn( const FName& C
 			.VAlign(VAlign_Center)
 			[
 				SNew( STextBlock )
-				.Text( FText::FromString( FString::FromInt( ItemPtr->GetNumber() ) ) )
+				.Text( FText::FromString( FString::FromInt( ItemPtr->GetExampleID() ) ) )
 			];
 	}	
 	//------------------------------------------------------------------------

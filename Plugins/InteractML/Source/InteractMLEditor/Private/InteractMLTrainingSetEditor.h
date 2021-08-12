@@ -13,6 +13,16 @@
 
 //module
 
+//types of property to show
+enum class EInteractMLTrainingSetProperty
+{
+	ExampleCount,
+	SampleMode,
+	LabelCount,
+	ParameterCount,
+	LabelType
+};
+
 // view model for a training set entry
 //
 struct FTrainingSetTreeItem : public TSharedFromThis<FTrainingSetTreeItem>
@@ -23,6 +33,9 @@ struct FTrainingSetTreeItem : public TSharedFromThis<FTrainingSetTreeItem>
 	
 	//the model we are the view model for
 	TWeakObjectPtr<class UInteractMLTrainingSet> Examples;
+
+	//persistent/unique ID of the example we represent
+	int ExampleID;
 
 	//specific example in the training set, the label and example we represent
 	int ExampleIndex;
@@ -37,18 +50,15 @@ struct FTrainingSetTreeItem : public TSharedFromThis<FTrainingSetTreeItem>
 	//init
 	FTrainingSetTreeItem()
 		: Examples( nullptr )
+		, ExampleID(0)
+		, ExampleIndex(0)
 		, Parent( nullptr )
 		, IndexInParent( 0 )
 	{}
-	FTrainingSetTreeItem( UInteractMLTrainingSet* pexamples, int example_index, FTrainingSetTreeItem::Ptr parent=nullptr, int index_in_parent=0 )
-		: Examples( pexamples )
-		, ExampleIndex( example_index )
-		, Parent( parent.Get() )
-		, IndexInParent( index_in_parent )
-	{}
+	FTrainingSetTreeItem(UInteractMLTrainingSet* pexamples, int example_index, FTrainingSetTreeItem::Ptr parent = nullptr, int index_in_parent = 0);
 
 	//access
-	int GetNumber() const;
+	int GetExampleID() const { return ExampleID; }
 	FString GetLabel() const;
 	bool IsDimmed() const { return false; }
 	const FSlateBrush* GetIcon(bool is_open) const;
@@ -78,7 +88,6 @@ class FTrainingSetEditor
 	: public FAssetEditorToolkit
 	, public FEditorUndoClient
 {
-	
 	/** TrainingSet Editor app identifier string */
 	static const FName TrainingSetEditorAppIdentifier;
 	
@@ -100,15 +109,18 @@ class FTrainingSetEditor
 	// UI for treeview
 	TSharedPtr< STreeView< TSharedPtr<FTrainingSetTreeItem>> > TreeView;
 
-	// root of view model
-	TArray<FTrainingSetTreeItem::Ptr> TreeRoot;
+	// roots of view model
+	TArray<FTrainingSetTreeItem::Ptr> TreeRoots;
 	
 	// currently selected item
-	FTrainingSetTreeItem::Ptr SelectedItem;
+	TArray<FTrainingSetTreeItem::Ptr> SelectedItems;
 
 	// tick management
 	FTickerDelegate TickDelegate;
 	FDelegateHandle TickDelegateHandle;
+
+	//tracking
+	int PrevExampleCount;
 
 	// deferred selection (by entry or item)
 	//TWeakObjectPtr<UInteractMLTrainingSet> DeferredSelectionEntry;
@@ -122,7 +134,7 @@ public:
 	void InitTrainingSetEditor(const EToolkitMode::Type Mode, const TSharedPtr< class IToolkitHost >& InitToolkitHost, class UInteractMLTrainingSet* examples );
 
 	//access
-	FTrainingSetTreeItem::Ptr GetSelectedItem() const { return SelectedItem; }
+//	FTrainingSetTreeItem::Ptr GetSelectedItem() const { return SelectedItem; }
 	
 	/** FAssetEditorToolkit interface */
 	virtual void RegisterTabSpawners(const TSharedRef<class FTabManager>& TabManager) override;
@@ -155,16 +167,19 @@ private:
 	TSharedRef<SVerticalBox> CreateTrainingSetHierarchyUI();
 	void ExtendToolbar(TSharedPtr<FExtender> Extender);	
 	void FillToolbar(FToolBarBuilder& ToolbarBuilder);
-	TSharedRef<SWidget> CreateInfoField(FText name, FText value, FText tooltip, float max_text_width=75.0f);
+	TSharedRef<SWidget> CreateInfoField(FText name, UInteractMLTrainingSet* pexamples, EInteractMLTrainingSetProperty property_type, FText tooltip, float max_text_width=75.0f);
+	FText GetPropertyText( UInteractMLTrainingSet* pexamples, EInteractMLTrainingSetProperty property_type ) const;
 
 	//idle/deferred updates
 	bool Tick(float DeltaTime);
+	void TrackChanges();
+	
 	
 	//editing via ui
-	bool CheckRemoveItemAllowed() const;
-	void OnRemoveItemClicked();
+	bool CheckDeleteAllowed() const;
+	void OnDeleteClicked();
+	bool DeleteSelectedExamples();
 	//void ShowAssetTypeContextMenu();
-	void SetSelection( FTrainingSetTreeItem::Ptr Item );
 	bool CanDeleteItem( FTrainingSetTreeItem* item ) const;
 	bool IsItemValidDragSource( FTrainingSetTreeItem* item ) const;
 
@@ -174,13 +189,16 @@ private:
 	//treeview
 	TSharedRef<ITableRow> GenerateTreeRow( TSharedPtr<FTrainingSetTreeItem> TreeItem, const TSharedRef<STableViewBase>& OwnerTable );
 	void GetChildrenForTree( TSharedPtr< FTrainingSetTreeItem > TreeItem, TArray< TSharedPtr<FTrainingSetTreeItem> >& OutChildren );
-	void RebuildEntryViewModel( bool track_item_instead_of_entry=false );
+	void RebuildEntryViewModel( bool select_latest_example=false );
 	void RefreshTreeview(); //update Slate-side when our viewmodel has chnaged
 	FTrainingSetTreeItem::Ptr BuildEntryViewModel( UInteractMLTrainingSet* pentry );
 	void OnTreeViewSelect( FTrainingSetTreeItem::Ptr Item, ESelectInfo::Type SelectInfo );
-	//void DeferredSelect( TWeakObjectPtr<UInteractMLTrainingSet> selected_entry );
-	//void DeferredSelect( FTrainingSetTreeItem::Ptr selected_item );
 	//TSharedPtr<SWidget> GenerateTreeContextMenu();
+	FTrainingSetTreeItem::Ptr FindTreeItemByExampleID( int example_id );
+	static FTrainingSetTreeItem::Ptr FindTreeItemByExampleID( FTrainingSetTreeItem::Ptr, int example_id );
+	FTrainingSetTreeItem::Ptr FindTreeItemByIndex( int example_index );
+	static FTrainingSetTreeItem::Ptr FindTreeItemByIndex( FTrainingSetTreeItem::Ptr, int example_index, int& current_index );
+	
 		
 	//notifications
 	void OnHierarchyTabActivated(TSharedRef<SDockTab> tab, ETabActivationCause cause);
