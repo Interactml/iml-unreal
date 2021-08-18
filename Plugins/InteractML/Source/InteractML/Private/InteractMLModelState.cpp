@@ -26,7 +26,7 @@ void FInteractMLModelState::StartRunning(FInteractMLTask::Ptr run_task)
 	if(run_task.IsValid())
 	{
 		//set context so model knows who to tell when run completed
-		run_task->Context = this;
+		run_task->Context = AsShared();
 
 		//remember our active task (indicates we are currently running)
 		Task = run_task;
