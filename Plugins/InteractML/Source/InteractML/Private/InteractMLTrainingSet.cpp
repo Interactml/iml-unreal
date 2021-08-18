@@ -11,6 +11,7 @@
 //module
 #include "InteractML.h"
 #include "InteractMLParameters.h"
+#include "InteractMLLabel.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
@@ -268,7 +269,7 @@ bool UInteractMLTrainingSet::BeginRecording(float label)
 bool UInteractMLTrainingSet::BeginRecording(const UInteractMLLabel* label_type, const void* label_data)
 {
 	//associate this label expected output values with a numeric label for lookup later
-	float label = LabelCache.Find(label_type, label_data);
+	float label = LabelCache.FindOrAdd(label_type, label_data);
 	NewRecordingSession( label );
 	return true;
 }
@@ -336,15 +337,93 @@ bool UInteractMLTrainingSet::EndRecording()
 	return success;
 }
 
-// start reset (split because we are driven from a bool and not an event so we need to track on/off state change)
+// delete all examples, completely resetting the training set
 //
-void UInteractMLTrainingSet::ResetTrainingSet()
+void UInteractMLTrainingSet::DeleteAllExamples()
 {
 	//perform reset
 	UE_LOG(LogInteractML, Log, TEXT("Resetting training set '%s'"), *GetFilePath());
 	ResetExamples();
 	MarkUnsavedData();
 }
+
+// delete only the most recent example
+//
+void UInteractMLTrainingSet::DeleteLastExample()
+{
+	//perform reset
+	UE_LOG(LogInteractML, Log, TEXT("Deleting most recent example from training set '%s'"), *GetFilePath());
+
+	//find most recent
+	int most_recent_index = -1;
+	int most_recent_id = -1;
+	for (int i = 0; i < Examples.Num(); i++)
+	{
+		if (Examples[i].ID > most_recent_id)
+		{
+			most_recent_id = Examples[i].ID;
+			most_recent_index = i;
+		}
+	}
+	
+	//remove
+	if (most_recent_index != -1)
+	{
+		Examples.RemoveAt(most_recent_index);
+		
+		MarkUnsavedData();
+		RefreshDerivedState();
+	}
+}
+
+
+// delete all examples for the give (simple) label
+//
+void UInteractMLTrainingSet::DeleteLabelExamples( float label )
+{
+	//perform reset
+	UE_LOG(LogInteractML, Log, TEXT("Deleting all examples for label %f from training set '%s'"), label, *GetFilePath());
+	
+	//scan examples
+	bool any_deleted = true;
+	for (int i = 0; i < Examples.Num(); i++)
+	{
+		const FInteractMLExample& example = Examples[i];
+
+		//is for this label?
+		if (example.label == label)
+		{
+			//remove
+			Examples.RemoveAt(i);
+			i--; //'cos we removed one
+		}
+	}
+
+	//refresh
+	if (any_deleted)
+	{
+		MarkUnsavedData();
+		RefreshDerivedState();
+	}
+}
+
+// delete all examples for the give (composite) label
+//
+void UInteractMLTrainingSet::DeleteLabelExamples( const UInteractMLLabel* label_type, const void* label_data )
+{
+	//perform reset
+	UE_LOG(LogInteractML, Log, TEXT("Deleting all examples for a '%s' label from training set '%s'"), *label_type->GetName(), *GetFilePath());
+	
+	//lookup label
+	float label = LabelCache.Find(label_type, label_data, false/*just lookup existing*/);
+
+	//delete if found
+	if (label >= 0)
+	{
+		DeleteLabelExamples(label);
+	}
+}
+
 
 //////////////////////// editing //////////////////////////////
 
@@ -389,14 +468,41 @@ bool UInteractMLTrainingSet::RemoveExample(int example_id, FInteractMLExample* o
 
 //////////////////////// blueprint access /////////////////////////
 
-int UInteractMLTrainingSet::GetExampleCount()
-{
-	return Examples.Num();
-}
-int UInteractMLTrainingSet::GetParameterCount()
+int UInteractMLTrainingSet::GetParameterCount() const
 {
 	return ParameterCount;
 }
+int UInteractMLTrainingSet::GetExampleCount() const
+{
+	return Examples.Num();
+}
+int UInteractMLTrainingSet::GetExampleCountForSimpleOutput(float expected_output)
+{
+	int count = 0;
+	for (int i = 0; i < Examples.Num(); i++)
+	{
+		if (Examples[i].label == expected_output)
+		{
+			count++;
+		}
+	}
+	return count;
+}
+int UInteractMLTrainingSet::GetExampleCountForCompositeOutput(const UInteractMLLabel* LabelType, const FGenericStruct& LabelData)
+{
+	//placeholder, never called
+	check(0);
+	return -1;
+}
+int UInteractMLTrainingSet::Generic_GetExampleCountForCompositeOutput(const UInteractMLLabel* LabelType, const void* LabelData)
+{
+	//find the label index we are talking about
+	float label = LabelCache.Find(LabelType, LabelData, false);
+
+	//count based on that label index
+	return GetExampleCountForSimpleOutput(label);
+}
+
 
 
 // EPILOGUE

@@ -50,10 +50,33 @@ void FInteractMLLabelCache::Assign(const FInteractMLLabelCache& source)
 	StringsMap = source.StringsMap;
 }
 
-
-// resolve/cache a specific label value (set) and get it's associated numeric label
+// resolve a specific label value (set) and get it's associated numeric label
 //
-float FInteractMLLabelCache::Find(const UInteractMLLabel* label_type, const void *label_data)
+float FInteractMLLabelCache::Find(const UInteractMLLabel* label_type, const void *label_data, bool create_if_missing)
+{
+	check(label_type);
+	check(label_data);
+	
+	//what does the label data actually look like?
+	TArray<float> raw_data;
+	label_type->CaptureData( label_data, raw_data, *this );
+	
+	//find existing label
+	for (int i = 0; i < Labels.Num(); i++)
+	{
+		if (Labels[i].Equal(raw_data))
+		{
+			return (float)i;
+		}
+	}
+	
+	//not found is an error as we don't want one created for us
+	return -1;
+}
+
+// resolve or add/cache a specific label value (set) and get it's associated numeric label
+//
+float FInteractMLLabelCache::FindOrAdd(const UInteractMLLabel* label_type, const void *label_data)
 {
 	check(label_type);
 	check(label_data);
@@ -78,7 +101,7 @@ float FInteractMLLabelCache::Find(const UInteractMLLabel* label_type, const void
 		if (!label_type->Equal( LabelType ))
 		{
 			UE_LOG(LogInteractML, Error, TEXT("Attempt to use mixed labels in training data, can't mix '%s' when already using '%s'"), *label_type->GetDisplayNameText().ToString(), *LabelType->GetDisplayNameText().ToString() );
-			return 0;
+			return -1;
 		}
 	}
 	else

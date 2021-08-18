@@ -37,12 +37,15 @@
 
 namespace FInteractMLRecordingNodePinNames
 {
+	//NOTE: these are localised in AllocateDefaultPins, don't change name here or you break existing graphs
 	//in
-	static const FName TrainingSetInputPinName("Training Set");
+	static const FName TrainingSetInputPinName("TrainingSet");		
 	static const FName LiveParametersInputPinName("Parameters");
 	static const FName LabelInputPinName("Label");
 	static const FName RecordInputPinName("Record");
-	static const FName ResetInputPinName( "Reset All" );
+	static const FName DeleteAllInputPinName( "DeleteAll" );
+	static const FName DeleteLabelInputPinName( "DeleteLabel" );
+	static const FName DeleteLastInputPinName( "DeleteLast" );
 	//out
 	static const FName ChangedOutputPinName("Changed");
 }  	
@@ -58,7 +61,9 @@ namespace FInteractMLRecordingNodeRecordFunctionPinNames
 	static const FName LiveParametersPinName("Parameters");
 	static const FName WantSeriesPinName("WantSeries");
 	static const FName RecordPinName("Record");
-	static const FName ResetPinName("Reset");
+	static const FName DeleteAllPinName("DeleteAll");
+	static const FName DeleteLabelPinName("DeleteLabel");
+	static const FName DeleteLastPinName("DeleteLast");
 	static const FName NodeIDPinName("NodeID");
 	//simple label
 	static const FName LabelPinName("Label");
@@ -164,11 +169,12 @@ void UInteractMLRecordingNode::AllocateDefaultPins()
 	// Which trainging set to record into?	
 	UEdGraphPin* trainingset_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Object, UInteractMLTrainingSet::StaticClass(), FInteractMLRecordingNodePinNames::TrainingSetInputPinName );
 	trainingset_pin->PinToolTip = LOCTEXT("RecordingNodeTrainingSetTooltip", "Training set asset to record to.").ToString();
+	trainingset_pin->PinFriendlyName = LOCTEXT("RecordingNodeTrainingSetInputPinName", "Training Set");
 
 	// parameters to record
 	UEdGraphPin* liveparams_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Struct, TBaseStructure<FInteractMLParameters>::Get(), FInteractMLRecordingNodePinNames::LiveParametersInputPinName);
 	liveparams_pin->PinToolTip = LOCTEXT("RecordingNodeLiveParamsPinTooltip", "The live parameters that will be recorded into the training set.").ToString();
-	liveparams_pin->PinFriendlyName = LOCTEXT("ParameterInputPinName", "Live Parameters");
+	liveparams_pin->PinFriendlyName = LOCTEXT("RecordingNodeParameterInputPinName", "Live Parameters");
 
 	// label to associate with parameters being recorded
 	if (LabelType)
@@ -176,18 +182,19 @@ void UInteractMLRecordingNode::AllocateDefaultPins()
 		//composite label
 		UEdGraphPin* label_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Struct, LabelType, FInteractMLRecordingNodePinNames::LabelInputPinName);
 		label_pin->PinToolTip = LOCTEXT("RecordingNodeCompositeLabelPinTooltip", "The set of label values expected as output to be associated with the current recorded parameters.").ToString();
-		label_pin->PinFriendlyName = LOCTEXT("LabelInputPinName", "Expected Output");
+		label_pin->PinFriendlyName = LOCTEXT("RecordingNodeLabelInputPinName", "Expected Output");
 	}
 	else
 	{
 		//simple numerical label
 		UEdGraphPin* label_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Float, nullptr, FInteractMLRecordingNodePinNames::LabelInputPinName);
 		label_pin->PinToolTip = LOCTEXT("RecordingNodeNumericLabelPinTooltip", "The numeric label expected as output to be associated with the current recorded parameters.").ToString();
-		label_pin->PinFriendlyName = LOCTEXT("LabelInputPinName", "Expected Output");
+		label_pin->PinFriendlyName = LOCTEXT("RecordingNodeLabelInputPinName", "Expected Output");
 	}
 
 	// enable recording
 	UEdGraphPin* record_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Boolean, nullptr, FInteractMLRecordingNodePinNames::RecordInputPinName);
+	record_pin->PinFriendlyName = LOCTEXT("RecordingNodeRecordInputPinName", "Record");
 	switch (Mode)
 	{
 		case EInteractMLRecordingMode::Single:
@@ -198,16 +205,22 @@ void UInteractMLRecordingNode::AllocateDefaultPins()
 			break;
 	}
 
-	// perform reset
-	UEdGraphPin* reset_pin = CreatePin( EGPD_Input, UEdGraphSchema_K2::PC_Boolean, nullptr, FInteractMLRecordingNodePinNames::ResetInputPinName );
-	reset_pin->PinToolTip = LOCTEXT( "RecordingNodeResetPinTooltip", "Set this to clear out all recorded training data and start again." ).ToString();
-
+	// various delete/reset operations
+	UEdGraphPin* deletelast_pin = CreatePin( EGPD_Input, UEdGraphSchema_K2::PC_Boolean, nullptr, FInteractMLRecordingNodePinNames::DeleteLastInputPinName );
+	deletelast_pin->PinToolTip = LOCTEXT( "RecordingNodeDeleteLastPinTooltip", "Set this to clear just the most recently recorded example." ).ToString();
+	deletelast_pin->PinFriendlyName = LOCTEXT("RecordingNodeDeleteLastInputPinName", "Delete Last");
+	UEdGraphPin* deletelabel_pin = CreatePin( EGPD_Input, UEdGraphSchema_K2::PC_Boolean, nullptr, FInteractMLRecordingNodePinNames::DeleteLabelInputPinName );
+	deletelabel_pin->PinToolTip = LOCTEXT( "RecordingNodeDeleteLabelPinTooltip", "Set this to clear out the examples recorded for the current Expected Output." ).ToString();
+	deletelabel_pin->PinFriendlyName = LOCTEXT("RecordingNodeDeleteLabelInputPinName", "Delete Output");
+	UEdGraphPin* deleteall_pin = CreatePin( EGPD_Input, UEdGraphSchema_K2::PC_Boolean, nullptr, FInteractMLRecordingNodePinNames::DeleteAllInputPinName );
+	deleteall_pin->PinToolTip = LOCTEXT( "RecordingNodeDeleteAllPinTooltip", "Set this to clear out ALL recorded training data and start again." ).ToString();
+	deleteall_pin->PinFriendlyName = LOCTEXT("RecordingNodeDeleteAllInputPinName", "Delete All");
+	
 	//---- Outputs ----
 
 	// change notification pin
 	UEdGraphPin* changed_pin = CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Boolean, nullptr, FInteractMLRecordingNodePinNames::ChangedOutputPinName);
 	changed_pin->PinToolTip = LOCTEXT("RecordingNodeChangedPinTooltip", "Becomes true briefly when new training data has been recorded.").ToString();
-	
 }
 
 
@@ -237,9 +250,21 @@ UEdGraphPin* UInteractMLRecordingNode::GetRecordInputPin() const
 	check(Pin == NULL || Pin->Direction == EGPD_Input);
 	return Pin;
 }
-UEdGraphPin* UInteractMLRecordingNode::GetResetInputPin() const
+UEdGraphPin* UInteractMLRecordingNode::GetDeleteLastInputPin() const
 {
-	UEdGraphPin* Pin = FindPin( FInteractMLRecordingNodePinNames::ResetInputPinName );
+	UEdGraphPin* Pin = FindPin( FInteractMLRecordingNodePinNames::DeleteLastInputPinName );
+	check( Pin == NULL || Pin->Direction == EGPD_Input );
+	return Pin;
+}
+UEdGraphPin* UInteractMLRecordingNode::GetDeleteLabelInputPin() const
+{
+	UEdGraphPin* Pin = FindPin( FInteractMLRecordingNodePinNames::DeleteLabelInputPinName );
+	check( Pin == NULL || Pin->Direction == EGPD_Input );
+	return Pin;
+}
+UEdGraphPin* UInteractMLRecordingNode::GetDeleteAllInputPin() const
+{
+	UEdGraphPin* Pin = FindPin( FInteractMLRecordingNodePinNames::DeleteAllInputPinName );
 	check( Pin == NULL || Pin->Direction == EGPD_Input );
 	return Pin;
 }
@@ -267,7 +292,9 @@ void UInteractMLRecordingNode::ExpandNode(class FKismetCompilerContext& Compiler
 	UEdGraphPin* MainLiveParametersPin = GetLiveParametersInputPin();
 	UEdGraphPin* MainLabelPin = GetLabelInputPin();
 	UEdGraphPin* MainRecordPin = GetRecordInputPin();	
-	UEdGraphPin* MainResetPin = GetResetInputPin();
+	UEdGraphPin* MainDeleteLastPin = GetDeleteLastInputPin();
+	UEdGraphPin* MainDeleteLabelPin = GetDeleteLabelInputPin();
+	UEdGraphPin* MainDeleteAllPin = GetDeleteAllInputPin();
 	//output pins : exec (execution continues)
 	UEdGraphPin* MainThenPin = FindPin( UEdGraphSchema_K2::PN_Then );	
 	//output pins : data
@@ -288,7 +315,9 @@ void UInteractMLRecordingNode::ExpandNode(class FKismetCompilerContext& Compiler
 	UEdGraphPin* RecordFnWantSeriesPin = CallRecordFn->FindPinChecked( FInteractMLRecordingNodeRecordFunctionPinNames::WantSeriesPinName );
 	UEdGraphPin* RecordFnLiveParametersPin = CallRecordFn->FindPinChecked( FInteractMLRecordingNodeRecordFunctionPinNames::LiveParametersPinName );
 	UEdGraphPin* RecordFnRecordPin = CallRecordFn->FindPinChecked( FInteractMLRecordingNodeRecordFunctionPinNames::RecordPinName );
-	UEdGraphPin* RecordFnResetPin = CallRecordFn->FindPinChecked( FInteractMLRecordingNodeRecordFunctionPinNames::ResetPinName );
+	UEdGraphPin* RecordFnDeleteLastPin = CallRecordFn->FindPinChecked( FInteractMLRecordingNodeRecordFunctionPinNames::DeleteLastPinName );
+	UEdGraphPin* RecordFnDeleteLabelPin = CallRecordFn->FindPinChecked( FInteractMLRecordingNodeRecordFunctionPinNames::DeleteLabelPinName );
+	UEdGraphPin* RecordFnDeleteAllPin = CallRecordFn->FindPinChecked( FInteractMLRecordingNodeRecordFunctionPinNames::DeleteAllPinName );
 	UEdGraphPin* RecordFnNodeIDPin = CallRecordFn->FindPinChecked( FInteractMLRecordingNodeRecordFunctionPinNames::NodeIDPinName );	
 	//label pins
 	UEdGraphPin* RecordFnLabelPin = nullptr; 
@@ -321,7 +350,9 @@ void UInteractMLRecordingNode::ExpandNode(class FKismetCompilerContext& Compiler
 	CompilerContext.MovePinLinksToIntermediate(*MainLiveParametersPin, *RecordFnLiveParametersPin);
 	CompilerContext.MovePinLinksToIntermediate(*MainLabelPin, *RecordFnLabelPin);
 	CompilerContext.MovePinLinksToIntermediate(*MainRecordPin, *RecordFnRecordPin);
-	CompilerContext.MovePinLinksToIntermediate(*MainResetPin, *RecordFnResetPin);
+	CompilerContext.MovePinLinksToIntermediate(*MainDeleteLastPin, *RecordFnDeleteLastPin);
+	CompilerContext.MovePinLinksToIntermediate(*MainDeleteLabelPin, *RecordFnDeleteLabelPin);
+	CompilerContext.MovePinLinksToIntermediate(*MainDeleteAllPin, *RecordFnDeleteAllPin);
 	RecordFnNodeIDPin->DefaultValue = NodeID;
 	RecordFnWantSeriesPin->DefaultValue = (Mode == EInteractMLRecordingMode::Series)?TEXT("true"):TEXT("false");
 	CompilerContext.MovePinLinksToIntermediate(*MainChangedPin, *RecordFnResultPin);

@@ -438,7 +438,7 @@ void FTrainingSetEditor::OnResetClicked()
 	ptraining_set->Modify();
 	
 	//do delete
-	ptraining_set->ResetTrainingSet();
+	ptraining_set->DeleteAllExamples();
 	
 	RebuildEntryViewModel();
 }

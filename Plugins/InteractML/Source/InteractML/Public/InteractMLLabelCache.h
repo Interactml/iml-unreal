@@ -95,8 +95,11 @@ public:
 
 	///////////////// QUERY /////////////////
 
-	//resolve/cache a specific label value (set) and get it's associated numeric label
-	float Find(const class UInteractMLLabel* label_type, const void *label_data);
+	//resolve a specific label value (set) and get it's associated numeric label
+	float Find(const class UInteractMLLabel* label_type, const void *label_data, bool create_if_missing );
+
+	//resolve or add/cache a specific label value (set) and get it's associated numeric label
+	float FindOrAdd(const class UInteractMLLabel* label_type, const void *label_data );
 
 	// look up/cache strings for each string property slot, mapping to an identifying value (for mapping in recognition phase later)
 	float FindString( const FText& string_value, int property_slot );

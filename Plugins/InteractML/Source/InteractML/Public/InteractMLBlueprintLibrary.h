@@ -66,12 +66,12 @@ public:
 	static UInteractMLTrainingSet* GetTrainingSet(AActor* Actor, FString DataPath, FString NodeID, bool& HasData);
 	// training set recording : Simple label
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
-	static bool RecordExampleSimple(AActor* Actor, UInteractMLTrainingSet* TrainingSet, FInteractMLParameters Parameters, bool WantSeries, float Label, bool Record, bool Reset, FString NodeID);
+	static bool RecordExampleSimple(AActor* Actor, UInteractMLTrainingSet* TrainingSet, FInteractMLParameters Parameters, bool WantSeries, float Label, bool Record, bool DeleteLast, bool DeleteLabel, bool DeleteAll, FString NodeID);
 	// training set recording : Composite label
 	UFUNCTION(BlueprintCallable, CustomThunk, meta=(CustomStructureParam="LabelData"), BlueprintInternalUseOnly)
-	static bool RecordExampleComposite(AActor* Actor, UInteractMLTrainingSet* TrainingSet, FInteractMLParameters Parameters, bool WantSeries, const UInteractMLLabel* LabelType, const FGenericStruct& LabelData, bool Record, bool Reset, FString NodeID);
+	static bool RecordExampleComposite(AActor* Actor, UInteractMLTrainingSet* TrainingSet, FInteractMLParameters Parameters, bool WantSeries, const UInteractMLLabel* LabelType, const FGenericStruct& LabelData, bool Record, bool DeleteLast, bool DeleteLabel, bool DeleteAll, FString NodeID);
 	//generic handler for any UInteractMLLabel struct type
-	static bool Generic_RecordExampleComposite(AActor* Actor, UInteractMLTrainingSet* TrainingSet, FInteractMLParameters Parameters, bool WantSeries, const UInteractMLLabel* LabelType, const void* LabelData, bool Record, bool Reset, FString NodeID);
+	static bool Generic_RecordExampleComposite(AActor* Actor, UInteractMLTrainingSet* TrainingSet, FInteractMLParameters Parameters, bool WantSeries, const UInteractMLLabel* LabelType, const void* LabelData, bool Record, bool DeleteLast, bool DeleteLabel, bool DeleteAll, FString NodeID);
 	/** Based on UInteractMLBlueprintLibrary::execRecordExampleComposite */
 	// AActor* Actor, 
 	// UInteractMLTrainingSet* TrainingSet, 
@@ -80,7 +80,9 @@ public:
 	// const UInteractMLLabel* LabelType, 
 	// const FGenericStruct& LabelData, 
 	// bool Record, 
-	// bool Reset, 
+	// bool DeleteLast,
+	// bool DeleteLabel,
+	// bool DeleteAll,
 	// FString NodeID);
 	DECLARE_FUNCTION(execRecordExampleComposite)
 	{
@@ -93,13 +95,15 @@ public:
 		Stack.StepCompiledIn<FStructProperty>(NULL); //P_GET_PROPERTY(FStructProperty, LabelData); - dont' need named prop entry, structs passed via pointer
 		void* LabelDataStructAddr = Stack.MostRecentPropertyAddress;
 		P_GET_PROPERTY(FBoolProperty, Record);	
-		P_GET_PROPERTY(FBoolProperty, Reset);	
+		P_GET_PROPERTY(FBoolProperty, DeleteLast);	
+		P_GET_PROPERTY(FBoolProperty, DeleteLabel);	
+		P_GET_PROPERTY(FBoolProperty, DeleteAll);	
 		P_GET_PROPERTY(FStrProperty, NodeID);	
 		P_FINISH;
 
 		bool bSuccess = false;
 		P_NATIVE_BEGIN;
-		bSuccess = Generic_RecordExampleComposite(Actor, TrainingSet, *ParametersStructAddr, WantSeries, LabelType, LabelDataStructAddr, Record, Reset, NodeID );
+		bSuccess = Generic_RecordExampleComposite(Actor, TrainingSet, *ParametersStructAddr, WantSeries, LabelType, LabelDataStructAddr, Record, DeleteLast, DeleteLabel, DeleteAll, NodeID );
 		P_NATIVE_END;
 		
 		*(bool*)RESULT_PARAM = bSuccess;
