@@ -27,6 +27,8 @@ class INTERACTMLSCRIPTING_API UInteractMLTrainingNode: public UInteractMLNode
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(EditAnywhere,meta=(Tooltip="Enable to train this node in the background instead of blocking blueprint operation"))
+	bool bBackgroundOperation;
 
 private:
 
@@ -36,12 +38,14 @@ private:
 	UEdGraphPin* GetTrainInputPin() const;
 	UEdGraphPin* GetResetInputPin() const;
 	UEdGraphPin* GetTrainedOutputPin() const;
+	UEdGraphPin* GetTrainingOutputPin() const;
+	UEdGraphPin* GetCompletedOutputPin() const;
 	
 protected:
 
 	//~ Begin UObject Interface
 	//virtual void Serialize(FArchive& Ar) override;	
-	//virtual void PostEditChangeProperty(struct FPropertyChangedEvent& e) override;
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& e) override;
 	//virtual void PostLoad() override;
 	//~ End UObject Interface
 

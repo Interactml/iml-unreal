@@ -14,8 +14,10 @@
 namespace InteractMLConstants
 {
 	// node base colour
-	// NOTE: hard to get clear as heavily overlaid/modified with white
-	static FColor NodeTitleColour(128, 100, 255); //IML Purple-ish
+	// NOTE: hard to get clear as heavily overlaid/modified with white for some reason
+	//static FColor NodeTitleColour(128, 100, 255); //IML Purple-ish - too purple
+	static FColor NodeTitleColour(142, 137, 246); //IML Bright-purple - ???
+	//static FColor NodeTitleColour(59, 58, 91); //IML Dark-purple - too dark
 
 	// category title for grouping iml nodes/etc in menus
 	static FText NodeMenuCategory = NSLOCTEXT("InteractML", "NodeMenuCategory", "InteractML");

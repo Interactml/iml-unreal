@@ -372,7 +372,7 @@ UInteractMLModel* UInteractMLBlueprintLibrary::GetModel(AActor* Actor, FString D
 }
 
 
-// model running : simple label
+// model running : simple label, blocking
 //
 float UInteractMLBlueprintLibrary::RunModelSimple( 
 	AActor* Actor, 
@@ -431,7 +431,6 @@ float UInteractMLBlueprintLibrary::RunModelSimple(
 			success = Model->RunModel( Parameters.Ptr.Get(), model_state->CurrentResult );
 		}
 	}
-
 	
 	//report current/last available result
 	if (success)
@@ -444,7 +443,92 @@ float UInteractMLBlueprintLibrary::RunModelSimple(
 	return 0.0f;
 }
 
-// model running : composite label
+// model running : simple label, async
+//
+float UInteractMLBlueprintLibrary::RunModelSimpleAsync( 
+	AActor* Actor, 
+	UInteractMLModel* Model, 
+	FInteractMLParameters Parameters, 
+	bool Run, 
+	FString NodeID,
+	bool& Running,
+	bool& Completed)
+{
+	if (!Model)
+	{
+		//no model, nothing to do
+		Running = false;
+		Completed = false;
+		return 0;
+	}
+	
+	//need context and state store to run with
+	UInteractMLContext* Context = GetMLContext( Actor );
+	check( Context );
+	FInteractMLModelState* model_state = Context->GetModelState( NodeID ).Get();
+	check( model_state );
+
+	//monitor for completion (before state checks which may want to retrigger this frame)
+	bool just_completed = model_state->CheckCompleted();	//(only check once as this resets on query)
+	//run complete? - new output will be available from the model state
+		
+	//series/single operation
+	if(Model->IsSeries())
+	{		
+		//-------------- SERIES: accumulate whilst active and run once complete ---------------
+		
+		//check for transition
+		if (model_state->RunAction.Triggered(Run, NodeID))
+		{
+			//change in run state
+			if (Run)
+			{
+				//just started a run
+				//reset stored series
+				model_state->ParameterSeries.Clear();
+			}
+			else
+			{
+				//just stopped a run
+				//TODO: Do we want to include the last parameter set sent as the run is stopped in the test set?
+				FInteractMLTask::Ptr run_task = Model->RunModelAsync( &model_state->ParameterSeries );
+				model_state->StartRunning(run_task);
+			}
+		}
+		
+		//accumulate
+		if(Run)
+		{
+			//still running
+			//record next parameter set
+			model_state->ParameterSeries.Add( Parameters.Ptr.Get() );
+		}
+	}
+	else
+	{
+		//--------------- SINGLE: just repeatedly run (retrigger) against a single parameter set ---------------
+		if (Run && !model_state->IsRunning())
+		{
+			FInteractMLTask::Ptr run_task = Model->RunModelAsync( Parameters.Ptr.Get() );
+			model_state->StartRunning(run_task);
+		}
+	}
+
+	//report status
+	Running = model_state->IsRunning();
+	Completed = just_completed;
+
+	//report new/current/last available result
+	if (model_state->CurrentResult.Num() == 1)
+	{
+		return model_state->CurrentResult[0];
+	}
+	return 0.0f;
+}
+
+
+
+// model running : composite label, blocking
 //
 void UInteractMLBlueprintLibrary::RunModelComposite( 
 	AActor* Actor, 
@@ -555,11 +639,136 @@ void UInteractMLBlueprintLibrary::Generic_RunModelComposite(
 	}
 }
 
+// model running : composite label, asynchronous
+//
+void UInteractMLBlueprintLibrary::RunModelCompositeAsync( 
+	AActor* Actor, 
+	UInteractMLModel* Model, 
+	FInteractMLParameters Parameters, 
+	bool Run, 
+	FString NodeID,
+	const UInteractMLLabel* LabelType,
+	FGenericStruct& LabelData, 	//<-- placeholder for the generic output parameter mapped in the thunk function below
+	bool& Running, 
+	bool& Completed )
+{
+	//placeholder for generic structure binding, never actually called
+	//see Generic_RunModelCompositeAsync below
+	check(0);
+}
+
+// generic implementation of above
+//
+void UInteractMLBlueprintLibrary::Generic_RunModelCompositeAsync(
+	AActor* Actor, 
+	UInteractMLModel* Model, 
+	FInteractMLParameters Parameters, 
+	bool Run, 
+	FString NodeID,
+	const UInteractMLLabel* LabelType,
+	void* LabelData,	//<-- the generic parameter
+	bool& Running, 
+	bool& Completed )
+{
+	//NOTE: Code should be identical to RunModelSimple above, but passing
+	//NOTE:  LabelType/LabelData instead of returning Label (float)
+	//NOTE: Other than that they should be kept in sync.
+	
+	if (!Model)
+	{		
+		//no model, nothing to do
+		Running = false;
+		Completed = false;
+		return;
+	}
+	
+	//need context and state store to run with
+	UInteractMLContext* Context = GetMLContext( Actor );
+	check( Context );
+	FInteractMLModelState* model_state = Context->GetModelState( NodeID ).Get();
+	check( model_state );
+	
+	//monitor for completion (before state checks which may want to retrigger this frame)
+	bool just_completed = model_state->CheckCompleted();	//(only check once as this resets on query)
+	//run complete? - new output will be available from the model state
+
+	//series/single operation
+	if(Model->IsSeries())
+	{		
+		//-------------- SERIES: accumulate whilst active and run once complete ---------------
+		
+		//check for transition
+		if (model_state->RunAction.Triggered(Run, NodeID))
+		{
+			//change in run state
+			if (Run)
+			{
+				//just started a run
+				//reset stored series
+				model_state->ParameterSeries.Clear();
+			}
+			else
+			{
+				//just stopped a run
+				//TODO: Do we want to include the last parameter set sent as the run is stopped in the test set?
+				FInteractMLTask::Ptr run_task = Model->RunModelAsync( &model_state->ParameterSeries );
+				model_state->StartRunning(run_task);
+			}
+		}
+		
+		//accumulate
+		if(Run)
+		{
+			//still running
+			//record next parameter set
+			model_state->ParameterSeries.Add( Parameters.Ptr.Get() );
+		}	
+	}
+	else
+	{
+		//--------------- SINGLE: just repeatedly run against a single parameter set ---------------
+		if (Run && !model_state->IsRunning())
+		{
+			FInteractMLTask::Ptr run_task = Model->RunModelAsync( Parameters.Ptr.Get() );
+			model_state->StartRunning(run_task);
+		}
+	}
+	
+	//report status
+	Running = model_state->IsRunning();
+	Completed = just_completed;
+	
+	//report new/current/last available result
+	if (model_state->CurrentResult.Num() > 0)
+	{
+		const FInteractMLLabelCache& label_cache = Model->GetLabelCache();
+		
+		//map results back to output label structure
+		if (Model->IsDiscrete())
+		{
+			//just one, use labels as-is, just index the one needed
+			if(ensure( model_state->CurrentResult.Num() == 1 )) //should only be single model output value
+			{
+				//find label to apply
+				int label_index = (int)model_state->CurrentResult[0];
+				TArray<float> specific_label;
+				if(label_cache.GetLabel( label_index, specific_label ))
+				{
+					//rebuild struct from this specific label
+					LabelType->RecreateData( specific_label, LabelData, label_cache );
+				}
+			}
+		}
+		else
+		{
+			//interpolated multi-value output, they map to each structure member directly
+			LabelType->RecreateData( model_state->CurrentResult, LabelData, label_cache );
+		}
+	}
+}
 
 
-
-
-// model training
+// model training : blocking
 //
 bool UInteractMLBlueprintLibrary::TrainModel( AActor* Actor, UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID )
 {
@@ -568,7 +777,7 @@ bool UInteractMLBlueprintLibrary::TrainModel( AActor* Actor, UInteractMLModel* M
 		bool changed = false;
 
 		//training state changed?
-		if(Model->TrainingAction.Triggered(Train, NodeID))
+		if(Model->TrainingRequest.Triggered(Train, NodeID))
 		{
 			//activated/deactivated?
 			if (Train)
@@ -580,7 +789,7 @@ bool UInteractMLBlueprintLibrary::TrainModel( AActor* Actor, UInteractMLModel* M
 		}
 		
 		//reset state changed?
-		if(Model->ResetAction.Triggered(Reset,NodeID))
+		if(Model->ResetRequest.Triggered(Reset,NodeID))
 		{
 			//activated/deactivated?
 			if (Reset)
@@ -608,6 +817,60 @@ bool UInteractMLBlueprintLibrary::TrainModel( AActor* Actor, UInteractMLModel* M
 	return false;
 }
 
+// model training : asynchronous
+//
+bool UInteractMLBlueprintLibrary::TrainModelAsync( AActor* Actor, UInteractMLModel* Model, UInteractMLTrainingSet* TrainingSet, bool Train, bool Reset, FString NodeID, bool& Training, bool& Completed )
+{
+	if (!Model)
+	{
+		//no model, nothing to do	
+		Training = false;
+		Completed = false;
+		return false;
+	}
+
+	bool notify_context = false;
+	
+	//training state changed?
+	if(Model->TrainingRequest.Triggered(Train, NodeID))
+	{
+		//activated/deactivated?
+		if (Train)
+		{
+			//trigger start of training when Train bool transitions to true
+			Model->TrainModelAsync( TrainingSet );
+			notify_context = true;
+		}
+	}
+	
+	//reset state changed?
+	if(Model->ResetRequest.Triggered(Reset,NodeID))
+	{
+		//activated/deactivated?
+		if (Reset)
+		{
+			//trigger reset when Reset transitions to true
+			Model->ResetModel();
+			
+			//explicitly count this as new data
+			Model->MarkUnsavedData();
+			notify_context = true;
+		}
+	}
+	
+	//need to make sure context/module are aware of model use/changes during PIE
+	if (notify_context)
+	{	
+		UInteractMLContext* Context = GetMLContext( Actor );
+		check( Context );
+		Context->SetModel(NodeID, Model);
+	}
+
+	//current status
+	Training = Model->IsTraining();
+	Completed = Model->CheckJustCompleted();
+	return Model->IsTrained();
+}
 
 
 ///////////////////// UTILITY //////////////////////
@@ -724,4 +987,3 @@ UInteractMLModel* UInteractMLBlueprintLibrary::DEPRECATED_GetModel_DynamicTimeWa
 
 // EPILOGUE
 #undef LOCTEXT_NAMESPACE
-

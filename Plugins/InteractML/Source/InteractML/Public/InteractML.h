@@ -7,6 +7,7 @@
 //module
 #include "CoreMinimal.h"
 #include "Modules/ModuleInterface.h"
+#include "InteractMLTask.h"
 
 //unreal
 //#include "Containers/Tickers.h"
@@ -30,6 +31,15 @@ class INTERACTML_API FInteractMLModule
 	// catalogue of IML objects in use
 	TMap<FString, TWeakObjectPtr<class UInteractMLStorage>> ObjectLookup;
 
+	//tick
+	FTickerDelegate TickDelegate;
+	FDelegateHandle TickDelegateHandle;
+
+	//async support
+	TArray<FInteractMLTask::Ptr>	PendingTasks;
+	TArray<FInteractMLTask::Ptr>	CompletedTasks;
+	FCriticalSection				CompletedTaskInterlock;
+
 public:
 	//systems
 	static FInteractMLModule& Get() { return *s_pModule; }
@@ -49,6 +59,9 @@ public:
 	//ml objects : inform of any obtained from direct asset references here as we need to synchronise with path based ones
 	void SetTrainingSet( class UInteractMLTrainingSet* training_set );
 	void SetModel( class UInteractMLModel* model );
+
+	//async execution
+	void RunTask( FInteractMLTask::Ptr task );
 	
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
@@ -57,9 +70,17 @@ public:
 private:
 
 	//setup
+	void InitTick();
 	void InitPaths();
-
+	
+	//update
+	bool Tick(float DeltaTime);
+	void TickTasks(float dt);
+		
 	//shutdown
+	void ShutdownTick();
 	void ShutdownCache();
+	void ShutdownTasks();
+
 	
 };

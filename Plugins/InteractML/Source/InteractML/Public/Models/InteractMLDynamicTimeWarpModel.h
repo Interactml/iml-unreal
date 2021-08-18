@@ -41,24 +41,29 @@ public:
 	// extension prefix for model data files
 	static FString cExtensionPrefix;
 	
-	//---- access ----
-
 	//---- persistence ----
 	virtual bool LoadJson(const FString& json_string) override;
 	virtual bool SaveJson(FString& json_string) const override;
-	
-	//---- operation ----
-	//specialised for dtw, not got shared API of classification or regression algorithms
-	virtual bool RunModelInstance(struct FInteractMLParameterSeries* parameters, TArray<float>& out_values) override;
-	virtual bool TrainModelInstance(class UInteractMLTrainingSet* training_set) override;
-	virtual void ResetModelInstance() override;
-	virtual modelSetFloat* GetModelInstance() const override { /*not compatible with general model base*/ check(false); return nullptr; }
 
+	//---- access ----
+	
 	//model type	
 	virtual bool IsSeries() const { return true; }	//matching against a series of snapshots instead of a single shapshot
 	//each type provides further qualifying extension prefix
 	virtual FString GetSpecificExtensionPrefix() const override { return cExtensionPrefix; }
 	
+protected:
+	//---- operation ----
+	//specialised for dtw, not got shared API of classification or regression algorithms
+	virtual void ResetModelInstance() override;
+	virtual modelSetFloat* GetModelInstance() const override { /*not compatible with general model base*/ check(false); return nullptr; }
+	//async
+	virtual FInteractMLTask::Ptr BeginTrainingModel( class UInteractMLTrainingSet* training_set ) override;
+	virtual void DoTrainingModel( FInteractMLTask::Ptr training_task ) override; //NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
+	virtual FInteractMLTask::Ptr BeginRunningModel(struct FInteractMLParameterSeries* parameter_series) override;
+	virtual void DoRunningModel( FInteractMLTask::Ptr run_task ) override; //NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
+	
+
 
 private:
 	

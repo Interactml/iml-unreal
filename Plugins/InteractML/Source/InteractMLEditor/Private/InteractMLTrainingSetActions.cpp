@@ -9,6 +9,7 @@
 
 //module
 #include "InteractMLTrainingSet.h"
+#include "InteractMLTrainingSetEditor.h"
 
 
 //module editor
@@ -37,7 +38,6 @@ uint32 FInteractMLTrainingSetActions::GetCategories()
 	return RegisteredCategoryHandle;
 }
 
-#if 0
 void FInteractMLTrainingSetActions::OpenAssetEditor( const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
 {
 	for (UObject* obj : InObjects)
@@ -51,7 +51,7 @@ void FInteractMLTrainingSetActions::OpenAssetEditor( const TArray<UObject*>& InO
 		}
 	}
 }
-#endif
+
 
 #undef LOCTEXT_NAMESPACE
 

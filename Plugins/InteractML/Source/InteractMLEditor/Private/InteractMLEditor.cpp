@@ -27,6 +27,7 @@ DEFINE_LOG_CATEGORY(LogInteractML);
 // LOCAL CLASSES & TYPES
 
 // GLOBAL STATE
+class FInteractMLEditorModule* FInteractMLEditorModule::EditorModule = nullptr;
 
 // CLASS STATE
 
@@ -36,10 +37,13 @@ DEFINE_LOG_CATEGORY(LogInteractML);
 //
 void FInteractMLEditorModule::StartupModule()
 {
+	EditorModule = this;
+
 	UE_LOG( LogInteractML, Display, TEXT( "Starting InteractML Plugin - Editor Module" ) );
 
 	InitHooks();
 	InitAssets();
+	InitExtensibility();
 }
 
 
@@ -54,6 +58,7 @@ void FInteractMLEditorModule::ShutdownModule()
 
 	ShutdownHooks();
 	ShutdownAssets();
+	ShutdownExtensibility();
 }
 
 
@@ -93,39 +98,76 @@ void FInteractMLEditorModule::InitAssets()
 	AssetTools.RegisterAssetTypeActions( MakeShareable( new FInteractMLLabelActions(interactml_category) ));
 	AssetTools.RegisterAssetTypeActions( MakeShareable( new FInteractMLLabelTableActions(interactml_category) ));
 	
-	//style setup for asset appearance
+	//style setup for icons
 	AssetStyleSet = MakeShareable(new FSlateStyleSet("InteractML"));
 	AssetStyleSet->SetContentRoot(ContentDir);
-	FSlateImageBrush* TrainingSetThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLTrainingSet"), TEXT(".png") ), FVector2D(128.f, 128.f) );
+	
+	//asset icons
+	FSlateImageBrush* TrainingSetThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLTrainingSet_128"), TEXT(".png") ), FVector2D(128.f, 128.f) );
 	if (TrainingSetThumbnail)
 	{
 		AssetStyleSet->Set("ClassThumbnail.InteractMLTrainingSet", TrainingSetThumbnail);
 	}
-	FSlateImageBrush* ClassificationThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLClassification"), TEXT(".png") ), FVector2D(128.f, 128.f) );
+	FSlateImageBrush* ClassificationThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLClassification_128"), TEXT(".png") ), FVector2D(128.f, 128.f) );
 	if (ClassificationThumbnail)
 	{
 		AssetStyleSet->Set("ClassThumbnail.InteractMLClassificationModel", ClassificationThumbnail);
 	}
-	FSlateImageBrush* RegressionThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLRegression"), TEXT(".png") ), FVector2D(128.f, 128.f) );
+	FSlateImageBrush* RegressionThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLRegression_128"), TEXT(".png") ), FVector2D(128.f, 128.f) );
 	if (RegressionThumbnail)
 	{
 		AssetStyleSet->Set("ClassThumbnail.InteractMLRegressionModel", RegressionThumbnail);
 	}
-	FSlateImageBrush* DTWThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLDynamicTimewarp"), TEXT(".png") ), FVector2D(128.f, 128.f) );
+	FSlateImageBrush* DTWThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLDynamicTimewarp_128"), TEXT(".png") ), FVector2D(128.f, 128.f) );
 	if (DTWThumbnail)
 	{
 		AssetStyleSet->Set("ClassThumbnail.InteractMLDynamicTimewarpModel", DTWThumbnail);
 	}
-	FSlateImageBrush* LabelThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLLabel"), TEXT(".png") ), FVector2D(128.f, 128.f) );
+	FSlateImageBrush* LabelThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLLabel_128"), TEXT(".png") ), FVector2D(128.f, 128.f) );
 	if (LabelThumbnail)
 	{
 		AssetStyleSet->Set("ClassThumbnail.InteractMLLabel", LabelThumbnail);
 	}
-	FSlateImageBrush* LabelTableThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLLabelTable"), TEXT(".png") ), FVector2D(128.f, 128.f) );
+	FSlateImageBrush* LabelTableThumbnail = new FSlateImageBrush(AssetStyleSet->RootToContentDir( TEXT("Icons/InteractMLLabelTable_128"), TEXT(".png") ), FVector2D(128.f, 128.f) );
 	if (LabelTableThumbnail)
 	{
 		AssetStyleSet->Set("ClassThumbnail.InteractMLLabelTable", LabelTableThumbnail);
 	}
+
+	//node icons
+	FSlateImageBrush* NodeIcon = new FSlateImageBrush( AssetStyleSet->RootToContentDir( TEXT( "Icons/InteractMLNode_16" ), TEXT( ".png" ) ), FVector2D( 16.f, 16.f ) );
+	if(NodeIcon)
+	{
+		AssetStyleSet->Set( "NodeIcons.Default_16x", NodeIcon );
+	}
+
+	//treeview icons
+	FSlateImageBrush* TreeIcon_SingleExample = new FSlateImageBrush( AssetStyleSet->RootToContentDir( TEXT( "Icons/InteractMLExampleSingle_16" ), TEXT( ".png" ) ), FVector2D( 16.f, 16.f ) );
+	if(TreeIcon_SingleExample)
+	{
+		AssetStyleSet->Set( "TreeViewIcons.SingleExample_16x", TreeIcon_SingleExample );
+	}
+
+	//misc icons
+	FSlateImageBrush* MiscIcon_TrainingSet_Small = new FSlateImageBrush( AssetStyleSet->RootToContentDir( TEXT( "Icons/InteractMLTrainingSet_16" ), TEXT( ".png" ) ), FVector2D( 16.f, 16.f ) );
+	if(MiscIcon_TrainingSet_Small)
+	{
+		AssetStyleSet->Set( "MiscIcons.TrainingSet_16x", MiscIcon_TrainingSet_Small );
+	}
+
+	//toolbar icons
+	FSlateImageBrush* ToolbarIcon_Delete = new FSlateImageBrush( AssetStyleSet->RootToContentDir( TEXT( "Icons/InteractMLDelete_40" ), TEXT( ".png" ) ), FVector2D( 40.f, 40.f ) );
+	if(ToolbarIcon_Delete)
+	{
+		AssetStyleSet->Set( "ToolbarIcons.Delete_40x", ToolbarIcon_Delete );
+	}
+	FSlateImageBrush* ToolbarIcon_Reset = new FSlateImageBrush( AssetStyleSet->RootToContentDir( TEXT( "Icons/InteractMLReset_40" ), TEXT( ".png" ) ), FVector2D( 40.f, 40.f ) );
+	if(ToolbarIcon_Reset)
+	{
+		AssetStyleSet->Set( "ToolbarIcons.Reset_40x", ToolbarIcon_Reset );
+	}
+	
+	//register for use
 	FSlateStyleRegistry::RegisterSlateStyle(*AssetStyleSet);
 }
 
@@ -140,6 +182,22 @@ void FInteractMLEditorModule::ShutdownAssets()
 }
 
 
+
+// setup extensibility systems for extending editor and building custom panels
+//
+void FInteractMLEditorModule::InitExtensibility()
+{
+	//MenuExtensibilityManager = MakeShareable(new FExtensibilityManager);
+	ToolBarExtensibilityManager = MakeShareable(new FExtensibilityManager);
+	
+}
+// clean up
+//
+void FInteractMLEditorModule::ShutdownExtensibility()
+{
+	//MenuExtensibilityManager.Reset();
+	ToolBarExtensibilityManager.Reset();
+}
 
 
 // play in editor has stopped.  an opportunity to propertly flag any unsaved state as dirty

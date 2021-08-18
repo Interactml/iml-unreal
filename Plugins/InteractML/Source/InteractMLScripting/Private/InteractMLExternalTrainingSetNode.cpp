@@ -11,7 +11,7 @@
 #include "KismetCompiler.h" //FKismetCompilerContext
 #include "K2Node_CallFunction.h" //UK2Node_Function
 #include "Engine/SimpleConstructionScript.h" //USimpleConstructionScript
-#include "BlueprintEditorUtils.h" //MarkBlueprintAsStructurallyModified
+#include "Kismet2/BlueprintEditorUtils.h" //MarkBlueprintAsStructurallyModified
 #include "ToolMenu.h" //UToolMenu
 #include "ScopedTransaction.h" //FScopedTransaction
 
@@ -72,7 +72,7 @@ FText UInteractMLExternalTrainingSetNode::GetNodeTitle(ENodeTitleType::Type Titl
 	{
 		case ENodeTitleType::FullTitle:
 			title.Append(TEXT("\n"));
-			title.Append( LOCTEXT("ExternalTrainingSetNodeSubTitle", "External Data File").ToString() );
+			title.Append( LOCTEXT("ExternalTrainingSetNodeSubTitle", "External training set data file").ToString() );
 			break;
 
 		case ENodeTitleType::MenuTitle:

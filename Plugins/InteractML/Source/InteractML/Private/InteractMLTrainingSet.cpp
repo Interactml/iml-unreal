@@ -6,6 +6,7 @@
 
 //unreal
 #include "JsonObjectConverter.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 //module
 #include "InteractML.h"
@@ -27,9 +28,10 @@ bool UInteractMLTrainingSet::LoadJson(const FString& json_string)
 {
 	if (LoadExamplesFromJson(json_string, Examples))
 	{
-		//post-load analysis
-		ExtractCharacteristics();
-			
+		//post-load analysis/fixups
+		ValidateExamples();
+		RefreshDerivedState();
+		
 		return true;		
 	}
 	
@@ -44,13 +46,30 @@ bool UInteractMLTrainingSet::SaveJson(FString& json_string) const
 	return SaveExamplesToJson(Examples, json_string);
 }
 
+// undo/redo change
+//
+void UInteractMLTrainingSet::PostEditUndo()
+{
+	RefreshDerivedState();
+}
+
+// ensure anything transient but based on object state is up to date
+//
+void UInteractMLTrainingSet::RefreshDerivedState()
+{
+	ExtractCharacteristics();
+}
+
 // empty out any example state
 //
 void UInteractMLTrainingSet::ResetExamples()
 {
 	ClearExamplesCollection(Examples);
 	LabelCache.Reset();
+
 	ParameterCount = 0;
+	LabelCount = 0;
+	SampleMode = EInteractMLSampleMode::Unknown;
 }
 
 // post load we can look at the data to determine:
@@ -63,6 +82,7 @@ void UInteractMLTrainingSet::ExtractCharacteristics()
 	//reset
 	SampleMode = EInteractMLSampleMode::Unknown;
 	ParameterCount = 0;
+	TSet<float> Labels;
 
 	//scan examples
 	int min_sample_count = MAX_int32;
@@ -88,7 +108,13 @@ void UInteractMLTrainingSet::ExtractCharacteristics()
 			min_param_count = FMath::Min(min_param_count, param_count );
 			max_param_count = FMath::Max(max_param_count, param_count );
 		}
+
+		//labels
+		Labels.Add(example.label);
 	}
+
+	//distinct labels
+	LabelCount = Labels.Num();
 
 	//results
 	bool invalid = false;
@@ -126,6 +152,23 @@ void UInteractMLTrainingSet::ExtractCharacteristics()
 	}
 }
 
+// validate data, apply any fixups/upgrades needed
+//
+void UInteractMLTrainingSet::ValidateExamples()
+{
+	//ensure ID's are assigned (upgrade old data)
+	if (Examples.Num() >= 2) //(need at least 2 to check this)
+	{
+		if (Examples[0].ID == Examples[1].ID) //defaults
+		{
+			//assign them
+			for (int i = 0; i < Examples.Num(); i++)
+			{
+				Examples[i].ID = i;
+			}
+		}
+	}
+}
 
 // re-usable load function
 //
@@ -187,15 +230,36 @@ bool UInteractMLTrainingSet::ClearExamplesCollection(TArray<FInteractMLExample>&
 	return true;
 }
 
+// prep current recording state for accumulation, etc
+//
+void UInteractMLTrainingSet::NewRecordingSession( float label_number )
+{
+	//reset state/accumulation
+	CurrentRecording.label = label_number;
+	CurrentRecording.inputSeries.Empty();
+
+	//find id for new example
+	int max_id = -1;
+	for (int i = 0; i < Examples.Num(); i++)
+	{
+		max_id = FMath::Max(max_id, Examples[i].ID);
+	}
+	CurrentRecording.ID = max_id + 1;	
+	
+	//session info
+	CurrentRecording.Session = FDateTime::Now().ToString();
+	CurrentRecording.User = UKismetSystemLibrary::GetPlatformUserName();
+
+	//start recording timer
+	CurrentRecording.Duration = 0;
+	RecordingStart = FDateTime::Now();
+}
 
 // check ready, prep and start recording - simple label
 //
 bool UInteractMLTrainingSet::BeginRecording(float label)
 {
-	//reset
-	CurrentRecording.label = label;
-	CurrentRecording.inputSeries.Empty();
-
+	NewRecordingSession( label );
 	return true;
 }
 
@@ -205,11 +269,7 @@ bool UInteractMLTrainingSet::BeginRecording(const UInteractMLLabel* label_type, 
 {
 	//associate this label expected output values with a numeric label for lookup later
 	float label = LabelCache.Find(label_type, label_data);
-
-	//reset
-	CurrentRecording.label = label;
-	CurrentRecording.inputSeries.Empty();
-	
+	NewRecordingSession( label );
 	return true;
 }
 
@@ -257,6 +317,10 @@ bool UInteractMLTrainingSet::EndRecording()
 	//any data added?
 	if (CurrentRecording.inputSeries.Num() > 0)
 	{
+		//timing
+		FTimespan elapsed = FDateTime::Now()-RecordingStart;
+		CurrentRecording.Duration = elapsed.GetTotalSeconds();
+
 		//move finished recording into the example set
 		Examples.Add( CurrentRecording );
 		success = true;
@@ -264,19 +328,8 @@ bool UInteractMLTrainingSet::EndRecording()
 		//flag as dirty
 		MarkUnsavedData();
 
-		//can we determine sample size?
-		if (SampleMode == EInteractMLSampleMode::Unknown)
-		{
-			//TODO: does series detection need to be more robust? (would need to explicitly pass in the mode)
-			if (CurrentRecording.inputSeries.Num() == 1)
-			{
-				SampleMode = EInteractMLSampleMode::Single;
-			}
-			else
-			{
-				SampleMode = EInteractMLSampleMode::Series;
-			}
-		}
+		//re-eval state to cache some stats/info
+		RefreshDerivedState();
 	}
 	
 	//done
@@ -292,6 +345,47 @@ void UInteractMLTrainingSet::ResetTrainingSet()
 	ResetExamples();
 	MarkUnsavedData();
 }
+
+//////////////////////// editing //////////////////////////////
+
+// remove an example by ID
+//
+bool UInteractMLTrainingSet::RemoveExample(int example_id, FInteractMLExample* out_removed_example )
+{
+	//find example
+	int example_index = -1;
+	for (int i = 0; i < Examples.Num(); i++)
+	{
+		if (Examples[i].ID == example_id)
+		{
+			example_index = i;
+			break;
+		}
+	}
+
+	//remove
+	if (example_index != -1)
+	{
+		//copy out
+		if (out_removed_example)
+		{
+			*out_removed_example = Examples[example_index];
+		}
+
+		//remove
+		Examples.RemoveAt(example_index);
+
+		//ensure state up to date
+		RefreshDerivedState();
+		
+		return true;
+	}
+
+	return false;
+}
+
+
+
 
 //////////////////////// blueprint access /////////////////////////
 

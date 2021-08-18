@@ -11,7 +11,7 @@
 #include "KismetCompiler.h" //FKismetCompilerContext
 #include "K2Node_CallFunction.h" //UK2Node_Function
 #include "Engine/SimpleConstructionScript.h" //USimpleConstructionScript
-#include "BlueprintEditorUtils.h" //MarkBlueprintAsStructurallyModified
+#include "Kismet2/BlueprintEditorUtils.h" //MarkBlueprintAsStructurallyModified
 #include "ToolMenu.h" //UToolMenu
 #include "ScopedTransaction.h" //FScopedTransaction
 #include "K2Node_Self.h" //Self
@@ -46,8 +46,20 @@ FText UInteractMLNode::GetMenuCategory() const
 }
 FLinearColor UInteractMLNode::GetNodeTitleColor() const
 {
-	return InteractMLConstants::NodeTitleColour.ReinterpretAsLinear(); 
+	return InteractMLConstants::NodeTitleColour.ReinterpretAsLinear();
 }
+FLinearColor UInteractMLNode::GetNodeBodyTintColor() const
+{
+	return InteractMLConstants::NodeTitleColour.ReinterpretAsLinear();
+}
+FSlateIcon UInteractMLNode::GetIconAndTint( FLinearColor& OutColor ) const
+{
+	OutColor = FLinearColor::White;
+	static FSlateIcon Icon( "InteractML", "NodeIcons.Default_16x" );
+	return Icon;
+}
+
+
 
 
 // put node in blueprint menu

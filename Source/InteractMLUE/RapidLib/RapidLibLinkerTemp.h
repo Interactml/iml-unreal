@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "JsonObjectConverter.h"
 #include "Components/ActorComponent.h"
-#include "DataSerialization.h"
+#include "../DataSerialization.h"
 
 
 

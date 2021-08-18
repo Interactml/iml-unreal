@@ -11,7 +11,7 @@
 #include "KismetCompiler.h" //FKismetCompilerContext
 #include "K2Node_CallFunction.h" //UK2Node_Function
 #include "Engine/SimpleConstructionScript.h" //USimpleConstructionScript
-#include "BlueprintEditorUtils.h" //MarkBlueprintAsStructurallyModified
+#include "Kismet2/BlueprintEditorUtils.h" //MarkBlueprintAsStructurallyModified
 #include "ToolMenu.h" //UToolMenu
 #include "ScopedTransaction.h" //FScopedTransaction
 #include "K2Node_Self.h" //Self node
@@ -39,8 +39,8 @@ namespace FInteractMLRecordingNodePinNames
 {
 	//in
 	static const FName TrainingSetInputPinName("Training Set");
-	static const FName LiveParametersInputPinName("Live Parameters");
-	static const FName LabelInputPinName("Expected Output");
+	static const FName LiveParametersInputPinName("Parameters");
+	static const FName LabelInputPinName("Label");
 	static const FName RecordInputPinName("Record");
 	static const FName ResetInputPinName( "Reset All" );
 	//out
@@ -168,6 +168,7 @@ void UInteractMLRecordingNode::AllocateDefaultPins()
 	// parameters to record
 	UEdGraphPin* liveparams_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Struct, TBaseStructure<FInteractMLParameters>::Get(), FInteractMLRecordingNodePinNames::LiveParametersInputPinName);
 	liveparams_pin->PinToolTip = LOCTEXT("RecordingNodeLiveParamsPinTooltip", "The live parameters that will be recorded into the training set.").ToString();
+	liveparams_pin->PinFriendlyName = LOCTEXT("ParameterInputPinName", "Live Parameters");
 
 	// label to associate with parameters being recorded
 	if (LabelType)
@@ -175,12 +176,14 @@ void UInteractMLRecordingNode::AllocateDefaultPins()
 		//composite label
 		UEdGraphPin* label_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Struct, LabelType, FInteractMLRecordingNodePinNames::LabelInputPinName);
 		label_pin->PinToolTip = LOCTEXT("RecordingNodeCompositeLabelPinTooltip", "The set of label values expected as output to be associated with the current recorded parameters.").ToString();
+		label_pin->PinFriendlyName = LOCTEXT("LabelInputPinName", "Expected Output");
 	}
 	else
 	{
 		//simple numerical label
 		UEdGraphPin* label_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Float, nullptr, FInteractMLRecordingNodePinNames::LabelInputPinName);
 		label_pin->PinToolTip = LOCTEXT("RecordingNodeNumericLabelPinTooltip", "The numeric label expected as output to be associated with the current recorded parameters.").ToString();
+		label_pin->PinFriendlyName = LOCTEXT("LabelInputPinName", "Expected Output");
 	}
 
 	// enable recording

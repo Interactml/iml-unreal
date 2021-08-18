@@ -19,24 +19,42 @@
 //
 class INTERACTMLEDITOR_API FInteractMLEditorModule 
 	: public IModuleInterface
+//	, public IHasMenuExtensibility
+	, public IHasToolBarExtensibility
 {
 	// asset appearance
 	TSharedPtr<FSlateStyleSet> AssetStyleSet;
+
+	// systems
+	static class FInteractMLEditorModule* EditorModule;
+
+	/** Extensibility managers */
+	TSharedPtr<FExtensibilityManager> ToolBarExtensibilityManager;
+	
 	
 public:
 
+	// systems access
+	static class FInteractMLEditorModule* GetModule() { return EditorModule; }
+	static TSharedPtr<FSlateStyleSet> GetStyle() { return EditorModule->AssetStyleSet; }
+	
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
+	/** IHasToolBarExtensibility interface */
+	virtual TSharedPtr<FExtensibilityManager> GetToolBarExtensibilityManager() override { return ToolBarExtensibilityManager; }	
+	
 private:
 
 	// editor module setup/shutdown
 	void InitHooks();
 	void InitAssets();
-	
+	void InitExtensibility();
+		
 	void ShutdownAssets();
 	void ShutdownHooks();
+	void ShutdownExtensibility();
 
 	// global editor event handlers	
 	void OnEndPIE(const bool bIsSimulating);
