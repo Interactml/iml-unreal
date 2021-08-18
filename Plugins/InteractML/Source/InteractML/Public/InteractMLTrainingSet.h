@@ -111,7 +111,9 @@ class INTERACTML_API UInteractMLTrainingSet
 	
 public:
 	FNodeActionInterlock RecordingAction; // are we currently recording, and which node is doing it? (might be only true for a single frame if Single sample mode)
-	FNodeActionInterlock ResettingAction; // are we currently resetting, and which node is doing it? (we track this so we can ignore continuous reset requests)
+	FNodeActionInterlock DeletingLastAction; // are we currently resetting (one), and which node is doing it? (we track this so we can ignore continuous reset requests)
+	FNodeActionInterlock DeletingLabelAction; // are we currently resetting (some), and which node is doing it? (we track this so we can ignore continuous reset requests)
+	FNodeActionInterlock DeletingAllAction; // are we currently resetting (all), and which node is doing it? (we track this so we can ignore continuous reset requests)
 	
 
 	//---- constants ----
@@ -126,11 +128,13 @@ public:
 	const TArray<FInteractMLExample>& GetExamples() const { return Examples; }
 	bool IsSingleSamples() const { return SampleMode == EInteractMLSampleMode::Single; }
 	bool IsSeriesSamples() const { return SampleMode == EInteractMLSampleMode::Series; }
-	int GetParameterCount() const { return ParameterCount; }
+	//BP (version below) int GetParameterCount() const { return ParameterCount; }
 	int GetLabelCount() const { return LabelCount; }
 	//interaction
 	bool IsRecording() const { return RecordingAction.Active(); }
-	bool IsResetting() const { return ResettingAction.Active(); }
+	bool IsDeletingLast() const { return DeletingLastAction.Active(); }
+	bool IsDeletingLabel() const { return DeletingLabelAction.Active(); }
+	bool IsDeletingAll() const { return DeletingAllAction.Active(); }
 	
 	const FInteractMLLabelCache& GetLabelCache() const { return LabelCache; }
 	bool HasCompositeLabels() const { return LabelCache.LabelType != nullptr; }
@@ -140,8 +144,11 @@ public:
 	bool BeginRecording( const UInteractMLLabel* label_type, const void* label_data );
 	bool RecordParameters( struct FInteractMLParameterCollection* parameters );
 	bool EndRecording();
-	void ResetTrainingSet();
-
+	void DeleteLastExample();
+	void DeleteLabelExamples( float label );
+	void DeleteLabelExamples( const UInteractMLLabel* label_type, const void* label_data );
+	void DeleteAllExamples();
+	
 	//---- editing ----
 	bool RemoveExample( int example_id, FInteractMLExample* out_removed_example=nullptr );
 	
@@ -158,12 +165,37 @@ public:
 	// End UObject overrides
 	
 	//---- blueprint access ----
-	//How many examples have been recorded into this training set
-	UFUNCTION(BlueprintPure,Category="InteractML",meta=(CompactNodeTitle="Example Count"))
-	int GetExampleCount();
 	//How many parameters are there in each example (if known)
 	UFUNCTION(BlueprintPure,Category="InteractML",meta=(CompactNodeTitle="Parameter Count"))
-	int GetParameterCount();
+	int GetParameterCount() const;
+	//How many examples have been recorded into this training set
+	UFUNCTION(BlueprintPure,Category="InteractML",meta=(CompactNodeTitle="Example Count"))
+	int GetExampleCount() const;
+	//How many examples have been recorded into this training set for a specific (simple) output
+	UFUNCTION(BlueprintPure,Category="InteractML",meta=(CompactNodeTitle="Example Count (Simple Output)"))
+	int GetExampleCountForSimpleOutput( float expected_output );
+	//How many examples have been recorded into this training set for a specific (composite) output
+	UFUNCTION(BlueprintPure,Category="InteractML",CustomThunk,meta=(CustomStructureParam="LabelData", CompactNodeTitle="Example Count (Composite Output)"))
+	int GetExampleCountForCompositeOutput( const UInteractMLLabel* LabelType, const FGenericStruct& LabelData);
+	//generic handler for any UInteractMLLabel struct type
+	int Generic_GetExampleCountForCompositeOutput(const UInteractMLLabel* LabelType, const void* LabelData);
+	/** Based on UInteractMLTrainingSet::execGetExampleCountForCompositeOutput */
+	// const UInteractMLLabel* LabelType, 
+	// const FGenericStruct& LabelData
+	DECLARE_FUNCTION(execGetExampleCountForCompositeOutput)
+	{
+		P_GET_OBJECT(UInteractMLLabel, LabelType);
+		Stack.StepCompiledIn<FStructProperty>(NULL); //P_GET_PROPERTY(FStructProperty, LabelData); - dont' need named prop entry, structs passed via pointer
+		void* LabelDataStructAddr = Stack.MostRecentPropertyAddress;
+		P_FINISH;
+		
+		int Return = 0;
+		P_NATIVE_BEGIN;
+		Return = P_THIS->Generic_GetExampleCountForCompositeOutput(LabelType, LabelDataStructAddr);
+		P_NATIVE_END;	
+		*(int*)RESULT_PARAM = Return;
+	}
+	
 
 	//---- static utility ----
 	static bool LoadExamplesFromJson( const FString& json_string_in, TArray<FInteractMLExample>& examples_out );
@@ -178,5 +210,5 @@ private:
 	void RefreshDerivedState();
 	void ExtractCharacteristics();
 	void NewRecordingSession( float label_number );
-	
+
 };

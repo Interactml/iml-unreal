@@ -52,7 +52,9 @@ private:
 	UEdGraphPin* GetLiveParametersInputPin() const;
 	UEdGraphPin* GetLabelInputPin() const;
 	UEdGraphPin* GetRecordInputPin() const;
-	UEdGraphPin* GetResetInputPin() const;
+	UEdGraphPin* GetDeleteLastInputPin() const;
+	UEdGraphPin* GetDeleteLabelInputPin() const;
+	UEdGraphPin* GetDeleteAllInputPin() const;
 	UEdGraphPin* GetChangedOutputPin() const;
 	
 protected:

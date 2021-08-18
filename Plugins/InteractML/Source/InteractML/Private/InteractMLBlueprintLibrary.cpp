@@ -164,7 +164,9 @@ bool UInteractMLBlueprintLibrary::RecordExampleSimple(
 	bool WantSeries,
 	float Label,
 	bool Record,
-	bool Reset,
+	bool DeleteLast,
+	bool DeleteLabel,
+	bool DeleteAll,
 	FString NodeID)
 {
 	if(!TrainingSet)
@@ -216,15 +218,31 @@ bool UInteractMLBlueprintLibrary::RecordExampleSimple(
 	}
 
 	//reset handling
-	if (TrainingSet->ResettingAction.Triggered( Reset, NodeID ))
+	if (TrainingSet->DeletingLastAction.Triggered( DeleteLast, NodeID ))
 	{
-		if (Reset)
+		if (DeleteLast)
 		{
 			//just activated
-			TrainingSet->ResetTrainingSet();
+			TrainingSet->DeleteLastExample();
 		}
 	}
-
+	if (TrainingSet->DeletingLabelAction.Triggered( DeleteLabel, NodeID ))
+	{
+		if (DeleteLabel)
+		{
+			//just activated
+			TrainingSet->DeleteLabelExamples( Label );
+		}
+	}
+	if (TrainingSet->DeletingAllAction.Triggered( DeleteAll, NodeID ))
+	{
+		if (DeleteAll)
+		{
+			//just activated
+			TrainingSet->DeleteAllExamples();
+		}
+	}
+	
 	//finished recording
 	return is_finished;
 }
@@ -243,7 +261,9 @@ bool UInteractMLBlueprintLibrary::RecordExampleComposite(
 	const UInteractMLLabel* LabelType,
 	const FGenericStruct& LabelData, 	//<-- placeholder for the generic parameter mapped in the thunk function below
 	bool Record,
-	bool Reset,
+	bool DeleteLast,
+	bool DeleteLabel,
+	bool DeleteAll,
 	FString NodeID)
 {
 	//placeholder for generic structure binding, never actually called
@@ -262,7 +282,9 @@ bool UInteractMLBlueprintLibrary::Generic_RecordExampleComposite(
 	const UInteractMLLabel* LabelType,
 	const void* LabelData,	//<-- the generic parameter
 	bool Record,
-	bool Reset,
+	bool DeleteLast,
+	bool DeleteLabel,
+	bool DeleteAll,
 	FString NodeID)
 {
 	//NOTE: Code should be identical to RecordExampleSimple above, but passing
@@ -318,12 +340,28 @@ bool UInteractMLBlueprintLibrary::Generic_RecordExampleComposite(
 	}
 	
 	//reset handling
-	if (TrainingSet->ResettingAction.Triggered( Reset, NodeID ))
+	if (TrainingSet->DeletingLastAction.Triggered( DeleteLast, NodeID ))
 	{
-		if (Reset)
+		if (DeleteLast)
 		{
 			//just activated
-			TrainingSet->ResetTrainingSet();
+			TrainingSet->DeleteLastExample();
+		}
+	}
+	if (TrainingSet->DeletingLabelAction.Triggered( DeleteLabel, NodeID ))
+	{
+		if (DeleteLabel)
+		{
+			//just activated
+			TrainingSet->DeleteLabelExamples( LabelType, LabelData );
+		}
+	}
+	if (TrainingSet->DeletingAllAction.Triggered( DeleteAll, NodeID ))
+	{
+		if (DeleteAll)
+		{
+			//just activated
+			TrainingSet->DeleteAllExamples();
 		}
 	}
 	
