@@ -52,12 +52,12 @@ using namespace std;
  */
 class BayesianFilter {
 public:
-#pragma mark -
-#pragma mark Public attributes
+//#pragma mark -
+//#pragma mark Public attributes
     vector<float> output; //<! bayes estimates
     
-#pragma mark -
-#pragma mark Constructors
+//#pragma mark -
+//#pragma mark Constructors
     /*!
      Constructor
      @param _samplerate Sampling frequency of input stream
@@ -74,8 +74,8 @@ public:
     void resize(std::size_t size);
     std::size_t size() const;
     
-#pragma mark -
-#pragma mark Main Algorithm
+//#pragma mark -
+//#pragma mark Main Algorithm
     /*!
      @brief Initialize filter
      Resets Prior to uniform distribution
@@ -90,8 +90,8 @@ public:
      */
     void update(vector<float> const& observation);
     
-#pragma mark -
-#pragma mark Python
+//#pragma mark -
+//#pragma mark Python
 #ifdef SWIGPYTHON
 	void update(int _inchannels, double *observation, int _outchannels, double *_output)
 	{

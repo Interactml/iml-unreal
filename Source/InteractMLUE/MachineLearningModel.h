@@ -3,10 +3,8 @@
 #pragma once
 
 //rapidlib
-#include "trainingExample.h"
-#include "regression.h"
-#include "classification.h"
-#include "seriesClassification.h"
+#include "rapidLib.h"
+using namespace rapidLib;
 
 //unreal
 #include "CoreMinimal.h"

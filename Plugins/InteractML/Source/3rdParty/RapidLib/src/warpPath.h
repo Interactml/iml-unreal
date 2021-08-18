@@ -6,31 +6,32 @@
  * @copyright Copyright © 2017 Goldsmiths. All rights reserved.
  */
 
-#ifndef warpPath_h
-#define warpPath_h
+#pragma once
 
 #include <vector>
 
 /** Class to hold warp paths through a cost matrix */
-class warpPath {
+class warpPath 
+{
 public:
     warpPath();
     ~warpPath();
+
     /**
      * Add a point to the beginning of the warp path.
      * (Paths are calculated starting from the end)
      */
-    void add(int x, int y);
+    void add(std::size_t x, std::size_t y);
     
-    std::vector< std::pair<int, int> > indices;
+    std::vector< std::pair<std::size_t, std::size_t> > indices;
 };
 
 /** return struct holding a warp path and the cost of that path */
-struct warpInfo {
+template<typename T>
+struct warpInfo 
+{
 public:
     warpPath path;
-    double cost;
+    T cost;
     
 };
-
-#endif /* warpPath_h */

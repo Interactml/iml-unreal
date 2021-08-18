@@ -11,7 +11,8 @@
 #include "InteractMLHelpers.h"
 
 //rapidlib
-#include "modelSet.h"
+#include "rapidLib.h"
+using namespace rapidLib;
 using modelSetFloat = modelSet<float>;
 
 //general declarations

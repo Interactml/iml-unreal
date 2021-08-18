@@ -31,6 +31,7 @@
     <ClInclude Include="..\src\knnClassification.h" />
     <ClInclude Include="..\src\modelSet.h" />
     <ClInclude Include="..\src\neuralNetwork.h" />
+    <ClInclude Include="..\src\rapidLib.h" />
     <ClInclude Include="..\src\rapidStream.h" />
     <ClInclude Include="..\src\regression.h" />
     <ClInclude Include="..\src\searchWindow.h" />

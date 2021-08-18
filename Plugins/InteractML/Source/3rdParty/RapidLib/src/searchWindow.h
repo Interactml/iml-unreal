@@ -6,8 +6,7 @@
  * @copyright Copyright © 2017 Goldsmiths. All rights reserved.
  */
 
-#ifndef searchWindow_h
-#define searchWindow_h
+#pragma once
 
 #include <vector>
 #include "warpPath.h"
@@ -16,19 +15,18 @@
  * These are cells within a specified search radius of a lower resolution path.
  */
 template<typename T>
-class searchWindow {
+class searchWindow
+{
 public:
-    searchWindow(const int seriesXSize,
-                 const int seriesYSize,
+    searchWindow(const std::size_t seriesXSize,
+                 const std::size_t seriesYSize,
                  const warpPath &shrunkenWarpPath,
                  const int searchRadius);
     
-     std::vector< std::pair<int, int> > minMaxValues;
+     std::vector< std::pair<std::size_t, std::size_t> > minMaxValues;
     
 private:
-    int maxY;
-    inline void markVisited(int col, int row);
+    std::size_t maxY;
+    inline void markVisited(std::size_t col, std::size_t row);
     void expandWindow(int searchRadius);
 };
-
-#endif /* searchWindow_h */

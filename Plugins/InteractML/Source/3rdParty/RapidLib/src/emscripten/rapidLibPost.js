@@ -1,3 +1,4 @@
+==== BASE ====
 //
 //  rapidLibPost.js
 //  RapidLib
@@ -91,11 +92,12 @@ Module.Regression.prototype = {
      * @param {Object} trainingSet - An array of training examples
      * @returns {Boolean} true indicates successful training
      */
-    train: function (trainingSet) {
+    train: async function (trainingSet) { // FIXME: AFAIK Babel doesn't like ES7
         this.modelSet.reset();
         //change to vectorDoubles and send in
         try {
-            this.modelSet.train(Module.prepTrainingSet(trainingSet));
+            await this.modelSet.train(Module.prepTrainingSet(trainingSet)); // FIXME: AFAIK Babel doesn't like ES7
+            console.log("AHAHAHAHAHAH!!!");
         } catch (err) {
             console.log(err);
             return false;

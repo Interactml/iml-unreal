@@ -7,9 +7,7 @@
  * @copyright Copyright © 2016 Goldsmiths. All rights reserved.
  */
 
-
-#ifndef baseModel_h
-#define baseModel_h
+#pragma once
 
 #include <vector>
 #include "trainingExample.h"
@@ -29,39 +27,54 @@ namespace std
         TempStream << Value;
         return TempStream.str();
     }
-    
-    inline long double strtold(const char * str, char ** str_end)
+
+    inline long double strtold(const char* str, char** str_end)
     {
         return strtod(str, str_end);
     }
 }
 #endif
 
-
 /** Base class for wekinator models. Implemented by NN and KNN classes */
 template<typename T>
-class baseModel {
+class baseModel
+{
 public:
     virtual ~baseModel() {};
-    virtual T run(const std::vector<T> &inputVector) = 0;
-    virtual void train(const std::vector<trainingExampleTemplate<T> > &trainingSet) = 0;
+    virtual T run(const std::vector<T>& inputVector) = 0; //TODO: I'd like this to be const
+    virtual void train(const std::vector<trainingExampleTemplate<T> >& trainingSet) = 0;
+    virtual void train(const std::vector<trainingExampleTemplate<T> >& trainingSet, const std::size_t whichOutput) = 0;
     virtual void reset() = 0;;
-    virtual int getNumInputs() const = 0;
-    virtual std::vector<int> getWhichInputs() const = 0;
-    
+    virtual size_t getNumInputs() const = 0;
+    virtual std::vector<size_t> getWhichInputs() const = 0;
+
 #ifndef EMSCRIPTEN
-    virtual void getJSONDescription(Json::Value &currentModel) = 0;
-    
+    virtual void getJSONDescription(Json::Value& currentModel) = 0;
+
 protected:
-    template<typename TT>
-    Json::Value vector2json(TT vec) {
+    
+    template<typename TT, class Dummy=int>
+    Json::Value vector2json(TT vec) 
+    {
         Json::Value toReturn;
-        for (int i = 0; i < vec.size(); ++i) {
-            toReturn.append(vec[i]);
+        for (size_t i = 0; i < vec.size(); ++i) 
+        {
+            toReturn.append( (Json::Value)vec[i] );
+        }
+        return toReturn;
+    }
+
+    //FIXME: This is a temporary hack because Json::Value doesn't know what to do with unsinged longs, and XCode cares
+    template<class Dummy=int>
+    Json::Value vector2json(std::vector<unsigned long> vec)
+    {
+        Json::Value toReturn;
+        for (size_t i = 0; i < vec.size(); ++i)
+        {
+            toReturn.append((double)vec[i]); //I chose double here because that's close to what JS uses
         }
         return toReturn;
     }
 #endif
-    
+
 };
-#endif
