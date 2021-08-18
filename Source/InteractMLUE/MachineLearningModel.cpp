@@ -7,6 +7,8 @@
 #include <sstream>
 #include <vector>
 
+//unreal
+#include "Misc/EngineVersionComparison.h"
 
 
 // Sets default values for this component's properties
@@ -373,8 +375,12 @@ FString LoadString( FString file_path, bool& success )
 //
 void SaveString( FString file_path, FString string, bool& success )
 {
+#if UE_VERSION_OLDER_THAN(4,26,0)   //API change in SaveStringToFile
+    if(FFileHelper::SaveStringToFile( string, * file_path ))
+#else
     FStringView whole_string( string );
     if(FFileHelper::SaveStringToFile( whole_string, *file_path ))
+#endif
     {
         success = true;
         return;

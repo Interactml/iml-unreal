@@ -244,7 +244,7 @@ license you like.
 #define JSONCPP_DEPRECATED(message)
 #endif // if !defined(JSONCPP_DEPRECATED)
 
-#if __GNUC__ >= 6
+#if defined(__GNUC__) && __GNUC__ >= 6
 #  define JSON_USE_INT64_DOUBLE_CONVERSION 1
 #endif
 
