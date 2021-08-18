@@ -28,7 +28,7 @@ class INTERACTML_API UInteractMLClassificationModel
 	
 	
 	//---- transient/cached state ----
-	TSharedPtr<classificationFloat> Model;
+	TSharedPtr<classificationFloat,ESPMode::ThreadSafe> Model;
 	
 public:
 	//---- constants ----

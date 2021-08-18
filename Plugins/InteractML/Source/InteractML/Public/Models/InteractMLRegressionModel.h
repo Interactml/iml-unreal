@@ -28,7 +28,7 @@ class INTERACTML_API UInteractMLRegressionModel
 	
 	
 	//---- transient/cached state ----
-	TSharedPtr<regressionFloat> Model;
+	TSharedPtr<regressionFloat, ESPMode::ThreadSafe> Model;
 	
 public:
 	//---- constants ----

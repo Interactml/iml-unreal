@@ -32,7 +32,7 @@ class INTERACTML_API UInteractMLDynamicTimeWarpModel
 	
 	
 	//---- transient/cached state ----
-	TSharedPtr<seriesClassificationFloat> Model;
+	TSharedPtr<seriesClassificationFloat, ESPMode::ThreadSafe> Model;
 	
 
 public:
