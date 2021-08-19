@@ -7,8 +7,7 @@
  * @copyright Copyright © 2017 Goldsmiths. All rights reserved.
  */
 
-#ifndef seriesClassification_hpp
-#define seriesClassification_hpp
+#pragma once
 
 #include <vector>
 #include <string>
@@ -22,7 +21,8 @@
  */
 
 template<typename T>
-class seriesClassificationTemplate {
+class seriesClassificationTemplate final
+{
 public:
     
     /** Constructor, no params */
@@ -42,13 +42,26 @@ public:
      * @return The label of the closest training series.
      */
     std::string run(const std::vector<std::vector<T> > &inputSeries);
-    
+
     /** Compare an input series to all of the stored series with a specified label
      * @param std::vector<std::vector> either float or double input data
      * @param String label to compare with
      * @return The lowest cost match, float or double
      */
-    T run(const std::vector<std::vector<T> > &inputSeries, std::string label);
+    T run(const std::vector<std::vector<T> >& inputSeries, std::string label);
+
+    /** Compare an input series to the stored training series. Parallel processing
+     * @param std::vector<std::vector> vector of vectors, either float or double input data
+     * @return The label of the closest training series.
+     */
+    std::string runParallel(const std::vector<std::vector<T> >& inputSeries);
+    
+    /** Compare an input series to all of the stored series with a specified label. Parallel processing
+     * @param std::vector<std::vector> either float or double input data
+     * @param String label to compare with
+     * @return The lowest cost match, float or double
+     */
+    T runParallel(const std::vector<std::vector<T> > &inputSeries, std::string label);
     
     /** Compare an input series to all of the stored series with a specified label
      * @param std::vector<T> one frame either float or double input data
@@ -64,24 +77,24 @@ public:
     /** Get minimum training series length
      * @return The minimum length training series
      */
-    int getMinLength() const;
+    std::size_t getMinLength() const;
     
     /** Get minimum training series length from a specified label
      * @param string The label to check
      * @return The minimum length training series of that label
      */
-    int getMinLength(std::string label) const;
+    std::size_t getMinLength(std::string label) const;
     
     /** Get maximum training series length
      * @return The maximum length training series
      */
-    int getMaxLength() const;
+    std::size_t getMaxLength() const;
     
     /** Get maximum training series length from a specified label
      * @param string The label to check
      * @return The maximum length training series of that label
      */
-    int getMaxLength(std::string label) const;
+    std::size_t getMaxLength(std::string label) const;
     
     /** Return struct for calculate costs */
     template<typename TT>
@@ -105,19 +118,25 @@ public:
     
 private:
     std::vector<trainingSeriesTemplate<T> > allTrainingSeries;
-    int vectorLength;
+    size_t vectorLength;
     std::vector<T> allCosts;
-    int maxLength;
-    int minLength;
+    size_t maxLength;
+    size_t minLength;
     std::map<std::string, minMax<int> > lengthsPerLabel;
+    bool isTraining;
     
     std::vector<std::vector<T> > seriesBuffer;
     int hopSize;
     int counter;
+    
+    size_t findClosestSeries() const;
+    void runThread(const std::vector<std::vector<T>> &inputSeries, std::size_t i);
 };
 
-//This is here to keep the old API working
-using seriesClassification = seriesClassificationTemplate<double>;
-using seriesClassificationFloat = seriesClassificationTemplate<float>;
+namespace rapidLib
+{
+    //This is here to keep the old API working
+    using seriesClassification = seriesClassificationTemplate<double>;
+    using seriesClassificationFloat = seriesClassificationTemplate<float>;
+}
 
-#endif

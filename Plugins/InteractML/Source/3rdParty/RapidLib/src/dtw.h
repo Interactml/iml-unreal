@@ -7,15 +7,15 @@
  * @copyright Copyright © 2017 Goldsmiths. All rights reserved.
  */
 
-#ifndef dtw_h
-#define dtw_h
+#pragma once
 
 #include <vector>
 #include "warpPath.h"
 #include "searchWindow.h"
 
 template<typename T>
-class dtw {
+class dtw 
+{
 public:
     dtw();
     ~dtw();
@@ -24,15 +24,13 @@ public:
     T getCost(const std::vector<std::vector<T>> &seriesX, const std::vector<std::vector<T > > &seriesY);
     
     /* Calculates both cost and the warp path */
-    warpInfo dynamicTimeWarp(const std::vector<std::vector<T> > &seriesX, const std::vector<std::vector<T> > &seriesY); //This returns everything, including a path
+    warpInfo<T> dynamicTimeWarp(const std::vector<std::vector<T> > &seriesX, const std::vector<std::vector<T> > &seriesY); //This returns everything, including a path
     
     /* Calculates both the cost and the warp path, with a given window as a constraint */
-    warpInfo constrainedDTW(const std::vector<std::vector<T> > &seriesX, const std::vector<std::vector<T> > &seriesY, searchWindow<T> window); //This takes a window object
+    warpInfo<T> constrainedDTW(const std::vector<std::vector<T> > &seriesX, const std::vector<std::vector<T> > &seriesY, searchWindow<T> window); //This takes a window object
     
 private:
     inline T distanceFunction(const std::vector<T> &pointX, const std::vector<T> &point);
     std::vector<std::vector<T> > costMatrix;
-    warpPath calculatePath(int seriesXsize, int seriesYsize) const;
+    warpPath calculatePath(std::size_t seriesXsize, std::size_t seriesYsize) const;
 };
-
-#endif /* dtw_h */

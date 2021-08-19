@@ -279,7 +279,15 @@ void UInteractMLModel::DoTrainingModel( FInteractMLTask::Ptr training_task )
 {
 	//train the model
 	modelSetFloat* model = GetModelInstance();
-	training_task->bSuccess = model->train( training_task->Examples );	
+	try
+	{
+		training_task->bSuccess = model->train( training_task->Examples );
+	}
+	catch(std::exception ex)
+	{
+		//handle?
+		UE_LOG( LogInteractML, Error, TEXT( "Exception trying to train model %s : %s" ), *GetName(), StringCast<TCHAR>( ex.what() ).Get() );
+	}
 }
 
 // handle results of training

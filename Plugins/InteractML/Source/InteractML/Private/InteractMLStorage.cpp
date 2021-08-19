@@ -5,6 +5,7 @@
 #include "InteractMLStorage.h"
 
 //unreal
+#include "Misc/EngineVersionComparison.h"
 
 //module
 #include "InteractML.h"
@@ -231,8 +232,12 @@ bool UInteractMLStorage::Save() const
 	SaveJson( json_string );
 	
 	//write file
+#if UE_VERSION_OLDER_THAN(4,26,0)   //API change in SaveStringToFile
+	if(FFileHelper::SaveStringToFile( json_string, *path ))
+#else
 	FStringView whole_string( json_string );
 	if(FFileHelper::SaveStringToFile( whole_string, *path ))
+#endif
 	{
 		//nolonger needs save
 		bNeedsSave = false;

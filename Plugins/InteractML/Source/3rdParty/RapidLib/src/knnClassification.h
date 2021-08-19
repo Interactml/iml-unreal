@@ -6,8 +6,7 @@
 //  Copyright © 2016 Goldsmiths. All rights reserved.
 //
 
-#ifndef knnClassification_h
-#define knnClassification_h
+#pragma once
 
 #include <vector>
 #include "baseModel.h"
@@ -18,17 +17,17 @@
 
 /** Class for implementing a knn classifier */
 template<typename T>
-class knnClassification final : public baseModel<T> {
-    
+class knnClassification final : public baseModel<T> 
+{    
 public:
     /** Constructor that takes training examples in
-     * @param number of inputs expected in the training and input vectors
+     * @param int Number of inputs expected in the training and input vectors
      * @param vector of input numbers to be fed into the classifer.
      * @param vector of training examples
-     * @param how many near neighbours to evaluate
+     * @param int how many near neighbours to evaluate
      */
     knnClassification(const int &num_inputs,
-                      const std::vector<int> &which_inputs,
+                      const std::vector<size_t> &which_inputs,
                       const std::vector<trainingExampleTemplate<T> > &trainingSet,
                       const int k);
     ~knnClassification();
@@ -51,6 +50,13 @@ public:
      *
      */
     void train(const std::vector<trainingExampleTemplate<T> > &trainingSet) override;
+
+    /** Fill the model with a vector of examples. Use this when the model is part of a modelSet.
+     *
+     * @param The training set is a vector of training examples that contain both a vector of input values and a value specifying desired output class.
+     *
+     */
+    void train(const std::vector<trainingExampleTemplate<T> >& trainingSet, const std::size_t whichOutput) override;
     
     /** Reset the model to its empty state. */
     void reset() override;
@@ -58,12 +64,12 @@ public:
     /** Find out how many inputs the model expects
      * @return Integer number of intpus
      */
-    int getNumInputs() const override;
+    size_t getNumInputs() const override;
     
     /** Find out which inputs in a vector will be used
      * @return Vector of ints, specifying input indices.
      */
-    std::vector<int> getWhichInputs() const override;
+    std::vector<size_t> getWhichInputs() const override;
     
     /** Get the number of nearest neighbours used by the kNN algorithm. */
     int getK() const;
@@ -81,13 +87,10 @@ public:
     
 private:
     int numInputs;
-    std::vector<int> whichInputs;
+    std::vector<size_t> whichInputs;
+    std::size_t whichOutput;
     std::vector<trainingExampleTemplate<T>> neighbours;
     int desiredK; //K that user asked for might be limited but number of examples
     int currentK; //K minimum of desiredK or neighbours.size()
     inline void updateK();
-    std::pair<int, T>* nearestNeighbours;
 };
-
-#endif
-

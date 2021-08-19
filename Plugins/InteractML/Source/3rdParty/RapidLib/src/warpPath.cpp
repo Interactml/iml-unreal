@@ -12,6 +12,7 @@
 warpPath::warpPath() {};
 warpPath::~warpPath() {};
 
-void warpPath::add(int x, int y) {
+void warpPath::add(std::size_t x, std::size_t y)
+{
     indices.insert(indices.begin(), std::make_pair(x, y));
 };

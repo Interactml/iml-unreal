@@ -130,7 +130,16 @@ void UInteractMLDynamicTimeWarpModel::DoRunningModel( FInteractMLTask::Ptr run_t
 	if(run_task->InputSeries.size() > 0)
 	{
 		//with the accumulated input parameter series we can now run the model
-		std::string label_text = Model->run( run_task->InputSeries );
+		std::string label_text;
+		try
+		{
+			label_text = Model->run( run_task->InputSeries );
+		}
+		catch(std::exception ex)
+		{
+			//handle?
+			UE_LOG( LogInteractML, Error, TEXT( "Exception trying to run DTW model %s : %s" ), *GetName(), StringCast<TCHAR>( ex.what() ).Get() );
+		}
 		
 		//interpret label
 		bool success = label_text.size() > 0;

@@ -78,6 +78,9 @@
     <ClInclude Include="..\dependencies\libsvm\libsvm.h">
       <Filter>dependencies\libsvm</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\rapidLib.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\classification.cpp">
