@@ -17,7 +17,10 @@ Intermediate
 *.vcxproj.user
 *.pdb
 
-# Compiled source files for the engine to use
+# Unwanted hot-reload binaries
+/Plugins/InteractML/Binaries/Win64/UE4Editor-InteractML-*
+/Plugins/InteractML/Binaries/Win64/UE4Editor-InteractMLEditor-*
+/Plugins/InteractML/Binaries/Win64/UE4Editor-InteractMLScripting-*
 
 # Generated solution project files
 InteractMLUE.sln
