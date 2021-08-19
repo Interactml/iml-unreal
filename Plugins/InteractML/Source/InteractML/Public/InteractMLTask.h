@@ -44,7 +44,7 @@ struct FInteractMLTask : public TSharedFromThis<FInteractMLTask,ESPMode::ThreadS
 	class UInteractMLModel* Model;
 
 	//model state that running operates in the context of
-	class FInteractMLModelState* Context;
+	TSharedPtr<class FInteractMLModelState> Context;
 
 	//training input
 	std::vector<trainingExampleFloat> Examples;
