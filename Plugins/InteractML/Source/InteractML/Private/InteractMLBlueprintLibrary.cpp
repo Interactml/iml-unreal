@@ -427,8 +427,8 @@ float UInteractMLBlueprintLibrary::RunModelSimple(
 	//need context and state store to run with
 	UInteractMLContext* Context = GetMLContext( Actor );
 	check( Context );
-	FInteractMLModelState* model_state = Context->GetModelState( NodeID ).Get();
-	check( model_state );
+	TSharedPtr<FInteractMLModelState> model_state = Context->GetModelState( NodeID );
+	check( model_state.IsValid() );
 
 	//series/single operation
 	bool success = true;
@@ -503,8 +503,8 @@ float UInteractMLBlueprintLibrary::RunModelSimpleAsync(
 	//need context and state store to run with
 	UInteractMLContext* Context = GetMLContext( Actor );
 	check( Context );
-	FInteractMLModelState* model_state = Context->GetModelState( NodeID ).Get();
-	check( model_state );
+	TSharedPtr<FInteractMLModelState> model_state = Context->GetModelState( NodeID );
+	check( model_state.IsValid() );
 
 	//monitor for completion (before state checks which may want to retrigger this frame)
 	bool just_completed = model_state->CheckCompleted();	//(only check once as this resets on query)
@@ -605,8 +605,8 @@ void UInteractMLBlueprintLibrary::Generic_RunModelComposite(
 	//need context and state store to run with
 	UInteractMLContext* Context = GetMLContext( Actor );
 	check( Context );
-	FInteractMLModelState* model_state = Context->GetModelState( NodeID ).Get();
-	check( model_state );
+	TSharedPtr<FInteractMLModelState> model_state = Context->GetModelState( NodeID );
+	check( model_state.IsValid() );
 	
 	//series/single operation
 	bool success = true;
@@ -723,8 +723,8 @@ void UInteractMLBlueprintLibrary::Generic_RunModelCompositeAsync(
 	//need context and state store to run with
 	UInteractMLContext* Context = GetMLContext( Actor );
 	check( Context );
-	FInteractMLModelState* model_state = Context->GetModelState( NodeID ).Get();
-	check( model_state );
+	TSharedPtr<FInteractMLModelState> model_state = Context->GetModelState( NodeID );
+	check( model_state.IsValid() );
 	
 	//monitor for completion (before state checks which may want to retrigger this frame)
 	bool just_completed = model_state->CheckCompleted();	//(only check once as this resets on query)

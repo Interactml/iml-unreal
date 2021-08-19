@@ -19,7 +19,7 @@
 // sometimes needed so that multiple nodes can run the same model independantly
 // obtained/cached by UInteractMLContext object in the nodes acto
 //
-class INTERACTML_API FInteractMLModelState
+class INTERACTML_API FInteractMLModelState : public TSharedFromThis<FInteractMLModelState>
 {
 public:		
 	// node currently running this model
