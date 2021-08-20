@@ -40,7 +40,7 @@ struct FParameterSpec
 	FEdGraphPinType Type;
 
 	//setup
-	FParameterSpec(){}
+	FParameterSpec() : Identifier(0), Name(TEXT("")) {}
 	FParameterSpec(FEdGraphPinType type, int id, FString name="") : Identifier(id), Name(name), Type(type) {}
 
 	//re-gen display name and tooltip of a pin

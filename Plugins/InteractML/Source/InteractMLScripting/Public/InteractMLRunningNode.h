@@ -29,10 +29,10 @@ class INTERACTMLSCRIPTING_API UInteractMLRunningNode: public UInteractMLNode
 
 public:
 	//label type (expected outputs)
-	UPROPERTY(EditAnywhere,meta=(Tooltip="Specify composite label type by selecting a Label Type asset that defines the output parameters expected, leave None for simple numerical output"))
+	UPROPERTY(EditAnywhere, Category=InteracML,meta=(Tooltip="Specify composite label type by selecting a Label Type asset that defines the output parameters expected, leave None for simple numerical output"))
 	UInteractMLLabel* LabelType;
 
-	UPROPERTY(EditAnywhere,meta=(Tooltip="Enable to run this node in the background instead of blocking blueprint operation"))
+	UPROPERTY(EditAnywhere, Category=InteracML,meta=(Tooltip="Enable to run this node in the background instead of blocking blueprint operation"))
 	bool bBackgroundOperation;
 
 private:

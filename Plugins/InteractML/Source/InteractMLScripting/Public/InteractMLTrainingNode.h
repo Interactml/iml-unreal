@@ -27,7 +27,7 @@ class INTERACTMLSCRIPTING_API UInteractMLTrainingNode : public UInteractMLNode
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere,meta=(Tooltip="Enable to train this node in the background instead of blocking blueprint operation"))
+	UPROPERTY(EditAnywhere, Category=InteracML,meta=(Tooltip="Enable to train this node in the background instead of blocking blueprint operation"))
 	bool bBackgroundOperation;
 
 private:

@@ -28,7 +28,7 @@ class INTERACTMLSCRIPTING_API UInteractMLNode : public UK2Node
 
 public:
 	//Allow the operating context of the node to be explicitly specified instead of defaulting to the containing graph
-	UPROPERTY( EditAnywhere, AdvancedDisplay )
+	UPROPERTY( EditAnywhere, AdvancedDisplay, Category=InteracML )
 	bool bCustomContextActor;
 
 private:

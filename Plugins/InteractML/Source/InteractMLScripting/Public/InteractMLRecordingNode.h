@@ -38,11 +38,11 @@ class INTERACTMLSCRIPTING_API UInteractMLRecordingNode : public UInteractMLNode
 
 public:
 	//single or series sample recording?
-	UPROPERTY(EditAnywhere,meta=(Tooltip="Record a single value each time activated or a continuous series whilst active?"))
+	UPROPERTY(EditAnywhere, Category=InteracML,meta=(Tooltip="Record a single value each time activated or a continuous series whilst active?"))
 	EInteractMLRecordingMode Mode;
 
 	//label type (expected outputs)
-	UPROPERTY(EditAnywhere,meta=(HideViewOptions,ShowDisplayNames,Tooltip="Specify composite label type by selecting a Label Type asset that defines the output parameters to train against, leave None for simple numerical output"))
+	UPROPERTY(EditAnywhere, Category=InteracML,meta=(HideViewOptions,ShowDisplayNames,Tooltip="Specify composite label type by selecting a Label Type asset that defines the output parameters to train against, leave None for simple numerical output"))
 	UInteractMLLabel* LabelType;
 
 private:
