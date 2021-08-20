@@ -54,7 +54,7 @@ void UInteractMLLabel::CaptureData( FField* prop, int& iprop, const uint8* in_st
 			else
 			{
 				//what other sort of numeric prop do we need to support?
-				UE_LOG(LogInteractML, Warning, TEXT("Unable to capture unsupported type '%s' in field '%s' of label structure %s'"), *prop->GetClass()->GetName(), *prop->GetName(), *GetDisplayNameText().ToString() );
+				UE_LOG(LogInteractML, Warning, TEXT("Unable to capture unsupported type '%s' in field '%s' of label structure %s'"), *prop->GetClass()->GetName(), *prop->GetName(), *GetName() );
 			}
 		}
 		else if (FStructProperty* struct_prop = CastField<FStructProperty>(prop))
@@ -85,7 +85,7 @@ void UInteractMLLabel::CaptureData( FField* prop, int& iprop, const uint8* in_st
 		}
 		else
 		{
-			UE_LOG(LogInteractML, Warning, TEXT("Unable to capture unsupported type '%s' in field '%s' of label structure %s'"), *prop->GetClass()->GetName(), *prop->GetName(), *GetDisplayNameText().ToString() );
+			UE_LOG(LogInteractML, Warning, TEXT("Unable to capture unsupported type '%s' in field '%s' of label structure %s'"), *prop->GetClass()->GetName(), *prop->GetName(), *GetName() );
 		}
 
 
@@ -164,7 +164,7 @@ int UInteractMLLabel::CountValues( FField* prop ) const
 		}
 		else
 		{
-			UE_LOG(LogInteractML, Warning, TEXT("Unable to capture unsupported type '%s' in field '%s' of label structure %s'"), *prop->GetClass()->GetName(), *prop->GetName(), *GetDisplayNameText().ToString() );
+			UE_LOG(LogInteractML, Warning, TEXT("Unable to capture unsupported type '%s' in field '%s' of label structure %s'"), *prop->GetClass()->GetName(), *prop->GetName(), *GetName() );
 		}
 				
 		prop = prop->Next;
@@ -181,7 +181,7 @@ void UInteractMLLabel::RecreateData( const TArray<float>& label_values, void* ou
 	//ensure enough props available
 	if (GetCaptureCount()!=label_values.Num())
 	{
-		UE_LOG(LogInteractML, Error, TEXT("Label definition changed since model trained, model produced %i values whilst %s label expects %i values"), label_values.Num(), *GetDisplayNameText().ToString(), GetCaptureCount() );
+		UE_LOG(LogInteractML, Error, TEXT("Label definition changed since model trained, model produced %i values whilst %s label expects %i values"), label_values.Num(), *GetName(), GetCaptureCount() );
 		return;
 	}
 
@@ -219,7 +219,7 @@ void UInteractMLLabel::RecreateData(FField* prop, int& iprop, const TArray<float
 			else
 			{
 				//what other sort of numeric prop do we need to support?
-				UE_LOG(LogInteractML, Warning, TEXT("Unable to recreate unsupported type '%s' in field '%s' of label structure %s'"), *prop->GetClass()->GetName(), *prop->GetName(), *GetDisplayNameText().ToString());
+				UE_LOG(LogInteractML, Warning, TEXT("Unable to recreate unsupported type '%s' in field '%s' of label structure %s'"), *prop->GetClass()->GetName(), *prop->GetName(), *GetName());
 			}
 		}
 		else if (FStructProperty* struct_prop = CastField<FStructProperty>(prop))
@@ -258,7 +258,7 @@ void UInteractMLLabel::RecreateData(FField* prop, int& iprop, const TArray<float
 		}
 		else
 		{
-			UE_LOG(LogInteractML, Warning, TEXT("Unable to recreate unsupported type '%s' in field '%s' of label structure %s'"), *prop->GetClass()->GetName(), *prop->GetName(), *GetDisplayNameText().ToString());
+			UE_LOG(LogInteractML, Warning, TEXT("Unable to recreate unsupported type '%s' in field '%s' of label structure %s'"), *prop->GetClass()->GetName(), *prop->GetName(), *GetName());
 		}
 
 		prop = prop->Next;

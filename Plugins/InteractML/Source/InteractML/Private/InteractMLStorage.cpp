@@ -278,6 +278,7 @@ void UInteractMLStorage::PostLoad()
 	//this event could affect the derived storage path
 	UpdateDerivedState();
 }
+#if WITH_EDITOR
 void UInteractMLStorage::PostEditUndo()
 {
 	//this event could affect the derived storage path
@@ -292,6 +293,7 @@ void UInteractMLStorage::PostTransacted(const FTransactionObjectEvent& Transacti
 
 	Super::PostTransacted(TransactionEvent);
 }
+#endif
 void UInteractMLStorage::PostRename(UObject* OldOuter, const FName OldName)
 {
 	//this event could affect the derived storage path

@@ -102,8 +102,10 @@ public:
 	//~ Begin UObject interface
 	//events that could affect the derived storage path
 	virtual void PostLoad() override;
+#if WITH_EDITOR
 	virtual void PostEditUndo() override;
 	virtual void PostTransacted(const FTransactionObjectEvent& TransactionEvent) override;
+#endif
 	virtual void PostRename(UObject* OldOuter, const FName OldName) override;
 	virtual void PostEditImport() override;
 	//save hook

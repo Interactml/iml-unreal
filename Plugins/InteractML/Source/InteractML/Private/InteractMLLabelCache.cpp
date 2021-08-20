@@ -100,7 +100,7 @@ float FInteractMLLabelCache::FindOrAdd(const UInteractMLLabel* label_type, const
 		//ensure only one type used in the training set
 		if (!label_type->Equal( LabelType ))
 		{
-			UE_LOG(LogInteractML, Error, TEXT("Attempt to use mixed labels in training data, can't mix '%s' when already using '%s'"), *label_type->GetDisplayNameText().ToString(), *LabelType->GetDisplayNameText().ToString() );
+			UE_LOG(LogInteractML, Error, TEXT("Attempt to use mixed labels in training data, can't mix '%s' when already using '%s'"), *label_type->GetName(), *LabelType->GetName() );
 			return -1;
 		}
 	}

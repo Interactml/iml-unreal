@@ -47,12 +47,14 @@ bool UInteractMLTrainingSet::SaveJson(FString& json_string) const
 	return SaveExamplesToJson(Examples, json_string);
 }
 
+#if WITH_EDITOR
 // undo/redo change
 //
 void UInteractMLTrainingSet::PostEditUndo()
 {
 	RefreshDerivedState();
 }
+#endif
 
 // ensure anything transient but based on object state is up to date
 //

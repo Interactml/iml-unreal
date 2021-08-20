@@ -161,7 +161,9 @@ public:
 	// End UInteractMLStorage overrides
 	
 	// Begin UObject overrides
+#if WITH_EDITOR
 	virtual void PostEditUndo() override;
+#endif
 	// End UObject overrides
 	
 	//---- blueprint access ----
