@@ -46,7 +46,6 @@ void FInteractMLEditorModule::StartupModule()
 	InitExtensibility();
 }
 
-
 // Exit
 //
 // This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
@@ -60,7 +59,6 @@ void FInteractMLEditorModule::ShutdownModule()
 	ShutdownAssets();
 	ShutdownExtensibility();
 }
-
 
 // start monitoring global editor events we are interested in
 //
@@ -77,7 +75,6 @@ void FInteractMLEditorModule::ShutdownHooks()
 	FEditorDelegates::EndPIE.RemoveAll(this);
 	FEditorDelegates::PostSaveWorld.RemoveAll(this);
 }
-
 
 // register asset types with the editor
 //
@@ -181,8 +178,6 @@ void FInteractMLEditorModule::ShutdownAssets()
 	AssetStyleSet.Reset();
 }
 
-
-
 // setup extensibility systems for extending editor and building custom panels
 //
 void FInteractMLEditorModule::InitExtensibility()
@@ -191,6 +186,7 @@ void FInteractMLEditorModule::InitExtensibility()
 	ToolBarExtensibilityManager = MakeShareable(new FExtensibilityManager);
 	
 }
+
 // clean up
 //
 void FInteractMLEditorModule::ShutdownExtensibility()
@@ -198,7 +194,6 @@ void FInteractMLEditorModule::ShutdownExtensibility()
 	//MenuExtensibilityManager.Reset();
 	ToolBarExtensibilityManager.Reset();
 }
-
 
 // play in editor has stopped.  an opportunity to propertly flag any unsaved state as dirty
 //

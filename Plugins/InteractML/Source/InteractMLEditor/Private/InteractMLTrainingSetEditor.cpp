@@ -25,18 +25,14 @@
 
 #define LOCTEXT_NAMESPACE "InteractML"
 
-
+//constant identifiers
 const FName FTrainingSetEditor::TrainingSetEditorAppIdentifier( TEXT( "InteractMLTrainingSetEditorApp" ) );
 const FName FTrainingSetEditor::TrainingSetHierarchyTabId("InteractMLTrainingSetEditor_Hierarchy");
-//const FName FTrainingSetEditor::TrainingSetDetailsTabId("InteractMLTrainingSetEditor_Details");
 
 
+////////////////////////////////// FTrainingSetTreeItem ////////////////////////////////////////
 
-
-//////////////////////////////////////////////////////////////////////////
-// FTrainingSetTreeItem
-
-//ctor
+// ctor
 //
 FTrainingSetTreeItem::FTrainingSetTreeItem( UInteractMLTrainingSet* pexamples, int example_index, FTrainingSetTreeItem::Ptr parent, int index_in_parent )
 	: Examples( pexamples )
@@ -47,6 +43,8 @@ FTrainingSetTreeItem::FTrainingSetTreeItem( UInteractMLTrainingSet* pexamples, i
 	ExampleID = pexamples->GetExamples()[example_index].ID;
 }
 
+// label column accessor
+//
 FString FTrainingSetTreeItem::GetLabel() const
 {
 	UInteractMLTrainingSet* pexamples = Examples.Get();
@@ -59,27 +57,17 @@ FString FTrainingSetTreeItem::GetLabel() const
 	return TEXT("");
 }
 
+// row icon
+// just something nice to visually begin each row, later this might show label vs example, e.g. if we add grouping/hierarchy support
+//
 const FSlateBrush* FTrainingSetTreeItem::GetIcon( bool is_open ) const
 {
 	UInteractMLTrainingSet* pexamples = Examples.Get();
-#if 0
-	if(pexamples)
-	{
-		FName icon_name;
-		//ask for icon to use
-		//icon_name = pexamples->GetIconName( is_open );
-
-		//resolve
-		const FSlateBrush* picon = FEditorStyle::GetBrush( icon_name );
-		if(picon)
-		{
-			return picon;
-		}
-	}
-#endif
 	return FInteractMLEditorModule::GetStyle()->GetBrush("TreeViewIcons.SingleExample_16x");
 }
 
+// sample count column accessor
+//
 int FTrainingSetTreeItem::GetSamples() const
 {
 	UInteractMLTrainingSet* pexamples = Examples.Get();
@@ -91,6 +79,9 @@ int FTrainingSetTreeItem::GetSamples() const
 	
 	return 0;
 }
+
+// duration column accessor
+//
 FText FTrainingSetTreeItem::GetDurationText() const
 {
 	UInteractMLTrainingSet* pexamples = Examples.Get();
@@ -112,6 +103,9 @@ FText FTrainingSetTreeItem::GetDurationText() const
 	
 	return FText();
 }
+
+// session column accessor
+//
 FText FTrainingSetTreeItem::GetSessionText() const
 {
 	UInteractMLTrainingSet* pexamples = Examples.Get();
@@ -122,6 +116,9 @@ FText FTrainingSetTreeItem::GetSessionText() const
 	}
 	return FText();
 }
+
+// user column accessor
+//
 FText FTrainingSetTreeItem::GetUser() const
 {
 	UInteractMLTrainingSet* pexamples = Examples.Get();
@@ -133,9 +130,6 @@ FText FTrainingSetTreeItem::GetUser() const
 	return FText();
 }
 
-
-
-
 // update our whole hierarchy to match the provided resource list
 //
 void FTrainingSetTreeItem::Sync(UInteractMLTrainingSet* proot )
@@ -144,69 +138,17 @@ void FTrainingSetTreeItem::Sync(UInteractMLTrainingSet* proot )
 }
 
 // update our sub-structure to match the provided resource list entry sub-structure
+//
 void FTrainingSetTreeItem::Sync(UInteractMLTrainingSet* pexamples, FTrainingSetTreeItem::Ptr parent, int index_in_parent )
 {
 	//ensure we are in sync (no need to check+update, just set)
 	Examples = pexamples;
 	Parent = parent.Get();
 	IndexInParent = index_in_parent;
-
-	//source is normal entry hierarchy
-#if 0
-	int num_children = Examples->Children.Num();
-	TArray<UInteractMLTrainingSet*> ordered_resource_entries( Resource->Children );
-
-	//sync children to source
-	Children.SetNum( num_children, false );
-	for(int i=0 ; i<num_children ; i++)
-	{
-		if(!Children[i].IsValid())
-		{
-			Children[i] = MakeShareable( new FTrainingSetTreeItem() );
-		}
-		Children[i]->Sync( ordered_resource_entries[i], AsShared(), i ); //sub-entries
-	}
-#endif
-}
-
-// sort our child list alphabettically
-//
-void FTrainingSetTreeItem::Sort()
-{
-	// lexical order comparison functor
-	static struct
-	{
-		FORCEINLINE bool operator()(const FTrainingSetTreeItem::Ptr A, const FTrainingSetTreeItem::Ptr B) const
-		{
-			return 0;// A->GetName().Compare(B->GetName()) < 0;
-		}
-	} lexical_compare;
-
-	// perform lexical sort
-	Children.Sort( lexical_compare );
-}
-
-// sort a list of entries alphabettically
-//
-void FTrainingSetTreeItem::Sort( TArray<UInteractMLTrainingSet*>& entries )
-{
-	// lexical order comparison functor
-	static struct
-	{
-		FORCEINLINE bool operator()( const UInteractMLTrainingSet& A, const UInteractMLTrainingSet& B ) const
-		{
-			return A.GetName().Compare( B.GetName() ) < 0;
-		}
-	} lexical_compare;
-
-	// perform lexical sort
-	entries.Sort( lexical_compare );
 }
 
 
-
-//////////////////////////////////////////////////////////////////////////
-// FTrainingSetEditor
+/////////////////////////////////// FTrainingSetEditor ///////////////////////////////////////
 
 // raw init, maybe a better place for editor opening
 //
@@ -240,7 +182,6 @@ UInteractMLTrainingSet* FTrainingSetEditor::GetEditableExamples() const
 	return Cast<UInteractMLTrainingSet>( GetEditingObject() );
 }
 
-
 // main setup
 //
 void FTrainingSetEditor::InitTrainingSetEditor(const EToolkitMode::Type Mode, const TSharedPtr< class IToolkitHost >& InitToolkitHost, UInteractMLTrainingSet* training_set)
@@ -267,26 +208,13 @@ void FTrainingSetEditor::InitTrainingSetEditor(const EToolkitMode::Type Mode, co
 					->AddTab(TrainingSetHierarchyTabId, ETabState::OpenedTab)
 					->SetForegroundTab(TrainingSetHierarchyTabId)
 				)
-#if 0
-				->Split
-				(
-					FTabManager::NewStack()
-					->SetSizeCoefficient(0.4f)
-					->SetHideTabWell(true)
-					->AddTab(TrainingSetDetailsTabId, ETabState::OpenedTab)
-				)
-#endif
 			)
 	);
 	
 	const bool bCreateDefaultStandaloneMenu = true;
 	const bool bCreateDefaultToolbar = true;
 	FAssetEditorToolkit::InitAssetEditor(Mode, InitToolkitHost, TrainingSetEditorAppIdentifier, StandaloneDefaultLayout, bCreateDefaultStandaloneMenu, bCreateDefaultToolbar, training_set);
-	
-	// menu customisation
-//	FDataTableEditorModule& DataTableEditorModule = FModuleManager::LoadModuleChecked<FDataTableEditorModule>("DataTableEditor");
-//	AddMenuExtender(DataTableEditorModule.GetMenuExtensibilityManager()->GetAllExtenders(GetToolkitCommands(), GetEditingObjects()));
-	
+
 	// toolbar customisation
 	TSharedPtr<FExtender> ToolbarExtender = FInteractMLEditorModule::GetModule()->GetToolBarExtensibilityManager()->GetAllExtenders( GetToolkitCommands(), GetEditingObjects() );
 	ExtendToolbar( ToolbarExtender );
@@ -295,20 +223,9 @@ void FTrainingSetEditor::InitTrainingSetEditor(const EToolkitMode::Type Mode, co
 
 	// Support undo/redo
 	GEditor->RegisterForUndo(this);
-	
-	// ensure resource list set up for editing (e.g. if brand new)
-	//training_set->Editor_InitForEditing();
 
 	// prep for UI
 	RebuildEntryViewModel();
-
-#if 0
-	if (DetailsView.IsValid())
-	{
-		//initially nothing
-		DetailsView->SetObject( nullptr );
-	}
-#endif
 }
 
 // opportunity to add buttons to our toolbar
@@ -380,6 +297,7 @@ void FTrainingSetEditor::TrackChanges()
 }
 
 // can we currently delete the selected example(s)?
+//
 bool FTrainingSetEditor::CheckDeleteAllowed() const
 {
 	if (SelectedItems.Num()==0)
@@ -397,7 +315,6 @@ bool FTrainingSetEditor::CheckDeleteAllowed() const
 
 	return true;
 }
-
 
 // delete the currently selected examples
 //
@@ -422,6 +339,7 @@ void FTrainingSetEditor::OnDeleteClicked()
 }
 
 // can we currently reset the training set?
+//
 bool FTrainingSetEditor::CheckResetAllowed() const
 {
 	return !GetEditableExamples()->HasBeenReset();
@@ -615,7 +533,6 @@ FTrainingSetTreeItem::Ptr FTrainingSetEditor::FindTreeItemByIndex(FTrainingSetTr
 	return nullptr;
 }
 
-
 // update Slate-side when our viewmodel has chnaged
 //
 void FTrainingSetEditor::RefreshTreeview()
@@ -625,24 +542,31 @@ void FTrainingSetEditor::RefreshTreeview()
 	TreeView->RequestTreeRefresh(); //update tree UI structure from hierarchy
 }
 
-
 /** IToolkit interface */
 
+// editor identification
+//
 FName FTrainingSetEditor::GetToolkitFName() const
 {
 	return FName("InteractMLTrainingSetEditor");
 }
 
+// editor identification
+//
 FText FTrainingSetEditor::GetBaseToolkitName() const
 {
 	return LOCTEXT( "InteractMLTrainingSetEditorLabel", "Training Set Editor" );
 }
 
+// editor tab identification
+//
 FString FTrainingSetEditor::GetWorldCentricTabPrefix() const
 {
 	return LOCTEXT("InteractMLTrainingSetEditorTabPrefix", "Training Set ").ToString();
 }
 
+// editor visuals
+//
 FLinearColor FTrainingSetEditor::GetWorldCentricTabColorScale() const
 {
 	return FColor::Emerald.ReinterpretAsLinear();
@@ -650,10 +574,15 @@ FLinearColor FTrainingSetEditor::GetWorldCentricTabColorScale() const
 
 /** FEditorUndoClient */
 
+// we can be notified of undo
+//
 void FTrainingSetEditor::PostUndo( bool bSuccess )
 {
 	OnUndoRedo();
 }
+
+// we can be notified of redo
+//
 void FTrainingSetEditor::PostRedo( bool bSuccess )
 {
 	OnUndoRedo();
@@ -665,14 +594,12 @@ void FTrainingSetEditor::OnUndoRedo()
 {
 	//invalidates view model
 	RebuildEntryViewModel();
-
-	//potentially invalidates all entities
-	//FInteractMLModule::GetModule()->Editor_Notify??Changed();
 }
-
 
 /** FAssetEditorToolkit interface */
 
+// how tabs (sub-panels) are added to our editor panel
+//
 void FTrainingSetEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>& InTabManager)
 {
 	WorkspaceMenuCategory = InTabManager->AddLocalWorkspaceMenuCategory(LOCTEXT("WorkspaceMenu_TrainingSetEditor", "Training Set Editor"));
@@ -683,6 +610,8 @@ void FTrainingSetEditor::RegisterTabSpawners(const TSharedRef<class FTabManager>
 	//CreateAndRegisterTrainingSetDetailsTab(InTabManager);
 }
 
+// done with tabs
+//
 void FTrainingSetEditor::UnregisterTabSpawners(const TSharedRef<class FTabManager>& InTabManager)
 {
 	FAssetEditorToolkit::UnregisterTabSpawners(InTabManager);
@@ -703,22 +632,6 @@ void FTrainingSetEditor::CreateAndRegisterTrainingSetHierarchyTab(const TSharedR
 		.SetDisplayName(LOCTEXT("TrainingSetHierarchyTab", "Examples"))
 		.SetGroup(WorkspaceMenuCategory.ToSharedRef());
 }
-
-#if 0
-// details tab type
-//
-void FTrainingSetEditor::CreateAndRegisterTrainingSetDetailsTab(const TSharedRef<class FTabManager>& InTabManager)
-{
-	//access standard property panel
-	FPropertyEditorModule & EditModule = FModuleManager::Get().GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-	FDetailsViewArgs DetailsViewArgs(/*bUpdateFromSelection=*/ false, /*bLockable=*/ false, /*bAllowSearch=*/ true, /*InNameAreaSettings=*/ FDetailsViewArgs::HideNameArea, /*bHideSelectionTip=*/ true);
-	DetailsView = EditModule.CreateDetailView(DetailsViewArgs);
-	
-	InTabManager->RegisterTabSpawner(TrainingSetDetailsTabId, FOnSpawnTab::CreateSP(this, &FTrainingSetEditor::SpawnTab_TrainingSetDetails))
-		.SetDisplayName(LOCTEXT("TrainingSetDetailsTab", "Details"))
-		.SetGroup(WorkspaceMenuCategory.ToSharedRef());
-}
-#endif
 
 // hierarchy tab creation
 //
@@ -755,35 +668,14 @@ TSharedRef<SDockTab> FTrainingSetEditor::SpawnTab_TrainingSetHierarchy( const FS
 	return tab;
 }
 
-#if 0
-// property tab creation
-//
-TSharedRef<SDockTab> FTrainingSetEditor::SpawnTab_TrainingSetDetails(const FSpawnTabArgs& Args)
-{
-	check(Args.GetTabId().TabType == ResourceListDetailsTabId);
-
-	return SNew(SDockTab)
-		.Icon(FEditorStyle::GetBrush("GenericEditor.Tabs.Properties"))
-		.Label(LOCTEXT("ResourceListDetailsTitle", "Details"))
-		.TabColorScale(GetTabColorScale())
-		[
-			SNew(SBorder)
-			.Padding(2)
-			.BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
-			[
-				DetailsView.ToSharedRef()
-			]
-		];
-}
-#endif
-
 // hierarchy tab active, ensure property panel follows selected item
 //
 void FTrainingSetEditor::OnHierarchyTabActivated(TSharedRef<SDockTab> tab, ETabActivationCause cause)
 {
 }
 
-//text access helpers
+// text access helpers: example mode
+//
 static FText GetExampleModeText(UInteractMLTrainingSet* pexamples)
 {
 	if (pexamples->IsSingleSamples())
@@ -799,6 +691,9 @@ static FText GetExampleModeText(UInteractMLTrainingSet* pexamples)
 		return LOCTEXT("TrainingSetModeDescUnknown", "N/A");
 	}
 }
+
+// text access helpers: label type
+//
 static FText GetLabelTypeText(UInteractMLTrainingSet* pexamples)
 {
 	const class UInteractMLLabel* label_type = pexamples->GetLabelCache().LabelType;
@@ -811,10 +706,16 @@ static FText GetLabelTypeText(UInteractMLTrainingSet* pexamples)
 		return LOCTEXT("TrainingSetLabelTypeSimpleDescription", "Number");
 	}
 }
+
+// text access helpers: example count
+//
 static FText GetExampleCountTooltip(UInteractMLTrainingSet* pexamples)
 {
 	return LOCTEXT("TrainingSetExampleCountTooltip", "Number of examples recorded into this training set");
 }
+
+// text access helpers: example mode tooltip
+//
 static FText GetExampleModeTooltip(UInteractMLTrainingSet* pexamples)
 {
 	if (pexamples->IsSingleSamples())
@@ -830,14 +731,23 @@ static FText GetExampleModeTooltip(UInteractMLTrainingSet* pexamples)
 		return LOCTEXT("TrainingSetModeTooltipUnknown", "No examples recorded, mode unknown");
 	}
 }
+
+// text access helpers: parameters tooltip
+//
 static FText GetExampleParametersTooltip(UInteractMLTrainingSet* pexamples)
 {
 	return LOCTEXT("TrainingSetParametersTooltip", "The number of numerical values derived from the live parameters recorded with each sample");
 }
+
+// text access helpers: label count tooltip
+//
 static FText GetExampleLabelCountTooltip(UInteractMLTrainingSet* pexamples)
 {
 	return LOCTEXT("TrainingSetLabelCountTooltip", "The number of distinct labels (output states) that examples have been recorded for");
 }
+
+// text access helpers: label type tooltip
+//
 static FText GetExampleLabelTypeTooltip(UInteractMLTrainingSet* pexamples)
 {
 	const class UInteractMLLabel* label_type = pexamples->GetLabelCache().LabelType;
@@ -870,7 +780,6 @@ FText FTrainingSetEditor::GetPropertyText(UInteractMLTrainingSet* pexamples, EIn
 	}
 	return FText::FromString("");
 }
-
 
 // hierarchy UI creation
 //
@@ -970,14 +879,9 @@ TSharedRef<SVerticalBox> FTrainingSetEditor::CreateTrainingSetHierarchyUI()
 			SAssignNew(TreeView, STrainingSetTreeView, SharedThis(this))
 			.TreeItemsSource(&TreeRoots)
 			.OnGenerateRow(this, &FTrainingSetEditor::GenerateTreeRow)
-//			.OnItemScrolledIntoView(TreeView, &STrainingSetTreeView::OnTreeItemScrolledIntoView)
 			.ItemHeight(21)
-//			.SelectionMode(InArgs._SelectionMode)
 			.OnSelectionChanged(this, &FTrainingSetEditor::OnTreeViewSelect)
-//			.OnExpansionChanged(this, &SPathView::TreeExpansionChanged)
 			.OnGetChildren(this, &FTrainingSetEditor::GetChildrenForTree)
-//			.OnSetExpansionRecursive(this, &SPathView::SetTreeItemExpansionRecursive)
-//			.OnContextMenuOpening(this, &FTrainingSetEditor::GenerateTreeContextMenu)
 			.ClearSelectionOnClick(false)
 			.HighlightParentNodesForSelection(true)				
 			.HeaderRow
@@ -1062,15 +966,6 @@ TSharedRef<SWidget> FTrainingSetEditor::CreateInfoField(FText name, UInteractMLT
 		];
 }
 
-#if 0
-// context menu on items
-//
-TSharedPtr<SWidget> FTrainingSetEditor::GenerateTreeContextMenu()
-{
-	return nullptr;
-}
-#endif
-
 // hierarchy item selected
 //
 void FTrainingSetEditor::OnTreeViewSelect( FTrainingSetTreeItem::Ptr Item, ESelectInfo::Type SelectInfo )
@@ -1094,9 +989,6 @@ bool FTrainingSetEditor::IsItemValidDragSource( FTrainingSetTreeItem* item ) con
 	return false;
 }
 
-
-	
-
 // build a row on demand
 //
 TSharedRef<ITableRow> FTrainingSetEditor::GenerateTreeRow( TSharedPtr<FTrainingSetTreeItem> TreeItem, const TSharedRef<STableViewBase>& OwnerTable )
@@ -1116,9 +1008,10 @@ void FTrainingSetEditor::GetChildrenForTree( TSharedPtr< FTrainingSetTreeItem > 
 }
 
 
-//------------------------------------------------------------------------
-// STrainingSetTreeView
+//--------------------------------- STrainingSetTreeView ---------------------------------------
 
+// setup
+//
 void STrainingSetTreeView::Construct(const FArguments& InArgs, TSharedRef<FTrainingSetEditor> Owner)
 {
 	TrainingSetEditorWeak = Owner;
@@ -1126,7 +1019,6 @@ void STrainingSetTreeView::Construct(const FArguments& InArgs, TSharedRef<FTrain
 }
 
 // key handling
-//	F2 - rename
 //	Del - delete
 //
 FReply STrainingSetTreeView::OnKeyDown( const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent )
@@ -1147,14 +1039,14 @@ FReply STrainingSetTreeView::OnKeyDown( const FGeometry& MyGeometry, const FKeyE
 }
 
 
-//------------------------------------------------------------------------
-// FTrainingSetDragDrop setup
+//----------------------------- FTrainingSetDragDrop -------------------------------------------
 
+// setup
+//
 FTrainingSetDragDrop::FTrainingSetDragDrop( FTrainingSetTreeItem::Ptr dragged_item )
 	: Item( dragged_item )
 {
 }
-
 void FTrainingSetDragDrop::Construct()
 {
 	FDecoratedDragDropOp::Construct();
@@ -1164,9 +1056,10 @@ void FTrainingSetDragDrop::Construct()
 	SetDecoratorVisibility( true );
 }
 
-//------------------------------------------------------------------------
-// STrainingSetItemDropTarget
+//------------------------------- STrainingSetItemDropTarget -----------------------------------------
 
+// setup
+//
 void STrainingSetItemDropTarget::Construct(const FArguments& InArgs )
 {
 	OnAssetDropped = InArgs._OnAssetDropped;
@@ -1312,9 +1205,10 @@ FTrainingSetTreeItem::Ptr STrainingSetItemDropTarget::GetDroppedItem(TSharedPtr<
 }
 
 
-//------------------------------------------------------------------------
-// STrainingSetTreeRow
+//------------------------------------ STrainingSetTreeRow ------------------------------------
 
+// setup
+//
 void STrainingSetTreeRow::Construct( const FArguments& InArgs, const TSharedRef<STableViewBase>& TreeView )
 {
 	Item = InArgs._Item->AsShared();
@@ -1366,13 +1260,15 @@ FReply STrainingSetTreeRow::OnDragDetected( const FGeometry& MyGeometry, const F
 	return FReply::Unhandled();
 }
 
-
-
+// notified when we are dragged over
+//
 FReply STrainingSetTreeRow::OnDragOver(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent)
 {
 	return FReply::Handled();
 }
 
+// notified when drop happens
+//
 FReply STrainingSetTreeRow::OnDrop(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent)
 {
 	//target (this)
@@ -1420,26 +1316,6 @@ FSlateColor STrainingSetTreeRow::GetRowColourAndOpacity( FTrainingSetTreeItem::P
 	}	
 }
 
-// Row accessor handler: get resource
-//
-UObject* STrainingSetTreeRow::GetRowResource( FTrainingSetTreeItem::Ptr item ) const
-{
-	return nullptr; //item->GetResource();
-}
-
-// Row accessor handler: set resources
-void STrainingSetTreeRow::SetRowResource( UObject* new_value, FTrainingSetTreeItem::Ptr item )
-{
-#if 0
-	if(item->SetResource( new_value ))
-	{
-		//update treeview (in case assignment changed semantics of controls, e.g. not want specific type filter)
-		TSharedPtr<FTrainingSetEditor> plisteditor = TrainingSetEditorWeak.Pin();
-		plisteditor->RebuildEntryViewModel();
-	}
-#endif
-}
-
 // Build UI for a specific column of the hierarchy
 //
 TSharedRef<SWidget> STrainingSetTreeRow::GenerateWidgetForColumn( const FName& ColumnName )
@@ -1458,21 +1334,7 @@ TSharedRef<SWidget> STrainingSetTreeRow::GenerateWidgetForColumn( const FName& C
 
 		//editable text (to support rename)
 		TSharedPtr<SInlineEditableTextBlock> InlineTextBlock = SNew(SInlineEditableTextBlock)
-			.Text(this, &STrainingSetTreeRow::GetRowName, ItemPtr )
-//			.HighlightText( SceneOutliner.GetFilterHighlightText() )
-//			.ColorAndOpacity(this, &STrainingSetTreeRow::GetRowColourAndOpacity, ItemPtr);
-//			.OnTextCommitted(this, &STrainingSetTreeRow::OnItemLabelCommitted, ItemPtr)
-//			.OnVerifyTextChanged(this, &STrainingSetTreeRow::OnVerifyItemLabelChange, ItemPtr)
-//			.IsSelected(FIsSelected::CreateSP(&InRow, &STrainingSetTreeRow::IsSelectedExclusively))
-//			.IsReadOnly_Lambda([Editor = plisteditor, Item = ItemPtr, this]()
-//			{
-//				return !Editor->CanRenameItem( Item.Get() );
-//			});		
-//		if(plisteditor->CanRenameItem( ItemPtr.Get() ))
-//		{
-//			ItemPtr->RenameRequestEvent.BindSP( InlineTextBlock.Get(), &SInlineEditableTextBlock::EnterEditingMode );
-//		}			
-			;
+			.Text(this, &STrainingSetTreeRow::GetRowName, ItemPtr );
 
 		// The first column gets the tree expansion arrow for this row
 		auto ui =
@@ -1508,8 +1370,6 @@ TSharedRef<SWidget> STrainingSetTreeRow::GenerateWidgetForColumn( const FName& C
 					.FillWidth(1.0f)
 					[ 
 						InlineTextBlock.ToSharedRef()
-//						SNew( STextBlock )
-//						.Text( this, &STrainingSetTreeRow::GetRowName, ItemPtr )
 					]
 				]
 			];
@@ -1710,7 +1570,6 @@ void STrainingSetTreeRow::OnItemDroppedName( FTrainingSetTreeItem::Ptr source_it
 	}
 #endif
 }
-
 
 // asset dragged over entry slot
 //

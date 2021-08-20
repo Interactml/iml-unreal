@@ -6,6 +6,11 @@
 
 #include "AssetTypeActions_Base.h"
 
+
+////////////////////////////// TRAINING SET /////////////////////////////
+
+// expose our training set asset type to various editor systems
+//
 class FInteractMLTrainingSetActions : public FAssetTypeActions_Base
 {
 	uint32 RegisteredCategoryHandle;

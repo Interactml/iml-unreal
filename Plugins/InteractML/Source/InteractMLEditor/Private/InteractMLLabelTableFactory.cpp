@@ -22,6 +22,8 @@
 
 ////////////////////////////// LABEL TABLE /////////////////////////////
 
+// factory setup
+//
 UInteractMLLabelTableFactory::UInteractMLLabelTableFactory(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -30,7 +32,7 @@ UInteractMLLabelTableFactory::UInteractMLLabelTableFactory(const FObjectInitiali
 	SupportedClass = UInteractMLLabelTable::StaticClass();
 }
 
-// Copy of UDataTableFactory::ConfigureProperties with additional filtering to restrict to label types
+// NOTE: Copy of UDataTableFactory::ConfigureProperties with additional filtering to restrict to label types
 //
 bool UInteractMLLabelTableFactory::ConfigureProperties()
 {

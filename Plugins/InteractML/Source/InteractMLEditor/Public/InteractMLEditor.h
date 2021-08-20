@@ -19,7 +19,6 @@
 //
 class INTERACTMLEDITOR_API FInteractMLEditorModule 
 	: public IModuleInterface
-//	, public IHasMenuExtensibility
 	, public IHasToolBarExtensibility
 {
 	// asset appearance
@@ -30,7 +29,6 @@ class INTERACTMLEDITOR_API FInteractMLEditorModule
 
 	/** Extensibility managers */
 	TSharedPtr<FExtensibilityManager> ToolBarExtensibilityManager;
-	
 	
 public:
 
