@@ -31,10 +31,8 @@
 // LOCAL CLASSES & TYPES
 
 
-
 // pin and function name constants
 //
-
 namespace FInteractMLRecordingNodePinNames
 {
 	//NOTE: these are localised in AllocateDefaultPins, don't change name here or you break existing graphs
@@ -54,6 +52,7 @@ namespace FInteractMLRecordingNodeFunctionNames
 	static const FName RecordSimpleLabelFunctionName(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, RecordExampleSimple));
 	static const FName RecordCompositeLabelFunctionName(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, RecordExampleComposite));
 }
+//UInteractMLBlueprintLibrary::RecordExampleSimple/Composite(...)
 namespace FInteractMLRecordingNodeRecordFunctionPinNames
 {
 	static const FName ActorPinName("Actor");
@@ -75,10 +74,9 @@ namespace FInteractMLRecordingNodeRecordFunctionPinNames
 /////////////////////////////////// HELPERS /////////////////////////////////////
 
 
-
 //////////////////////////////// RECORDING NODE CLASS ////////////////////////////////////
 
-// basic node properties
+// node title
 //
 FText UInteractMLRecordingNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
@@ -109,19 +107,6 @@ FText UInteractMLRecordingNode::GetNodeTitle(ENodeTitleType::Type TitleType) con
 		default:
 		{
 			FString title = node_name.ToString();
-#if false //only one entry appears now since the node is configurable
-			title.Append(TEXT(" ("));
-			switch (Mode)
-			{
-				case EInteractMLRecordingMode::Single:
-					title.Append( LOCTEXT("RecordingNodeModeSingle","Single").ToString() );
-					break;
-				case EInteractMLRecordingMode::Series:
-					title.Append( LOCTEXT("RecordingNodeModeSeries","Series").ToString() );
-					break;
-			}
-			title.Append(TEXT(")"));
-#endif
 			return FText::FromString(title);
 		}
 			
@@ -130,6 +115,9 @@ FText UInteractMLRecordingNode::GetNodeTitle(ENodeTitleType::Type TitleType) con
 			break;
 	}
 }
+
+// node tooltip
+//
 FText UInteractMLRecordingNode::GetTooltipText() const
 {
 	switch (Mode)
@@ -143,10 +131,13 @@ FText UInteractMLRecordingNode::GetTooltipText() const
 	}
 }
 
-
+// monitor property changes that may invalidate node structure (e.g. exposed pins or title)
+//
 void UInteractMLRecordingNode::PostEditChangeProperty(struct FPropertyChangedEvent& e)
 {
 	const FName PropertyName = e.GetPropertyName();
+
+	//mode and label both affect pins
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UInteractMLRecordingNode, Mode)
 	  ||PropertyName == GET_MEMBER_NAME_CHECKED(UInteractMLRecordingNode, LabelType))
 	{
@@ -223,7 +214,6 @@ void UInteractMLRecordingNode::AllocateDefaultPins()
 	changed_pin->PinToolTip = LOCTEXT("RecordingNodeChangedPinTooltip", "Becomes true briefly when new training data has been recorded.").ToString();
 }
 
-
 // pin access helpers : inputs
 //
 UEdGraphPin* UInteractMLRecordingNode::GetTrainingSetInputPin() const
@@ -277,7 +267,6 @@ UEdGraphPin* UInteractMLRecordingNode::GetChangedOutputPin() const
 	check(Pin == NULL || Pin->Direction == EGPD_Output);
 	return Pin;
 }
-
 
 // runtime node operation functionality hookup
 //

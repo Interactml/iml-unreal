@@ -33,10 +33,8 @@
 // LOCAL CLASSES & TYPES
 
 
-
 // pin and function name constants
 //
-
 namespace FInteractMLTrainingNodePinNames
 {
 	//in
@@ -72,10 +70,9 @@ namespace FInteractMLTrainingNodeTrainModelPinNames
 /////////////////////////////////// HELPERS /////////////////////////////////////
 
 
-
 //////////////////////////////// TRAINING NODE CLASS ////////////////////////////////////
 
-// basic node properties
+// node title
 //
 FText UInteractMLTrainingNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
@@ -109,14 +106,21 @@ FText UInteractMLTrainingNode::GetNodeTitle(ENodeTitleType::Type TitleType) cons
 
 	return FText::FromString(title);
 }
+
+// node tooltip
+//
 FText UInteractMLTrainingNode::GetTooltipText() const
 {
 	return LOCTEXT("TrainingNodeTooltip", "Train a machine learning model using examples in a training set");
 }
 
+// monitor property changes that may invalidate node structure (e.g. exposed pins or title)
+//
 void UInteractMLTrainingNode::PostEditChangeProperty(struct FPropertyChangedEvent& e)
 {
 	const FName PropertyName = e.GetPropertyName();
+
+	//background operation affects pins	
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UInteractMLTrainingNode, bBackgroundOperation))
 	{
 		//rebuild because async mode changed

@@ -30,10 +30,8 @@
 // LOCAL CLASSES & TYPES
 
 
-
 // pin and function name constants
 //
-
 namespace FInteractMLExternalModelNodePinNames
 {
 	//in
@@ -63,7 +61,7 @@ namespace FInteractMLExternalModelNodeModelAccessFunctionPinNames
 
 ////////////////////// EXTERNAL TRAINING SET NODE CLASS /////////////////////////
 
-// basic node properties
+// node title
 //
 FText UInteractMLExternalModelNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
@@ -92,6 +90,9 @@ FText UInteractMLExternalModelNode::GetNodeTitle(ENodeTitleType::Type TitleType)
 	
 	return FText::FromString(title);
 }
+
+// node tooltip
+//
 FText UInteractMLExternalModelNode::GetTooltipText() const
 {
 	return LOCTEXT("ExternalModelNodeTooltip", "Directly access an external model data file");
@@ -127,7 +128,6 @@ void UInteractMLExternalModelNode::AllocateDefaultPins()
 	
 }
 
-
 // pin access helpers : inputs
 //
 UEdGraphPin* UInteractMLExternalModelNode::GetDataPathInputPin() const
@@ -157,8 +157,6 @@ UEdGraphPin* UInteractMLExternalModelNode::GetIsTrainedOutputPin() const
 	check( Pin == NULL || Pin->Direction == EGPD_Output );
 	return Pin;
 }
-
-
 
 // runtime node operation functionality hookup
 //

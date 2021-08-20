@@ -31,36 +31,40 @@
 // LOCAL CLASSES & TYPES
 
 
-
 /////////////////////////////////// HELPERS /////////////////////////////////////
-
 
 
 //////////////////////////////// TRAINING NODE CLASS ////////////////////////////////////
 
-// basic node properties
+// category to group all nodes in
 //
 FText UInteractMLNode::GetMenuCategory() const
 {
 	return InteractMLConstants::NodeMenuCategory;
 }
+
+// title panel background colour/tint for node (subtle)
+//
 FLinearColor UInteractMLNode::GetNodeTitleColor() const
 {
 	return InteractMLConstants::NodeTitleColour.ReinterpretAsLinear();
 }
+
+// main panel background colour/tint for node (subtle)
+//
 FLinearColor UInteractMLNode::GetNodeBodyTintColor() const
 {
 	return InteractMLConstants::NodeTitleColour.ReinterpretAsLinear();
 }
+
+// node icon (top left corner)
+//
 FSlateIcon UInteractMLNode::GetIconAndTint( FLinearColor& OutColor ) const
 {
 	OutColor = FLinearColor::White;
 	static FSlateIcon Icon( "InteractML", "NodeIcons.Default_16x" );
 	return Icon;
 }
-
-
-
 
 // put node in blueprint menu
 //
@@ -80,10 +84,13 @@ void UInteractMLNode::GetMenuActions(FBlueprintActionDatabaseRegistrar& ActionRe
 	}
 }
 
-
+// monitor property changes that may invalidate node structure (e.g. exposed pins or title)
+//
 void UInteractMLNode::PostEditChangeProperty( struct FPropertyChangedEvent& e )
 {
 	const FName PropertyName = e.GetPropertyName();
+
+	//common custom context actor option affects pins
 	if(PropertyName == GET_MEMBER_NAME_CHECKED( UInteractMLNode, bCustomContextActor ))
 	{
 		//context actor option changed, rebuild
@@ -92,7 +99,6 @@ void UInteractMLNode::PostEditChangeProperty( struct FPropertyChangedEvent& e )
 
 	Super::PostEditChangeProperty( e );
 }
-
 
 // custom pins, call first in derived implementation
 //
@@ -114,7 +120,6 @@ void UInteractMLNode::AllocateDefaultPins()
 	Super::AllocateDefaultPins(); //benign
 }
 
-
 // pin access helpers : inputs
 //
 UEdGraphPin* UInteractMLNode::GetActorInputPin() const
@@ -127,9 +132,6 @@ UEdGraphPin* UInteractMLNode::GetActorInputPin() const
 	}
 	return nullptr;
 }
-
-
-
 
 // runtime node operation functionality hookup
 //
