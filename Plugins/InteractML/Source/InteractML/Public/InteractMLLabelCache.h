@@ -14,6 +14,7 @@
 
 //general declarations
 
+
 // captured single set of label values
 USTRUCT()
 struct INTERACTML_API FInteractMLLabelCapture
@@ -35,6 +36,7 @@ public:
 	bool Equal(TArray<float>& raw_data) const;
 };
 
+
 // string cache map
 USTRUCT()
 struct INTERACTML_API FInteractMLStringMapping
@@ -50,6 +52,7 @@ struct INTERACTML_API FInteractMLStringMapping
 	UPROPERTY()
 	TArray<FText> Strings;
 };
+
 
 // InteractML Label Cache
 // For remembering the association between composite label type and each set of label data recorded in a training set
@@ -84,7 +87,6 @@ public:
 	//how many float values does this label map to/contain?
 	int GetNumValues() const;
 
-
 	/////////////// OPERATION ///////////////
 
 	//clear out cache of all label captures
@@ -112,5 +114,4 @@ public:
 
 private:
 	
-
 };

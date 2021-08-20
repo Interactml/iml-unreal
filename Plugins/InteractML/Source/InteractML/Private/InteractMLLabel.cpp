@@ -94,7 +94,6 @@ void UInteractMLLabel::CaptureData( FField* prop, int& iprop, const uint8* in_st
 	}
 }
 
-
 // does this label type have the same structure as us?
 //
 bool UInteractMLLabel::Equal(const UInteractMLLabel* other) const
@@ -116,7 +115,6 @@ bool UInteractMLLabel::Equal(const UInteractMLLabel* other) const
 	//good if both reached end together
 	return pmyfield == nullptr && potherfield == nullptr;
 }
-
 
 //rebuild any derived state
 //NOTE: needs to be const as used from accessors and updates on demand
@@ -172,7 +170,6 @@ int UInteractMLLabel::CountValues( FField* prop ) const
 	
 	return count;
 }
-
 
 // capture the fields of an instance of this struct type into an array of floats
 //
@@ -265,7 +262,6 @@ void UInteractMLLabel::RecreateData(FField* prop, int& iprop, const TArray<float
 		iprop++;
 	}
 }
-
 
 
 // EPILOGUE

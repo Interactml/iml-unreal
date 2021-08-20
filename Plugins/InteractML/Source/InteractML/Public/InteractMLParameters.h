@@ -35,17 +35,12 @@ struct INTERACTML_API FInteractMLParameters
 //
 struct INTERACTML_API FInteractMLParameterCollection
 {
-	//type information
-	//TArray<FString>  Names;
-	//TArray<FName>    Types;
-
 	//parameter value snapshot
 	TArray<float>    Values;
 
 	//accumulation cursor, i.e. which value we're adding next
 	int              Cursor;
 
-	
 	//---- setup ----
 
 	// completely clear out state
@@ -63,7 +58,6 @@ struct INTERACTML_API FInteractMLParameterCollection
 	void Add(FQuat value);
 	void Add(FLinearColor value);
 	void Add(FColor value);
-	
 
 private:
 
@@ -89,6 +83,7 @@ private:
 struct INTERACTML_API FInteractMLParameterSeries
 {
 private:
+	//simple way to store an ordered series of samples
 	TArray<TSharedPtr<struct FInteractMLParameterCollection>> ParameterSamples;
 	
 public:

@@ -18,6 +18,7 @@ using modelSetFloat = modelSet<float>;
 
 //general declarations
 
+
 //task type
 enum class EInteractMLTaskType
 {
@@ -25,6 +26,7 @@ enum class EInteractMLTaskType
 	Train,
 	Run,
 };
+
 
 // InteractML Task
 // Base for encapsulation of training or running a model, and any state they may need
@@ -67,8 +69,7 @@ struct FInteractMLTask : public TSharedFromThis<FInteractMLTask,ESPMode::ThreadS
 	//run output values
 	TArray<float> Outputs;	
 
-
-	//////////////// EXECUTION //////////////
+	//////////////// SETUP //////////////
 
 	FInteractMLTask(UInteractMLModel* model, EInteractMLTaskType action)
 		: Type(action)
@@ -78,6 +79,8 @@ struct FInteractMLTask : public TSharedFromThis<FInteractMLTask,ESPMode::ThreadS
 		, bSuccess(false)
 	{
 	}
+
+	//////////////// EXECUTION //////////////
 	
 	//main operation (on background thread)
 	void Run();

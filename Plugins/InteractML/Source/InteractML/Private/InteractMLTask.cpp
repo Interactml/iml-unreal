@@ -23,6 +23,7 @@
 //
 void FInteractMLTask::Run()
 {
+	//dispatch based on task type
 	switch (Type)
 	{
 		case EInteractMLTaskType::Train:
@@ -39,6 +40,7 @@ void FInteractMLTask::Run()
 //apply results (on main thread)
 void FInteractMLTask::Apply()
 {
+	//dispatch based on task type
 	switch (Type)
 	{
 		case EInteractMLTaskType::Train:

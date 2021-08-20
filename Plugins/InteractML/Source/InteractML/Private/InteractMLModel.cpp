@@ -81,8 +81,6 @@ bool UInteractMLModel::SaveJson(FString& json_string) const
 	return true;
 }
 
-
-
 // run the model against the single provided parameter set
 // returns the values matched against during the run
 // NOTE: for single match, runs synchronously, i.e. blocks until complete
@@ -207,7 +205,6 @@ void UInteractMLModel::ResetModel()
 	ResetModelInstance();
 	bIsTrained = false;
 }
-
 
 // fallback preparation for training a model, can be specialised
 //
@@ -376,6 +373,7 @@ void UInteractMLModel::DoRunningModel(FInteractMLTask::Ptr run_task)
 }
 
 // handle results of running model
+// NOTE: currently the same for all models, not usually overridden
 //
 void UInteractMLModel::EndRunningModel( FInteractMLTask::Ptr run_task )
 {

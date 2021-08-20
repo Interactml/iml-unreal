@@ -49,6 +49,7 @@ UInteractMLTrainingSet* UInteractMLContext::GetTrainingSet( UInteractMLContext::
 }
 
 // fetch/re-fetch a model for a specific graph node
+//
 UInteractMLModel* UInteractMLContext::GetModel( UClass* model_type, UInteractMLContext::TGraphNodeID node_id, FString data_path)
 {
 	UInteractMLModel** pentry = ModelLookup.Find(node_id);
@@ -78,6 +79,7 @@ UInteractMLModel* UInteractMLContext::GetModel( UClass* model_type, UInteractMLC
 }
 
 // fetch/re-fetch a parameter set for passing around the graph
+//
 TSharedPtr<FInteractMLParameterCollection> UInteractMLContext::GetParameters( UInteractMLContext::TGraphNodeID node_id )
 {
 	//existing?
@@ -98,6 +100,7 @@ TSharedPtr<FInteractMLParameterCollection> UInteractMLContext::GetParameters( UI
 }
 
 // fetch/re-fetch a model state object for a specific node to run a model
+//
 TSharedPtr<FInteractMLModelState> UInteractMLContext::GetModelState( TGraphNodeID node_id )
 {
 	//existing?
@@ -115,8 +118,6 @@ TSharedPtr<FInteractMLModelState> UInteractMLContext::GetModelState( TGraphNodeI
 	
 	return state;
 }
-
-
 
 // notify use of a training set asset
 //
@@ -179,7 +180,6 @@ void UInteractMLContext::SetModel( UInteractMLContext::TGraphNodeID node_id, UIn
 		ModelLookup.Add(node_id, model);
 	}
 }
-
 
 
 // EPILOGUE

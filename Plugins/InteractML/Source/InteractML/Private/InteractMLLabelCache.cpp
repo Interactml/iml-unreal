@@ -19,11 +19,12 @@
 
 //////////////////////////// LABEL CAPTURE /////////////////////////////
 
+// label data comparison, are the two equal?
+//
 bool FInteractMLLabelCapture::Equal(TArray<float>& raw_data) const
 {
 	return LabelData == raw_data;
 }
-
 
 
 ///////////////////////////// LABEL CACHE ////////////////////////////////

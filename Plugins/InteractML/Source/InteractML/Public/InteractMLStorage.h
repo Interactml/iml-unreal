@@ -18,8 +18,7 @@
 // Handles interaction with the underlying JSON data file used to persist the ML data (training or trained model))
 //
 UCLASS()
-class INTERACTML_API UInteractMLStorage
-	: public UObject
+class INTERACTML_API UInteractMLStorage	: public UObject
 {
 	GENERATED_BODY()
 

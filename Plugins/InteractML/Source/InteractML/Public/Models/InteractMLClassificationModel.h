@@ -26,7 +26,6 @@ class INTERACTML_API UInteractMLClassificationModel
 		
 	//---- persistent state ----
 	
-	
 	//---- transient/cached state ----
 	TSharedPtr<classificationFloat,ESPMode::ThreadSafe> Model;
 	
@@ -45,7 +44,6 @@ public:
 	//each type provides further qualifying extension prefix
 	virtual FString GetSpecificExtensionPrefix() const override { return cExtensionPrefix; }
 	
-
 private:
 	
 };

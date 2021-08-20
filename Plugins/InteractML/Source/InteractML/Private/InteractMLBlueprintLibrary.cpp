@@ -272,7 +272,7 @@ bool UInteractMLBlueprintLibrary::RecordExampleComposite(
 	return false;
 }
 
-// generic implementation of above
+// generic implementation of above fn
 //
 bool UInteractMLBlueprintLibrary::Generic_RecordExampleComposite(
 	AActor* Actor,
@@ -409,7 +409,6 @@ UInteractMLModel* UInteractMLBlueprintLibrary::GetModel(AActor* Actor, FString D
 	return model;
 }
 
-
 // model running : simple label, blocking
 //
 float UInteractMLBlueprintLibrary::RunModelSimple( 
@@ -419,6 +418,7 @@ float UInteractMLBlueprintLibrary::RunModelSimple(
 	bool Run, 
 	FString NodeID)
 {
+	//possible?
 	if (!Model)
 	{
 		return 0;
@@ -564,8 +564,6 @@ float UInteractMLBlueprintLibrary::RunModelSimpleAsync(
 	return 0.0f;
 }
 
-
-
 // model running : composite label, blocking
 //
 void UInteractMLBlueprintLibrary::RunModelComposite( 
@@ -582,7 +580,7 @@ void UInteractMLBlueprintLibrary::RunModelComposite(
 	check(0);
 }
 
-// generic implementation of above
+// generic implementation of above fn
 //
 void UInteractMLBlueprintLibrary::Generic_RunModelComposite(
 	AActor* Actor, 
@@ -695,7 +693,7 @@ void UInteractMLBlueprintLibrary::RunModelCompositeAsync(
 	check(0);
 }
 
-// generic implementation of above
+// generic implementation of above fn
 //
 void UInteractMLBlueprintLibrary::Generic_RunModelCompositeAsync(
 	AActor* Actor, 
@@ -804,7 +802,6 @@ void UInteractMLBlueprintLibrary::Generic_RunModelCompositeAsync(
 		}
 	}
 }
-
 
 // model training : blocking
 //
@@ -941,7 +938,6 @@ float UInteractMLBlueprintLibrary::GetFloatProperty( UObject* Target, FName Name
 }
 
 
-
 ///////////////////// DEBUG/DIAGS //////////////////////
 
 // dump parameter collection output
@@ -965,63 +961,6 @@ void UInteractMLBlueprintLibrary::LogParameterCollection(FInteractMLParameters P
 	}
 }
 
-
-
-///////////////////// DEPRECATED //////////////////////
-
-UInteractMLTrainingSet* UInteractMLBlueprintLibrary::DEPRECATED_GetTrainingSet(AActor* Actor, FString DataPath, FString NodeID)
-{
-	//find the context we cache our state in
-	UInteractMLContext* Context = GetMLContext( Actor );
-	check(Context);
-	
-	//get a parameter collection for this node to use
-	UInteractMLContext::TGraphNodeID id = NodeID;
-	UInteractMLTrainingSet* training_set = Context->GetTrainingSet( id, DataPath );
-	check(training_set);
-	
-	return training_set;
-}
-
-UInteractMLModel* UInteractMLBlueprintLibrary::DEPRECATED_GetModel_Classification(AActor* Actor, FString DataPath, FString NodeID)
-{
-	//find the context we cache our state in
-	UInteractMLContext* Context = GetMLContext( Actor );
-	check( Context );
-	
-	//get a parameter collection for this node to use
-	UInteractMLContext::TGraphNodeID id = NodeID;
-	UInteractMLModel* model = Context->GetModel( UInteractMLClassificationModel::StaticClass(), id, DataPath );
-	check( model );
-	
-	return model;
-}
-UInteractMLModel* UInteractMLBlueprintLibrary::DEPRECATED_GetModel_Regression(AActor* Actor, FString DataPath, FString NodeID)
-{
-	//find the context we cache our state in
-	UInteractMLContext* Context = GetMLContext( Actor );
-	check( Context );
-	
-	//get a parameter collection for this node to use
-	UInteractMLContext::TGraphNodeID id = NodeID;
-	UInteractMLModel* model = Context->GetModel( UInteractMLRegressionModel::StaticClass(), id, DataPath );
-	check( model );
-	
-	return model;
-}
-UInteractMLModel* UInteractMLBlueprintLibrary::DEPRECATED_GetModel_DynamicTimeWarp(AActor* Actor, FString DataPath, FString NodeID)
-{
-	//find the context we cache our state in
-	UInteractMLContext* Context = GetMLContext( Actor );
-	check( Context );
-	
-	//get a parameter collection for this node to use
-	UInteractMLContext::TGraphNodeID id = NodeID;
-	UInteractMLModel* model = Context->GetModel( UInteractMLDynamicTimeWarpModel::StaticClass(), id, DataPath );
-	check( model );
-	
-	return model;
-}
 
 // EPILOGUE
 #undef LOCTEXT_NAMESPACE

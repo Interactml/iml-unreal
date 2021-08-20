@@ -14,13 +14,13 @@
 
 //general declarations
 
-// InteractML Label type (structure definition)
+// InteractML Label type (data driven structure definition)
 // List of name/type pairs defining the set of values to be associated together as a label
 // Used for specifying expected output when recording/training and produced as actual output on a running model
 // NOTE: Just a simple specialisation of Blueprint Struct asset type, we want all the functionality/features but don't really need to add much
 //
 UCLASS(hidecategories=Object, MinimalAPI, BlueprintType)
-class /*INTERACTML_API*/ UInteractMLLabel : public UUserDefinedStruct
+class UInteractMLLabel : public UUserDefinedStruct
 {
 	GENERATED_BODY()
 	
@@ -42,7 +42,6 @@ public:
 	
 	// does this label type have the same structure as us?
 	bool Equal(const UInteractMLLabel* other) const;
-
 
 #if WITH_EDITOR
 	// UObject interface.
