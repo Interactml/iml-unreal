@@ -9,6 +9,8 @@
 
 ////////////////////////////// LABEL TABLE /////////////////////////////
 
+// expose our label table asset type to various editor systems
+//
 class FInteractMLLabelTableActions : public FAssetTypeActions_Base
 {
 	uint32 RegisteredCategoryHandle;

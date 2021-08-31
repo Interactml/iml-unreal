@@ -7,6 +7,8 @@ public class InteractMLUE : ModuleRules
 {
 	public InteractMLUE(ReadOnlyTargetRules Target) : base(Target)
 	{
+		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	
 		AddRapidLibLibrary( Target );
 
 		string CurDirectory = Path.GetFullPath( Path.Combine(ModuleDirectory, "..", ".." ) );

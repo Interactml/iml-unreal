@@ -21,27 +21,37 @@
 ////////////////////////////// LABEL TABLE /////////////////////////////
 
 // IAssetTypeActions Implementation
+
+// display name of asset type
+//
 FText FInteractMLLabelTableActions::GetName() const
 {
 	return LOCTEXT("LabelTableAssetName", "Label Table");
 }
 
+// 'colour' of asset (used on various UI flashes to help visual identification)
+//
 FColor FInteractMLLabelTableActions::GetTypeColor() const
 {
 	return FColor::FromHex("888EF7"); //InteractML Bright Purple
 }
 
+// actual asset class we represent
+//
 UClass* FInteractMLLabelTableActions::GetSupportedClass() const
 {
 	return UInteractMLLabelTable::StaticClass();
 }
 
+// asset categorisation (comes from IML editor module startup)
+//
 uint32 FInteractMLLabelTableActions::GetCategories()
 {
 	return RegisteredCategoryHandle;
 }
 
-// Copy of FAssetTypeActions_DataTable::OpenAssetEditor because we can't derive (private)
+// open an explicit editor for this asset instead of the default details panel
+// NOTE: copied from FAssetTypeActions_Struct::OpenAssetEditor as we want the same functionality but we can't derive (private)
 //
 void FInteractMLLabelTableActions::OpenAssetEditor( const TArray<UObject*>& InObjects, TSharedPtr<IToolkitHost> EditWithinLevelEditor )
 {

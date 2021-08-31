@@ -30,10 +30,8 @@ class INTERACTML_API UInteractMLDynamicTimeWarpModel
 	UPROPERTY()
 	TArray<FInteractMLExample> Examples;
 	
-	
 	//---- transient/cached state ----
 	TSharedPtr<seriesClassificationFloat, ESPMode::ThreadSafe> Model;
-	
 
 public:
 	//---- constants ----
@@ -62,8 +60,6 @@ protected:
 	virtual void DoTrainingModel( FInteractMLTask::Ptr training_task ) override; //NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
 	virtual FInteractMLTask::Ptr BeginRunningModel(struct FInteractMLParameterSeries* parameter_series) override;
 	virtual void DoRunningModel( FInteractMLTask::Ptr run_task ) override; //NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
-	
-
 
 private:
 	

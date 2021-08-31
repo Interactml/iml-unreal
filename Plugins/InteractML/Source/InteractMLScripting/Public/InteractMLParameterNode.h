@@ -40,7 +40,7 @@ struct FParameterSpec
 	FEdGraphPinType Type;
 
 	//setup
-	FParameterSpec(){}
+	FParameterSpec() : Identifier(0), Name(TEXT("")) {}
 	FParameterSpec(FEdGraphPinType type, int id, FString name="") : Identifier(id), Name(name), Type(type) {}
 
 	//re-gen display name and tooltip of a pin
@@ -61,7 +61,7 @@ struct FParameterSpec
 // collection object for passing around the graph and consumption by training and model nodes.
 //
 UCLASS()
-class INTERACTMLSCRIPTING_API UInteractMLParameterNode: public UInteractMLNode, public IK2Node_AddPinInterface
+class INTERACTMLSCRIPTING_API UInteractMLParameterNode : public UInteractMLNode, public IK2Node_AddPinInterface
 {
 	GENERATED_BODY()
 	
@@ -75,45 +75,26 @@ private:
 
 	//specialist
 	UEdGraphPin* GetParametersOutputPin() const;
-
 	
 protected:
-
-
-	//~ Begin UObject Interface
-	//virtual void Serialize(FArchive& Ar) override;	
-	//virtual void PostEditChangeProperty(struct FPropertyChangedEvent& e) override;
-	//virtual void PostLoad() override;
-	//~ End UObject Interface
 
 	//~ Begin UEdGraphNode Interface
 	virtual void AllocateDefaultPins() override;
 	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 	virtual FText GetTooltipText() const override;
-	//virtual FText GetMenuCategory() const override;
 	virtual void GetNodeContextMenuActions(class UToolMenu* Menu, class UGraphNodeContextMenuContext* Context) const override;
-	//virtual bool IncludeParentNodeContextMenu() const override { return true; }
-	//virtual void ValidateNodeDuringCompilation(class FCompilerResultsLog& MessageLog) const override;
-	//virtual void PostPlacedNewNode();
-	//virtual FLinearColor GetNodeTitleColor() const override;
 	//~ End UEdGraphNode Interface
 
 	//~ Begin K2Node Interface
 	virtual void NotifyPinConnectionListChanged(UEdGraphPin* Pin) override;
-	//virtual bool IsNodePure() const override { return bIsPureGet; }
-	//virtual void ReallocatePinsDuringReconstruction(TArray<UEdGraphPin*>& OldPins) override;
-	//virtual bool ShouldShowNodeProperties() const override { return false; }
-	//virtual class FNodeHandlingFunctor* CreateNodeHandler(class FKismetCompilerContext& CompilerContext) const override;
 	virtual void ExpandNode(class FKismetCompilerContext& CompilerContext, UEdGraph* SourceGraph) override;
-	//virtual void GetMenuActions(FBlueprintActionDatabaseRegistrar& ActionRegistrar) const override;
 	virtual bool IsConnectionDisallowed(const UEdGraphPin* MyPin, const UEdGraphPin* OtherPin, FString& OutReason) const override;
 	virtual void PostReconstructNode();
-	//~ End K2Node Interface};
+	//~ End K2Node Interface
 
 	// IK2Node_AddPinInterface interface
 	virtual void AddInputPin() override;
 	// End of IK2Node_AddPinInterface interface
-
 	
 private:
 	int CountParameters() const; //only valid ones

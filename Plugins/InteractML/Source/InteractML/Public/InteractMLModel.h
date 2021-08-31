@@ -20,7 +20,6 @@ using modelSetFloat = modelSet<float>;
 
 //general declarations
 
-
 // InteractML Model Base
 // represents a trained machine learning model for specific algorithm types to derive from
 // holds in-memory version of model instance, trained model state backed by underlying JSON file storage
@@ -38,7 +37,6 @@ class INTERACTML_API UInteractMLModel
 	UPROPERTY()
 	FInteractMLLabelCache LabelCache;
 
-	
 	//---- transient/cached state ----
 
 	//task currently running this model (used to spot concurrency requests)

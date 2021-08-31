@@ -20,8 +20,7 @@
 // makes a label asset
 //
 UCLASS()
-class INTERACTMLEDITOR_API UInteractMLLabelFactory
-	: public UFactory
+class INTERACTMLEDITOR_API UInteractMLLabelFactory : public UFactory
 {
 	GENERATED_UCLASS_BODY()
 

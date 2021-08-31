@@ -26,6 +26,7 @@ enum class EInteractMLModelType : uint8
 	DynamicTimewarp,
 };
 
+
 // InteractML blueprint support library
 // * Internal - Various functions for building our custom blueprint nodes from
 // * Public - We may also include helper functions for users to build into their graphs
@@ -207,21 +208,11 @@ public:
 	UFUNCTION( BlueprintCallable, Category = "Utility", meta = (ReturnDisplayName = "Value", ToolTip = "Access an objects float property by name.") )
 	static float GetFloatProperty( UObject* Target, FName Name );
 
+
 	///////////////////// DEBUG/DIAGS //////////////////////
 
 	// log a parameter collections list of parameter values
 	UFUNCTION(BlueprintCallable, Category = "InteractML",meta=(DevelopmentOnly))
 	static void LogParameterCollection(FInteractMLParameters Parameters);
 
-
-	///////////////////// DEPRECATED //////////////////////
-
-	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly, meta=(DeprecatedFunction))
-	static UInteractMLTrainingSet* DEPRECATED_GetTrainingSet(AActor* Actor, FString DataPath, FString NodeID);
-	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly, meta=(DeprecatedFunction))
-	static UInteractMLModel* DEPRECATED_GetModel_Classification(AActor* Actor, FString DataPath, FString NodeID);
-	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly, meta=(DeprecatedFunction))
-	static UInteractMLModel* DEPRECATED_GetModel_Regression(AActor* Actor, FString DataPath, FString NodeID);
-	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly, meta=(DeprecatedFunction))
-	static UInteractMLModel* DEPRECATED_GetModel_DynamicTimeWarp(AActor* Actor, FString DataPath, FString NodeID);
 };

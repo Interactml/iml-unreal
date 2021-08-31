@@ -30,6 +30,8 @@ static FColor cInteractMLPrimaryColour(128, 100, 255); //IML Purple); // 58, 59,
 // LOCAL CLASSES & TYPES
 
 
+//////////////////////////////// PARAMETER INPUT INFO ////////////////////////////////////
+
 // info about types of compatible input parameters
 //
 struct FInputParameterInfo
@@ -49,6 +51,9 @@ struct FInputParameterInfo
 	{}
 	static FInputParameterInfo None;
 };
+
+// add accepted input parameter types here
+//
 static TArray<FInputParameterInfo>& GetInputParameterInfoList()
 {
 	static TArray<FInputParameterInfo> list;
@@ -65,7 +70,6 @@ static TArray<FInputParameterInfo>& GetInputParameterInfoList()
 	return list;
 }
 FInputParameterInfo FInputParameterInfo::None( FText::FromString(TEXT("Unknown")), UEdGraphSchema_K2::PC_Wildcard, NAME_None, nullptr, 0 );
-
 
 // is this pin type supported for parameter collection?
 //
@@ -138,7 +142,6 @@ static FString GetInputParameterTypesDescription()
 
 // pin and function name constants
 //
-
 namespace FInteractMLParameterNodePinNames
 {
 	//in
@@ -149,17 +152,18 @@ namespace FInteractMLParameterUtilityFunctionNames
 {
 	static const FName AccessParametersName(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, GetParameters));
 }
+//UInteractMLBlueprintLibrary::GetParameters(...)
 namespace FParameterNodeParametersAccessPinNames
 {
 	static const FName ActorPinName("Actor");
 	static const FName GuidPinName("NodeID");
 }
+//UInteractMLBlueprintLibrary::Add*Parameter(...)
 namespace FParameterNodeParameterAddPinNames
 {
 	static const FName ParametersPinName("Parameters");
 	static const FName ValuePinName("Value");
 }
-
 
 
 /////////////////////////////////// HELPERS /////////////////////////////////////
@@ -254,11 +258,9 @@ void FParameterSpec::ApplyPinTooltip( UEdGraphPin* pin ) const
 }
 
 
-
-
 //////////////////////////////// PARAMETER NODE CLASS ////////////////////////////////////
 
-// basic node properties
+// node title
 //
 FText UInteractMLParameterNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
@@ -294,11 +296,13 @@ FText UInteractMLParameterNode::GetNodeTitle(ENodeTitleType::Type TitleType) con
 			break;
 	}
 }
+
+// node tooltip
+//
 FText UInteractMLParameterNode::GetTooltipText() const
 {
 	return LOCTEXT("ParameterNodeTooltip", "Connect all the parameters to be used as training inputs");
 }
-
 
 // how many valid parameters does this collection have?
 //
@@ -384,6 +388,8 @@ bool UInteractMLParameterNode::IsConnectionDisallowed(const UEdGraphPin* MyPin, 
 	return false;
 }
 
+// we can be notified of rebuild
+//
 void UInteractMLParameterNode::PostReconstructNode()
 {
 	Super::PostReconstructNode();
@@ -398,7 +404,6 @@ void UInteractMLParameterNode::PostReconstructNode()
 		}
 	}
 }
-
 
 // custom pins
 //
@@ -498,7 +503,6 @@ void UInteractMLParameterNode::RemoveParameterInput( UEdGraphPin* pin )
 	}
 }
 
-
 // pin access helpers : parameters output
 //
 UEdGraphPin* UInteractMLParameterNode::GetParametersOutputPin() const
@@ -526,6 +530,9 @@ FParameterSpec* UInteractMLParameterNode::FindPinSpec(const UEdGraphPin* pin)
 	}
 	return nullptr;
 }
+
+// const version of above
+//
 const FParameterSpec* UInteractMLParameterNode::FindPinSpec(const UEdGraphPin* pin) const
 {
 	int pin_code = ParsePinCode( pin->PinName );
@@ -573,7 +580,6 @@ void UInteractMLParameterNode::NotifyPinConnectionListChanged(UEdGraphPin* pin)
 	//always update tooltip (disconnected pins come with a warning)
 	pin_spec->ApplyPinTooltip( pin );
 }
-
 
 // runtime node operation functionality hookup
 //

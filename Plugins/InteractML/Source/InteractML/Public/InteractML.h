@@ -4,13 +4,29 @@
 
 #pragma once
 
-//module
+//unreal
 #include "CoreMinimal.h"
+#include "UObject/WeakObjectPtr.h"
+#include "UObject/WeakObjectPtrTemplates.h"
+#include "Containers/Ticker.h"
+#include "Misc/ConfigCacheIni.h"
+
+//module
 #include "Modules/ModuleInterface.h"
 #include "InteractMLTask.h"
 
-//unreal
-//#include "Containers/Tickers.h"
+
+// CONFIGURATION
+
+//enable/disable multi-threaded operations (assuming nodes are set to use it)
+#define INTERACTML_ALLOW_MULTITHREADING		1
+
+// we can only use C++ exceptions in the editor builds, not at runtime, Unreal doesn't support it (perf reasons)
+#if WITH_EDITOR
+#define INTERACTML_TRAP_CPP_EXCEPTIONS 		1
+#else
+#define INTERACTML_TRAP_CPP_EXCEPTIONS		0
+#endif
 
 
 // general declarations
@@ -82,5 +98,4 @@ private:
 	void ShutdownCache();
 	void ShutdownTasks();
 
-	
 };

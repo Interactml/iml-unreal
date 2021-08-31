@@ -81,8 +81,6 @@ bool UInteractMLModel::SaveJson(FString& json_string) const
 	return true;
 }
 
-
-
 // run the model against the single provided parameter set
 // returns the values matched against during the run
 // NOTE: for single match, runs synchronously, i.e. blocks until complete
@@ -208,7 +206,6 @@ void UInteractMLModel::ResetModel()
 	bIsTrained = false;
 }
 
-
 // fallback preparation for training a model, can be specialised
 //
 FInteractMLTask::Ptr UInteractMLModel::BeginTrainingModel(UInteractMLTrainingSet* training_set)
@@ -279,15 +276,19 @@ void UInteractMLModel::DoTrainingModel( FInteractMLTask::Ptr training_task )
 {
 	//train the model
 	modelSetFloat* model = GetModelInstance();
+#if INTERACTML_TRAP_CPP_EXCEPTIONS
 	try
+#endif
 	{
 		training_task->bSuccess = model->train( training_task->Examples );
 	}
+#if INTERACTML_TRAP_CPP_EXCEPTIONS
 	catch(std::exception ex)
 	{
 		//handle?
 		UE_LOG( LogInteractML, Error, TEXT( "Exception trying to train model %s : %s" ), *GetName(), StringCast<TCHAR>( ex.what() ).Get() );
 	}
+#endif
 }
 
 // handle results of training
@@ -347,7 +348,9 @@ void UInteractMLModel::DoRunningModel(FInteractMLTask::Ptr run_task)
 	//run the model
 	modelSetFloat* model = GetModelInstance();
 	check(model);
+#if INTERACTML_TRAP_CPP_EXCEPTIONS
 	try
+#endif
 	{
 		//run
 		std::vector<float> outputs;
@@ -360,14 +363,17 @@ void UInteractMLModel::DoRunningModel(FInteractMLTask::Ptr run_task)
 			run_task->Outputs.Add(outputs[i]);
 		}
 	}
+#if INTERACTML_TRAP_CPP_EXCEPTIONS
 	catch(std::exception ex)
 	{
 		//handle?
 		UE_LOG(LogInteractML, Error, TEXT("Exception trying to run model %s : %s"), *GetName(), StringCast<TCHAR>(ex.what()).Get());
 	}
+#endif
 }
 
 // handle results of running model
+// NOTE: currently the same for all models, not usually overridden
 //
 void UInteractMLModel::EndRunningModel( FInteractMLTask::Ptr run_task )
 {

@@ -13,6 +13,7 @@
 
 //module
 
+
 //types of property to show
 enum class EInteractMLTrainingSetProperty
 {
@@ -22,6 +23,7 @@ enum class EInteractMLTrainingSetProperty
 	ParameterCount,
 	LabelType
 };
+
 
 // view model for a training set entry
 //
@@ -67,17 +69,10 @@ struct FTrainingSetTreeItem : public TSharedFromThis<FTrainingSetTreeItem>
 	FText GetSessionText() const;
 	FText GetUser() const;
 
-	
-
 	//editing
 	UObject* GetExamples();
 	void Sync(class UInteractMLTrainingSet* proot );
 	void Sync(class UInteractMLTrainingSet* pentry, FTrainingSetTreeItem::Ptr parent, int index_in_parent );
-
-private:
-	void Sort();
-	static void Sort( TArray<UInteractMLTrainingSet*>& entries );
-
 };
 
 	
@@ -134,8 +129,7 @@ public:
 	void InitTrainingSetEditor(const EToolkitMode::Type Mode, const TSharedPtr< class IToolkitHost >& InitToolkitHost, class UInteractMLTrainingSet* examples );
 
 	//access
-//	FTrainingSetTreeItem::Ptr GetSelectedItem() const { return SelectedItem; }
-	
+
 	/** FAssetEditorToolkit interface */
 	virtual void RegisterTabSpawners(const TSharedRef<class FTabManager>& TabManager) override;
 	virtual void UnregisterTabSpawners(const TSharedRef<class FTabManager>& TabManager) override;
@@ -147,7 +141,6 @@ public:
 	virtual FLinearColor GetWorldCentricTabColorScale() const override;
 
 	/** FEditorUndoClient */
-//	virtual bool MatchesContext( const FTransactionContext& InContext, const TArray<TPair<UObject*, FTransactionObjectEvent>>& TransactionObjectContexts ) const;
 	virtual void PostUndo( bool bSuccess ) override;
 	virtual void PostRedo( bool bSuccess ) override;
 
@@ -161,9 +154,7 @@ private:
 	
 	//ui setup
 	void CreateAndRegisterTrainingSetHierarchyTab(const TSharedRef<class FTabManager>& InTabManager);
-	//void CreateAndRegisterTrainingSetDetailsTab(const TSharedRef<class FTabManager>& InTabManager);
 	TSharedRef<SDockTab> SpawnTab_TrainingSetHierarchy( const FSpawnTabArgs& Args );
-	//TSharedRef<SDockTab> SpawnTab_TrainingSetDetails(const FSpawnTabArgs& Args);
 	TSharedRef<SVerticalBox> CreateTrainingSetHierarchyUI();
 	void ExtendToolbar(TSharedPtr<FExtender> Extender);	
 	void FillToolbar(FToolBarBuilder& ToolbarBuilder);
@@ -173,7 +164,6 @@ private:
 	//idle/deferred updates
 	bool Tick(float DeltaTime);
 	void TrackChanges();
-	
 	
 	//editing via ui
 	bool CheckDeleteAllowed() const;
@@ -196,16 +186,13 @@ private:
 	void RefreshTreeview(); //update Slate-side when our viewmodel has chnaged
 	FTrainingSetTreeItem::Ptr BuildEntryViewModel( UInteractMLTrainingSet* pentry );
 	void OnTreeViewSelect( FTrainingSetTreeItem::Ptr Item, ESelectInfo::Type SelectInfo );
-	//TSharedPtr<SWidget> GenerateTreeContextMenu();
 	FTrainingSetTreeItem::Ptr FindTreeItemByExampleID( int example_id );
 	static FTrainingSetTreeItem::Ptr FindTreeItemByExampleID( FTrainingSetTreeItem::Ptr, int example_id );
 	FTrainingSetTreeItem::Ptr FindTreeItemByIndex( int example_index );
 	static FTrainingSetTreeItem::Ptr FindTreeItemByIndex( FTrainingSetTreeItem::Ptr, int example_index, int& current_index );
-	
 		
 	//notifications
 	void OnHierarchyTabActivated(TSharedRef<SDockTab> tab, ETabActivationCause cause);
-	//void OnTrainingSetStructuralChange( UInteractMLTrainingSet* examples, FName property );
 
 	friend class STrainingSetTreeView;
 	friend class STrainingSetTreeRow;
@@ -281,11 +268,11 @@ public:
 	//access
 	TWeakPtr<FTrainingSetEditor> GetTrainingSetEditor() { return TrainingSetEditorWeak; }
 
-	
 };
 
+
 //------------------------------------------------------------------------
-// drag and drop payload
+// drag and drop payload - not used yet
 //
 class FTrainingSetDragDrop : public FDecoratedDragDropOp
 {
@@ -403,7 +390,6 @@ public:
 	
 protected:
 	
-
 	/** SWidget interface */
 	virtual FReply OnDragOver(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent) override;
 	virtual FReply OnDrop(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent) override;	
@@ -428,13 +414,10 @@ private:
 	TWeakPtr<FTrainingSetTreeItem> Item;
 	
 	//test
-	UObject* GetRowResource( FTrainingSetTreeItem::Ptr item ) const;
-	void SetRowResource( UObject* new_value, FTrainingSetTreeItem::Ptr item );
 	FText GetRowName( FTrainingSetTreeItem::Ptr item ) const;
 	const FSlateBrush* GetRowIcon( FTrainingSetTreeItem::Ptr item ) const;
 	FSlateColor GetRowColourAndOpacity( FTrainingSetTreeItem::Ptr item ) const;
-
-			
+	
 protected:
 	
 private:

@@ -17,7 +17,6 @@
 //general declarations
 
 
-
 // single sample of training data parameters
 //
 USTRUCT()
@@ -28,6 +27,7 @@ struct INTERACTML_API FInteractMLSample
 	UPROPERTY()
 	TArray<float> inputData;
 };
+
 
 // training example that associates a label with a single or series of parameter samples
 USTRUCT()
@@ -62,6 +62,7 @@ struct INTERACTML_API FInteractMLExample
 	float Duration;
 };
 
+
 // recording/storage/sampling mode, are samples a single parameter set or a series?
 UENUM()
 enum class EInteractMLSampleMode
@@ -77,8 +78,7 @@ enum class EInteractMLSampleMode
 // holds in-memory version of training set, backed by underlying JSON file storage
 //
 UCLASS(BlueprintType)
-class INTERACTML_API UInteractMLTrainingSet
-	: public UInteractMLStorage
+class INTERACTML_API UInteractMLTrainingSet	: public UInteractMLStorage
 {
 	GENERATED_BODY()
 		
@@ -115,12 +115,10 @@ public:
 	FNodeActionInterlock DeletingLabelAction; // are we currently resetting (some), and which node is doing it? (we track this so we can ignore continuous reset requests)
 	FNodeActionInterlock DeletingAllAction; // are we currently resetting (all), and which node is doing it? (we track this so we can ignore continuous reset requests)
 	
-
 	//---- constants ----
 	
 	// extension prefix for example/training data files
 	static FString cExtensionPrefix;
-	
 
 	//---- access ----
 	bool HasBeenReset() const { return !HasExamples() && SampleMode==EInteractMLSampleMode::Unknown && ParameterCount==0 && LabelCount==0; }
@@ -161,7 +159,9 @@ public:
 	// End UInteractMLStorage overrides
 	
 	// Begin UObject overrides
+#if WITH_EDITOR
 	virtual void PostEditUndo() override;
+#endif
 	// End UObject overrides
 	
 	//---- blueprint access ----
@@ -195,14 +195,12 @@ public:
 		P_NATIVE_END;	
 		*(int*)RESULT_PARAM = Return;
 	}
-	
 
 	//---- static utility ----
 	static bool LoadExamplesFromJson( const FString& json_string_in, TArray<FInteractMLExample>& examples_out );
 	static bool SaveExamplesToJson( const TArray<FInteractMLExample>& examples_in, FString& json_string_out );
 	static bool ClearExamplesCollection( TArray<FInteractMLExample>& examples );
 	
-
 private:
 
 	void ResetExamples();

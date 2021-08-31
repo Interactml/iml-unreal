@@ -18,7 +18,7 @@
 
 ////////////////////////////// LABEL /////////////////////////////
 
-// makes a label table asset
+// makes a label table asset (based on built in DataTable asset type)
 //
 UCLASS()
 class INTERACTMLEDITOR_API UInteractMLLabelTableFactory
@@ -28,7 +28,6 @@ class INTERACTMLEDITOR_API UInteractMLLabelTableFactory
 
 	//~ Begin UFactory Interface
 	virtual bool ConfigureProperties() override;
-	//virtual UObject* FactoryCreateNew(UClass* Class, UObject* InParent, FName Name, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn) override;
 	//~ Begin UFactory Interface
 	
 protected:

@@ -34,12 +34,12 @@ class INTERACTMLEDITOR_API UInteractMLClassificationModelFactory
 // makes a regression model asset
 //
 UCLASS()
-	class INTERACTMLEDITOR_API UInteractMLRegressionModelFactory
+class INTERACTMLEDITOR_API UInteractMLRegressionModelFactory
 	: public UFactory
 {
 	GENERATED_UCLASS_BODY()
 		
-		virtual UObject* FactoryCreateNew(UClass* Class, UObject* InParent, FName Name, EObjectFlags tFlags, UObject* Context, FFeedbackContext* Warn) override;
+	virtual UObject* FactoryCreateNew(UClass* Class, UObject* InParent, FName Name, EObjectFlags tFlags, UObject* Context, FFeedbackContext* Warn) override;
 };
 
 
@@ -48,11 +48,11 @@ UCLASS()
 // makes a DTW model asset
 //
 UCLASS()
-	class INTERACTMLEDITOR_API UInteractMLDynamicTimewarpModelFactory
+class INTERACTMLEDITOR_API UInteractMLDynamicTimewarpModelFactory
 	: public UFactory
 {
 	GENERATED_UCLASS_BODY()
 		
-		virtual UObject* FactoryCreateNew(UClass* Class, UObject* InParent, FName Name, EObjectFlags tFlags, UObject* Context, FFeedbackContext* Warn) override;
+	virtual UObject* FactoryCreateNew(UClass* Class, UObject* InParent, FName Name, EObjectFlags tFlags, UObject* Context, FFeedbackContext* Warn) override;
 };
 

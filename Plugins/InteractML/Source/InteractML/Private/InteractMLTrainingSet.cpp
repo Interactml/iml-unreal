@@ -13,13 +13,16 @@
 #include "InteractMLParameters.h"
 #include "InteractMLLabel.h"
 
+
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
+
 
 // CONSTANTS & MACROS
 
 // extension prefix for example/training data files
 FString UInteractMLTrainingSet::cExtensionPrefix(TEXT(".training"));
+
 
 // LOCAL CLASSES & TYPES
 
@@ -47,12 +50,14 @@ bool UInteractMLTrainingSet::SaveJson(FString& json_string) const
 	return SaveExamplesToJson(Examples, json_string);
 }
 
+#if WITH_EDITOR
 // undo/redo change
 //
 void UInteractMLTrainingSet::PostEditUndo()
 {
 	RefreshDerivedState();
 }
+#endif
 
 // ensure anything transient but based on object state is up to date
 //
@@ -274,7 +279,6 @@ bool UInteractMLTrainingSet::BeginRecording(const UInteractMLLabel* label_type, 
 	return true;
 }
 
-
 // submit a parameter set to be accumulated with the current label
 //
 bool UInteractMLTrainingSet::RecordParameters(FInteractMLParameterCollection* parameters )
@@ -376,7 +380,6 @@ void UInteractMLTrainingSet::DeleteLastExample()
 	}
 }
 
-
 // delete all examples for the give (simple) label
 //
 void UInteractMLTrainingSet::DeleteLabelExamples( float label )
@@ -464,18 +467,24 @@ bool UInteractMLTrainingSet::RemoveExample(int example_id, FInteractMLExample* o
 }
 
 
-
-
 //////////////////////// blueprint access /////////////////////////
 
+// number of parameters we record for each sample
+//
 int UInteractMLTrainingSet::GetParameterCount() const
 {
 	return ParameterCount;
 }
+
+// total number of examples recorded
+//
 int UInteractMLTrainingSet::GetExampleCount() const
 {
 	return Examples.Num();
 }
+
+// count up number of examples recorded for a specific (simple) label/output
+//
 int UInteractMLTrainingSet::GetExampleCountForSimpleOutput(float expected_output)
 {
 	int count = 0;
@@ -488,13 +497,24 @@ int UInteractMLTrainingSet::GetExampleCountForSimpleOutput(float expected_output
 	}
 	return count;
 }
-int UInteractMLTrainingSet::GetExampleCountForCompositeOutput(const UInteractMLLabel* LabelType, const FGenericStruct& LabelData)
+
+// count up number of examples recorded for a specific (composite) label/output
+//
+int UInteractMLTrainingSet::GetExampleCountForCompositeOutput(
+	const UInteractMLLabel* LabelType, 
+	const FGenericStruct& LabelData )  	//<-- placeholder for the generic parameter mapped in the thunk function below
 {
-	//placeholder, never called
+	//placeholder for generic structure binding, never actually called
+	//see Generic_GetExampleCountForCompositeOutput below
 	check(0);
 	return -1;
 }
-int UInteractMLTrainingSet::Generic_GetExampleCountForCompositeOutput(const UInteractMLLabel* LabelType, const void* LabelData)
+
+// generic implementation of above fn
+//
+int UInteractMLTrainingSet::Generic_GetExampleCountForCompositeOutput(
+	const UInteractMLLabel* LabelType, 
+	const void* LabelData )		//<-- the generic parameter
 {
 	//find the label index we are talking about
 	float label = LabelCache.Find(LabelType, LabelData, false);

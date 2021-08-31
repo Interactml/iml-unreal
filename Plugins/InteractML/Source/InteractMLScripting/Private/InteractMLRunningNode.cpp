@@ -33,10 +33,8 @@
 // LOCAL CLASSES & TYPES
 
 
-
 // pin and function name constants
 //
-
 namespace FInteractMLRunningNodePinNames
 {
 	//in
@@ -56,7 +54,7 @@ namespace FInteractMLRunningNodeFunctionNames
 	static const FName RunModelSimpleAsyncFunctionName(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, RunModelSimpleAsync));
 	static const FName RunModelCompositeAsyncFunctionName(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, RunModelCompositeAsync));
 }
-//UInteractMLBlueprintLibrary::RunModel(...)
+//UInteractMLBlueprintLibrary::RunModel*(...)
 namespace FInteractMLRunningNodeRunModelPinNames
 {
 	static const FName ActorPinName( "Actor" );
@@ -75,10 +73,9 @@ namespace FInteractMLRunningNodeRunModelPinNames
 /////////////////////////////////// HELPERS /////////////////////////////////////
 
 
-
 //////////////////////////////// MODEL NODE (BASE) CLASS ////////////////////////////////////
 
-// basic node properties
+// node title
 //
 FText UInteractMLRunningNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
@@ -111,14 +108,21 @@ FText UInteractMLRunningNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 
 	return FText::FromString(title);
 }
+
+// node tooltip
+//
 FText UInteractMLRunningNode::GetTooltipText() const
 {
 	return LOCTEXT("RunningNodeTooltip", "Runs a machine learning model on live parameters to find a trained output");
 }
 
+// monitor property changes that may invalidate node structure (e.g. exposed pins or title)
+//
 void UInteractMLRunningNode::PostEditChangeProperty(struct FPropertyChangedEvent& e)
 {
 	const FName PropertyName = e.GetPropertyName();
+	
+	//label and background operation both affect pins	
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UInteractMLRunningNode, LabelType)
 		|| PropertyName == GET_MEMBER_NAME_CHECKED(UInteractMLRunningNode, bBackgroundOperation))
 	{
@@ -182,7 +186,6 @@ void UInteractMLRunningNode::AllocateDefaultPins()
 	}
 }
 
-
 // pin access helpers : inputs
 //
 UEdGraphPin* UInteractMLRunningNode::GetModelInputPin() const
@@ -224,8 +227,6 @@ UEdGraphPin* UInteractMLRunningNode::GetCompletedOutputPin() const
 	check( Pin == NULL || Pin->Direction == EGPD_Output );
 	return Pin;
 }
-
-
 
 // runtime node operation functionality hookup
 //

@@ -8,6 +8,10 @@
 #include "Modules/ModuleManager.h"
 #include "Interfaces/IPluginManager.h"
 #include "Misc/Paths.h"
+#include "HAL/PlatformFilemanager.h"
+#include "HAL/PlatformFile.h"
+#include "Async/Async.h"
+#include "Framework/Threading.h"
 
 //module
 #include "InteractMLStorage.h"
@@ -19,11 +23,8 @@
 #define LOCTEXT_NAMESPACE "InteractML"
 DEFINE_LOG_CATEGORY(LogInteractML);
 
+
 // CONSTANTS & MACROS
-
-//enable/disable multi-threaded operation (assuming nodes are set to use it)
-#define INTERACTML_ALLOW_MULTITHREADING		1
-
 
 // default location of ML data in a project, overridable in game ini files
 const TCHAR* c_DefaultDataDirectoryName = TEXT("../Data");
@@ -31,12 +32,13 @@ const TCHAR* c_DefaultDataDirectoryName = TEXT("../Data");
 
 // LOCAL CLASSES & TYPES
 
-//dev/unit testing (at end of file)
+//dev/unit testing
 extern void InteractMLTests_Run();
 
 
 // GLOBAL STATE
 FInteractMLModule* FInteractMLModule::s_pModule = nullptr;
+
 
 // CLASS STATE
 
@@ -88,7 +90,7 @@ void FInteractMLModule::InitTick()
 //	DataPath=my/custom/path/
 //
 // NOTE: this is relative to the Content folder of the project
-// NOTE: The default is "../Data/", i.e. outside the content folder, but alongside
+// NOTE: The default is "../Data/", i.e. outside the content folder, but alongside it
 //
 void FInteractMLModule::InitPaths()
 {
@@ -178,7 +180,7 @@ void FInteractMLModule::ShutdownCache()
 {
 	//Doesn't seem to be needed at application shutdown, everything released anyway
 	//(the removefromroot was crashing, presumably these objects are already removed earlier than the module on exit)
-#if false
+#if false //(code left in for completeness)
 	//clear object lookup cache
 	for (auto it = ObjectLookup.CreateIterator(); it; ++it)
 	{
@@ -207,7 +209,7 @@ FString MakeFilePathKey(FString path)
 	return path;
 }
 
-// ml objects : obtain path based ones here to track and synchronise globally
+// ml objects : obtain path based training set here to track and synchronise globally
 //
 UInteractMLTrainingSet* FInteractMLModule::GetTrainingSet( FString path_and_name )
 {
@@ -242,6 +244,8 @@ UInteractMLTrainingSet* FInteractMLModule::GetTrainingSet( FString path_and_name
 	return ptraining_set;
 }
 
+// ml objects : obtain path based model here to track and synchronise globally
+//
 UInteractMLModel* FInteractMLModule::GetModel( UClass* model_type, FString path_and_name)
 {
 	//determine extension (need to query model type dynamically)
@@ -278,9 +282,7 @@ UInteractMLModel* FInteractMLModule::GetModel( UClass* model_type, FString path_
 	return pmodel;
 }
 
-
-
-// ml objects : inform of any obtained from direct asset references here as we need to synchronise with path based ones
+// ml objects : inform of any training set obtained from direct asset references here as we need to synchronise with path based ones
 //
 void FInteractMLModule::SetTrainingSet(UInteractMLTrainingSet* training_set)
 {
@@ -302,6 +304,8 @@ void FInteractMLModule::SetTrainingSet(UInteractMLTrainingSet* training_set)
 	ObjectLookup.Add( file_key, training_set );
 }
 
+// ml objects : inform of any model obtained from direct asset references here as we need to synchronise with path based ones
+//
 void FInteractMLModule::SetModel(UInteractMLModel* model)
 {
 	//scan known objects for unsaved state
@@ -322,7 +326,6 @@ void FInteractMLModule::SetModel(UInteractMLModel* model)
 	//remember
 	ObjectLookup.Add( file_key, model );
 }
-
 
 
 ///////////////////////////////// STATE ////////////////////////////////////
@@ -401,6 +404,8 @@ bool FInteractMLModule::Tick(float DeltaTime)
 	return true;
 }
 
+// register a new perf stat to have interactml tasks (train/run) appear in the perf diags tools
+//
 DECLARE_CYCLE_STAT( TEXT( "Run InteractML Task" ), STAT_RunInteractMLTask, STATGROUP_ThreadPoolAsyncTasks );
 
 // schedule task to run asynchronously
@@ -440,12 +445,15 @@ void FInteractMLModule::RunTask(FInteractMLTask::Ptr task)
 			}
 		});
 #else
-	//Multithreading : DISABLED
-	//run the task now, blocking
-	//UE_LOG( LogInteractML, Display, TEXT( "Running task on thread %08X" ), FPlatformTLS::GetCurrentThreadId() );
-	task->Run();
-	//UE_LOG( LogInteractML, Display, TEXT( "Run task on thread %08X" ), FPlatformTLS::GetCurrentThreadId() );
-	CompletedTasks.Add( task );
+	{
+		SCOPE_CYCLE_COUNTER(STAT_RunInteractMLTask);
+		//Multithreading : DISABLED
+		//run the task now, blocking
+		//UE_LOG( LogInteractML, Display, TEXT( "Running task on thread %08X" ), FPlatformTLS::GetCurrentThreadId() );
+		task->Run();
+		//UE_LOG( LogInteractML, Display, TEXT( "Run task on thread %08X" ), FPlatformTLS::GetCurrentThreadId() );
+		CompletedTasks.Add(task);
+	}
 #endif
 }
 

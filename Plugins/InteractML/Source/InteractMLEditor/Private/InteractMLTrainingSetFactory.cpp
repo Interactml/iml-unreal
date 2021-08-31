@@ -15,6 +15,8 @@
 
 #define LOCTEXT_NAMESPACE "InteractML"
 
+// factory setup
+//
 UInteractMLTrainingSetFactory::UInteractMLTrainingSetFactory(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -23,6 +25,8 @@ UInteractMLTrainingSetFactory::UInteractMLTrainingSetFactory(const FObjectInitia
 	SupportedClass = UInteractMLTrainingSet::StaticClass();
 }
 
+// main factory purpose; create an instance of our class and make sure it's properly set up
+//
 UObject* UInteractMLTrainingSetFactory::FactoryCreateNew(UClass* Class, UObject* InParent, FName Name, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn)
 {
 	UInteractMLTrainingSet* NewObjectAsset = NewObject<UInteractMLTrainingSet>(InParent, Name, Flags | RF_Transactional);
