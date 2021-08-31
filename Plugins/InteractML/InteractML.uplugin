@@ -10,7 +10,7 @@
 	"DocsURL": "https://github.com/Interactml/iml-ue4/wiki",
 	"MarketplaceURL": "",
 	"SupportURL": "https://github.com/Interactml/iml-ue4/issues",
-	"EngineVersion": "4.25.0",
+	"EngineVersion": "4.26.0",
 	"CanContainContent": false,
 	"IsBetaVersion": true,
 	"IsExperimentalVersion": true,
