@@ -6,6 +6,7 @@
 
 //unreal
 #include "CoreMinimal.h"
+#include "Components/ActorComponent.h"
 
 //module
 #include "InteractMLTrainingSet.h"

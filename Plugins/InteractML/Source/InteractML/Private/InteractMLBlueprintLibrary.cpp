@@ -5,6 +5,7 @@
 #include "InteractMLBlueprintLibrary.h"
 
 //unreal
+#include "GameFramework/Actor.h"
 
 //module
 #include "InteractML.h"

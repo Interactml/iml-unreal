@@ -8,6 +8,10 @@
 #include "Modules/ModuleManager.h"
 #include "Interfaces/IPluginManager.h"
 #include "Misc/Paths.h"
+#include "HAL/PlatformFilemanager.h"
+#include "HAL/PlatformFile.h"
+#include "Async/Async.h"
+#include "Framework/Threading.h"
 
 //module
 #include "InteractMLStorage.h"

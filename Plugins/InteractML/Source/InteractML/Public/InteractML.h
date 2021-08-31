@@ -4,13 +4,17 @@
 
 #pragma once
 
-//module
+//unreal
 #include "CoreMinimal.h"
+#include "UObject/WeakObjectPtr.h"
+#include "UObject/WeakObjectPtrTemplates.h"
+#include "Containers/Ticker.h"
+#include "Misc/ConfigCacheIni.h"
+
+//module
 #include "Modules/ModuleInterface.h"
 #include "InteractMLTask.h"
 
-//unreal
-//#include "Containers/Tickers.h"
 
 // CONFIGURATION
 

@@ -6,6 +6,7 @@
 
 //unreal
 #include "Misc/EngineVersionComparison.h"
+#include "Misc/FileHelper.h"
 
 //module
 #include "InteractML.h"
