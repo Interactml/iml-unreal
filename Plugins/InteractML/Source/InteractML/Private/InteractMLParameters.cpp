@@ -1,6 +1,9 @@
 //----
-// InteractML - University Of Arts London
+// InteractML - Interactive Machine Learning Plugin
+// Copyright (c) 2021 Phoenix Perry and Rebecca Fiebrink
+// Using the MIT License. https://github.com/Interactml
 //----
+
 
 #include "InteractMLParameters.h"
 
