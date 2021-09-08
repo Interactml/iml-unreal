@@ -13,7 +13,7 @@
 #include "KismetCompiler.h" //FKismetCompilerContext
 #include "K2Node_CallFunction.h" //UK2Node_Function
 #include "Engine/SimpleConstructionScript.h" //USimpleConstructionScript
-#include "BlueprintEditorUtils.h" //MarkBlueprintAsStructurallyModified
+#include "Kismet2/BlueprintEditorUtils.h" //MarkBlueprintAsStructurallyModified
 #include "ToolMenu.h" //UToolMenu
 #include "ScopedTransaction.h" //FScopedTransaction
 
@@ -32,10 +32,8 @@
 // LOCAL CLASSES & TYPES
 
 
-
 // pin and function name constants
 //
-
 namespace FInteractMLExternalTrainingSetNodePinNames
 {
 	//in
@@ -60,10 +58,9 @@ namespace FInteractMLExternalTrainingSetNodeTrainingSetAccessFunctionPinNames
 /////////////////////////////////// HELPERS /////////////////////////////////////
 
 
-
 ////////////////////// EXTERNAL TRAINING SET NODE CLASS /////////////////////////
 
-// basic node properties
+// node title
 //
 FText UInteractMLExternalTrainingSetNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
@@ -74,7 +71,7 @@ FText UInteractMLExternalTrainingSetNode::GetNodeTitle(ENodeTitleType::Type Titl
 	{
 		case ENodeTitleType::FullTitle:
 			title.Append(TEXT("\n"));
-			title.Append( LOCTEXT("ExternalTrainingSetNodeSubTitle", "External Data File").ToString() );
+			title.Append( LOCTEXT("ExternalTrainingSetNodeSubTitle", "External training set data file").ToString() );
 			break;
 
 		case ENodeTitleType::MenuTitle:
@@ -92,6 +89,9 @@ FText UInteractMLExternalTrainingSetNode::GetNodeTitle(ENodeTitleType::Type Titl
 
 	return FText::FromString(title);
 }
+
+// node tooltip
+//
 FText UInteractMLExternalTrainingSetNode::GetTooltipText() const
 {
 	return LOCTEXT("ExternalTrainingSetNodeTooltip", "Directly access an external training set data file");
@@ -119,9 +119,7 @@ void UInteractMLExternalTrainingSetNode::AllocateDefaultPins()
 	//has data? pin
 	UEdGraphPin* has_data_pin = CreatePin( EGPD_Output, UEdGraphSchema_K2::PC_Boolean, nullptr, FInteractMLExternalTrainingSetNodePinNames::HasDataOutputPinName );
 	has_data_pin->PinToolTip = LOCTEXT( "ExternalTrainingSetNodeHasDataPinTooltip", "Indicated whether the current training set has any recorded examples." ).ToString();
-	
 }
-
 
 // pin access helpers : inputs
 //
@@ -146,8 +144,6 @@ UEdGraphPin* UInteractMLExternalTrainingSetNode::GetHasDataOutputPin() const
 	check( Pin == NULL || Pin->Direction == EGPD_Output );
 	return Pin;
 }
-
-
 
 // runtime node operation functionality hookup
 //

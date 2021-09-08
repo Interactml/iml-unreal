@@ -4,7 +4,7 @@
 // Using the MIT License. https://github.com/Interactml
 //----
 
-#include "InteractMLClassificationModel.h"
+#include "Models/InteractMLClassificationModel.h"
 
 //unreal
 

@@ -26,6 +26,7 @@
 
 
 // some minor dev-only testing
+//
 static void InteractMLTests_MLObjectReqeusts()
 {
 	FInteractMLModule& iml = FInteractMLModule::Get();
@@ -44,6 +45,7 @@ static void InteractMLTests_MLObjectReqeusts()
 
 // main test entry point
 // requires "extern void InteractMLTests_Run();" to use
+//
 void InteractMLTests_Run()
 {
 	InteractMLTests_MLObjectReqeusts();

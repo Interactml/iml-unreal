@@ -28,9 +28,8 @@ class INTERACTML_API UInteractMLRegressionModel
 		
 	//---- persistent state ----
 	
-	
 	//---- transient/cached state ----
-	TSharedPtr<regressionFloat> Model;
+	TSharedPtr<regressionFloat, ESPMode::ThreadSafe> Model;
 	
 public:
 	//---- constants ----
@@ -43,7 +42,9 @@ public:
 	//---- operation ----
 	virtual void ResetModelInstance() override;
 	virtual modelSetFloat* GetModelInstance() const override { return Model.Get(); }
-	
+
+	//model type	
+	virtual bool IsContinuous() const { return true; }	//produces interpolated outputs instead of discreet values
 	//each type provides further qualifying extension prefix
 	virtual FString GetSpecificExtensionPrefix() const override { return cExtensionPrefix; }
 	

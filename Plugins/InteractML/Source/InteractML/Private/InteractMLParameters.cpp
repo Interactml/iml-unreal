@@ -25,6 +25,7 @@
 /////////////////////////// PARAMETER COLLECTION ///////////////////////////
 
 // completely clear out state
+//
 void FInteractMLParameterCollection::Clear()
 {
 	Values.Empty();
@@ -32,12 +33,14 @@ void FInteractMLParameterCollection::Clear()
 }
 
 // start accumulation from first parameter again
+//
 void FInteractMLParameterCollection::Reset()
 {
 	Cursor = 0;
 }
 
 //accumulation
+//
 void FInteractMLParameterCollection::Add(bool value)
 {
 	AccumulateValue( value );

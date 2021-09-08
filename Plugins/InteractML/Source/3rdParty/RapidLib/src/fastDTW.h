@@ -6,15 +6,15 @@
  * @copyright Copyright © 2017 Goldsmiths. All rights reserved.
  */
 
-#ifndef fastDTW_h
-#define fastDTW_h
+#pragma once
 
 #include <vector>
 #include "warpPath.h"
 
 /** Class for performing an fast dynamic time warping between two time series*/
 template<typename T>
-class fastDTW {
+class fastDTW
+{
 public:
     fastDTW();
     ~fastDTW();
@@ -36,7 +36,7 @@ private:
      * @param searchRadius search radius (usually 1)
      * @return information about optimal time warp
      */
-    static warpInfo fullFastDTW(const std::vector<std::vector<T>> &seriesX, const std::vector<std::vector<T > > &seriesY, int searchRadius);
+    static warpInfo<T> fullFastDTW(const std::vector<std::vector<T>> &seriesX, const std::vector<std::vector<T > > &seriesY, int searchRadius);
 
     /**
      * Returns just lowest cost path to warping one series into a second.
@@ -56,6 +56,3 @@ private:
     inline static std::vector<std::vector<T> > downsample(const std::vector<std::vector<T>> &series, T resolution);
     
 };
-
-
-#endif /* fastDTW_h */

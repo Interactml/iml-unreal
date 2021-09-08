@@ -6,12 +6,29 @@
 
 #pragma once
 
-//module
-#include "CoreMinimal.h"
-#include "Modules/ModuleInterface.h"
-
 //unreal
-//#include "Containers/Tickers.h"
+#include "CoreMinimal.h"
+#include "UObject/WeakObjectPtr.h"
+#include "UObject/WeakObjectPtrTemplates.h"
+#include "Containers/Ticker.h"
+#include "Misc/ConfigCacheIni.h"
+
+//module
+#include "Modules/ModuleInterface.h"
+#include "InteractMLTask.h"
+
+
+// CONFIGURATION
+
+//enable/disable multi-threaded operations (assuming nodes are set to use it)
+#define INTERACTML_ALLOW_MULTITHREADING		1
+
+// we can only use C++ exceptions in the editor builds, not at runtime, Unreal doesn't support it (perf reasons)
+#if WITH_EDITOR
+#define INTERACTML_TRAP_CPP_EXCEPTIONS 		1
+#else
+#define INTERACTML_TRAP_CPP_EXCEPTIONS		0
+#endif
 
 
 // general declarations
@@ -32,6 +49,15 @@ class INTERACTML_API FInteractMLModule
 	// catalogue of IML objects in use
 	TMap<FString, TWeakObjectPtr<class UInteractMLStorage>> ObjectLookup;
 
+	//tick
+	FTickerDelegate TickDelegate;
+	FDelegateHandle TickDelegateHandle;
+
+	//async support
+	TArray<FInteractMLTask::Ptr>	PendingTasks;
+	TArray<FInteractMLTask::Ptr>	CompletedTasks;
+	FCriticalSection				CompletedTaskInterlock;
+
 public:
 	//systems
 	static FInteractMLModule& Get() { return *s_pModule; }
@@ -51,6 +77,9 @@ public:
 	//ml objects : inform of any obtained from direct asset references here as we need to synchronise with path based ones
 	void SetTrainingSet( class UInteractMLTrainingSet* training_set );
 	void SetModel( class UInteractMLModel* model );
+
+	//async execution
+	void RunTask( FInteractMLTask::Ptr task );
 	
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
@@ -59,9 +88,16 @@ public:
 private:
 
 	//setup
+	void InitTick();
 	void InitPaths();
-
-	//shutdown
-	void ShutdownCache();
 	
+	//update
+	bool Tick(float DeltaTime);
+	void TickTasks(float dt);
+		
+	//shutdown
+	void ShutdownTick();
+	void ShutdownCache();
+	void ShutdownTasks();
+
 };

@@ -20,8 +20,7 @@
 // Handles interaction with the underlying JSON data file used to persist the ML data (training or trained model))
 //
 UCLASS()
-class INTERACTML_API UInteractMLStorage
-	: public UObject
+class INTERACTML_API UInteractMLStorage	: public UObject
 {
 	GENERATED_BODY()
 
@@ -104,8 +103,10 @@ public:
 	//~ Begin UObject interface
 	//events that could affect the derived storage path
 	virtual void PostLoad() override;
+#if WITH_EDITOR
 	virtual void PostEditUndo() override;
 	virtual void PostTransacted(const FTransactionObjectEvent& TransactionEvent) override;
+#endif
 	virtual void PostRename(UObject* OldOuter, const FName OldName) override;
 	virtual void PostEditImport() override;
 	//save hook

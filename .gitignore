@@ -1,5 +1,5 @@
 # Unreal transient folders
-Binaries
+/Binaries
 DerivedDataCache
 Saved
 Intermediate
@@ -17,10 +17,12 @@ Intermediate
 *.vcxproj.user
 *.pdb
 
-# Compiled source files for the engine to use
-#Intermediate/*
-#Plugins/InteractML/Intermediate/
-#Plugins/InteractML/Source/3rdParty/RapidLib/vs2019/intermediate/
+# Unwanted hot-reload binaries
+/Plugins/InteractML/Binaries/Win64/UE4Editor-InteractML-*
+/Plugins/InteractML/Binaries/Win64/UE4Editor-InteractMLEditor-*
+/Plugins/InteractML/Binaries/Win64/UE4Editor-InteractMLScripting-*
 
 # Generated solution project files
 InteractMLUE.sln
+Build/
+Builds/

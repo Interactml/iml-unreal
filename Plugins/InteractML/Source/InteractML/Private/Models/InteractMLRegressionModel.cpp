@@ -4,7 +4,7 @@
 // Using the MIT License. https://github.com/Interactml
 //----
 
-#include "InteractMLRegressionModel.h"
+#include "Models/InteractMLRegressionModel.h"
 
 //unreal
 

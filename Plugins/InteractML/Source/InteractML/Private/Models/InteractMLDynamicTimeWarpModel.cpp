@@ -4,7 +4,7 @@
 // Using the MIT License. https://github.com/Interactml
 //----
 
-#include "InteractMLDynamicTimeWarpModel.h"
+#include "Models/InteractMLDynamicTimeWarpModel.h"
 
 //unreal
 
@@ -12,6 +12,7 @@
 #include "InteractML.h"
 #include "InteractMLTrainingSet.h"
 #include "InteractMLParameters.h"
+#include "InteractMLTask.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
@@ -23,30 +24,31 @@ FString UInteractMLDynamicTimeWarpModel::cExtensionPrefix(TEXT(".dtw"));
 
 // LOCAL CLASSES & TYPES
 
-// handle DTW running
+// prepare for DTW running
 //
-float UInteractMLDynamicTimeWarpModel::RunModelInstance(struct FInteractMLParameterSeries* parameter_series)
+FInteractMLTask::Ptr UInteractMLDynamicTimeWarpModel::BeginRunningModel(struct FInteractMLParameterSeries* parameter_series)
 {
 	//check
+	check(IsSeries()); //shouldn't be trying to run a series model with single input
 	if (!IsTrained())
 	{
 		UE_LOG(LogInteractML, Warning, TEXT("Running an untrained model: %s"), *GetFilePath());
-		return false;
+		return nullptr;
 	}
 
-	//co
+	//create running task
+	FInteractMLTask::Ptr task = MakeShareable(new FInteractMLTask(this, EInteractMLTaskType::Run));
 
-	//convert to RapidLib form
-	std::vector<std::vector<float>> InputParameters;
+	//convert data to RapidLib form
 	int num_samples = parameter_series->Num();
 	for (int isamples = 0; isamples < num_samples; isamples++)
 	{
 		//emplace new collection for snapshot values (avoid copy after populating)
-		InputParameters.push_back(std::vector<float>());
-		std::vector<float>& model_input_parameters = InputParameters.back();
+		task->InputSeries.push_back(std::vector<float>());
+		std::vector<float>& model_input_parameters = task->InputSeries.back();
 
 		//incoming snapshot
-		const FInteractMLParameterCollection* parameters = parameter_series->GetSample( isamples );
+		const FInteractMLParameterCollection* parameters = parameter_series->GetSample(isamples);
 
 		//fill them in
 		int num_values = parameters->Values.Num();
@@ -58,48 +60,72 @@ float UInteractMLDynamicTimeWarpModel::RunModelInstance(struct FInteractMLParame
 		}
 	}
 
-	//don't run on 0 samples (actually crashes the model)
-	if(num_samples > 0)
+	return task;
+}
+
+// run the DTW model
+// NOTE: Multi-threaded call, must be handled thread safely, only for direct training/running using task state
+//
+void UInteractMLDynamicTimeWarpModel::DoRunningModel( FInteractMLTask::Ptr run_task )
+{	
+	//don't run on 0 samples (used to crash the model)
+	if(run_task->InputSeries.size() > 0)
 	{
 		//with the accumulated input parameter series we can now run the model
-		std::string label_text = Model->run( InputParameters );
-
+		std::string label_text;
+#if INTERACTML_TRAP_CPP_EXCEPTIONS
+		try
+#endif
+		{
+			label_text = Model->run( run_task->InputSeries );
+		}
+#if INTERACTML_TRAP_CPP_EXCEPTIONS
+		catch(std::exception ex)
+		{
+			//handle?
+			UE_LOG( LogInteractML, Error, TEXT( "Exception trying to run DTW model %s : %s" ), *GetName(), StringCast<TCHAR>( ex.what() ).Get() );
+		}
+#endif
+		
 		//interpret label
 		bool success = label_text.size() > 0;
 		if(success)
 		{
 			//interpret result
 			float label = FCStringAnsi::Atof( label_text.c_str() );
-			return label;
+			
+			run_task->Outputs.Reset();
+			run_task->Outputs.Add(label);
+			run_task->bSuccess = true;
 		}
 	}
-
-	return 0.0f;
+	
+	run_task->bSuccess = true;
 }
 
-// handle DTW training
+// preparation for training dtw model
+// NOTE: not async training, as it's just a copy, saves processing/passing state to task object
 //
-bool UInteractMLDynamicTimeWarpModel::TrainModelInstance(class UInteractMLTrainingSet* training_set)
+FInteractMLTask::Ptr UInteractMLDynamicTimeWarpModel::BeginTrainingModel(UInteractMLTrainingSet* training_set)
 {
+	//create training task
+	FInteractMLTask::Ptr task = MakeShareable( new FInteractMLTask( this, EInteractMLTaskType::Train ) );
+
 	//we keep a copy of our training set
 	Examples = training_set->GetExamples();
+
+	//gather and load new training state into model
+	task->bSuccess = ApplyExamples();	
 	
-	//gather and load new training state into model when it is loaded from storage
-	bool success = ApplyExamples();
-	bIsTrained = success;
-	
-	//we have new state to save
-	if (success)
-	{
-		MarkUnsavedData();
-	}
-	
-	//result
-	if(!success)
-	{
-		UE_LOG(LogInteractML, Error, TEXT("Training failed: %s"), *GetFilePath() );
-	}
-	return success;
+	return task;
+}
+
+// nothing to do for DTW training
+// NOTE: Multithreaded call, only train in context of the training task state or known thread-safe calls
+//
+void UInteractMLDynamicTimeWarpModel::DoTrainingModel( FInteractMLTask::Ptr training_task )
+{
+	//nothing to do, training happens in Begin (since it's just a simple copy op)
 }
 
 // init on demand, clear, reset

@@ -7,11 +7,11 @@
 	"Category": "Machine Learning",
 	"CreatedBy": "University Of Arts London",
 	"CreatedByURL": "https://interactml.com/",
-	"DocsURL": "",
+	"DocsURL": "https://github.com/Interactml/iml-ue4/wiki",
 	"MarketplaceURL": "",
-	"SupportURL": "",
-	"EngineVersion" : "4.26.0",
-	"CanContainContent": true,
+	"SupportURL": "https://github.com/Interactml/iml-ue4/issues",
+	"EngineVersion": "4.26.0",
+	"CanContainContent": false,
 	"IsBetaVersion": true,
 	"IsExperimentalVersion": true,
 	"Installed": false,
@@ -20,21 +20,20 @@
 			"Name": "InteractML",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
-			"WhitelistPlatforms": "Win64"
+			"WhitelistPlatforms": [
+				"Win64",
+				"Win32"
+			]
 		},
 		{
 			"Name": "InteractMLScripting",
 			"Type": "UncookedOnly",
-			"LoadingPhase": "Default",
-			"WhitelistPlatforms": "Win64"
+			"LoadingPhase": "Default"
 		},
 		{
 			"Name": "InteractMLEditor",
 			"Type": "Editor",
-			"LoadingPhase": "Default",
-			"WhitelistPlatforms": "Win64"
+			"LoadingPhase": "Default"
 		}
-	],
-    "Plugins":[
 	]
 }

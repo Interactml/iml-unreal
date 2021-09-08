@@ -10,15 +10,21 @@
 #include "Modules/ModuleManager.h"
 #include "Interfaces/IPluginManager.h"
 #include "Misc/Paths.h"
+#include "HAL/PlatformFilemanager.h"
+#include "HAL/PlatformFile.h"
+#include "Async/Async.h"
+#include "Framework/Threading.h"
 
 //module
 #include "InteractMLStorage.h"
 #include "InteractMLTrainingSet.h"
 #include "InteractMLModel.h"
+#include "InteractMLTask.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
 DEFINE_LOG_CATEGORY(LogInteractML);
+
 
 // CONSTANTS & MACROS
 
@@ -28,12 +34,13 @@ const TCHAR* c_DefaultDataDirectoryName = TEXT("../Data");
 
 // LOCAL CLASSES & TYPES
 
-//dev/unit testing (at end of file)
+//dev/unit testing
 extern void InteractMLTests_Run();
 
 
 // GLOBAL STATE
 FInteractMLModule* FInteractMLModule::s_pModule = nullptr;
+
 
 // CLASS STATE
 
@@ -46,6 +53,7 @@ void FInteractMLModule::StartupModule()
 	UE_LOG( LogInteractML, Display, TEXT( "Starting InteractML Plugin" ) );
 	s_pModule = this;
 
+	InitTick();
 	InitPaths();
 
 	//testing during development
@@ -61,11 +69,21 @@ void FInteractMLModule::ShutdownModule()
 {
 	UE_LOG( LogInteractML, Display, TEXT( "Stopping InteractML Plugin" ) );
 	
+	ShutdownTick();
+	ShutdownTasks();
 	ShutdownCache();
 
 	s_pModule = nullptr;
 }
 
+
+// start regular module tick callbacks
+//
+void FInteractMLModule::InitTick()
+{
+	TickDelegate = FTickerDelegate::CreateRaw( this, &FInteractMLModule::Tick );
+	TickDelegateHandle = FTicker::GetCoreTicker().AddTicker( TickDelegate );
+}
 
 // resolve and store ML data storage root path
 // To override, add the following to an InteractML section of the Config/DefaultGame.ini
@@ -74,7 +92,7 @@ void FInteractMLModule::ShutdownModule()
 //	DataPath=my/custom/path/
 //
 // NOTE: this is relative to the Content folder of the project
-// NOTE: The default is "../Data/", i.e. outside the content folder, but alongside
+// NOTE: The default is "../Data/", i.e. outside the content folder, but alongside it
 //
 void FInteractMLModule::InitPaths()
 {
@@ -116,13 +134,55 @@ void FInteractMLModule::InitPaths()
 	}
 }
 
+// stop regular module ticks
+//
+void FInteractMLModule::ShutdownTick()
+{
+	FTicker::GetCoreTicker().RemoveTicker( TickDelegateHandle );
+}
+
+// clean up any outstanding tasks that may still be running
+//
+void FInteractMLModule::ShutdownTasks()
+{
+	//cancel any tasks
+	{
+		FScopeLock lock( &CompletedTaskInterlock );
+		for(int i = 0; i < PendingTasks.Num(); i++)
+		{
+			PendingTasks[i]->Cancel();
+		}
+		for(int i = 0; i < CompletedTasks.Num(); i++)
+		{
+			CompletedTasks[i]->Cancel();
+		}
+	}
+
+	//wait for completion
+	while(true)
+	{
+		//check for active tasks
+		{
+			FScopeLock lock( &CompletedTaskInterlock );
+			if(PendingTasks.Num() == 0 && CompletedTasks.Num() == 0)
+			{
+				break;
+			}
+		}
+
+		//pump task processing
+		TickTasks( 0.1f );
+		FPlatformProcess::Sleep( 0.01f );
+	}
+}
+
 // release any tracked objects
 //
 void FInteractMLModule::ShutdownCache()
 {
 	//Doesn't seem to be needed at application shutdown, everything released anyway
 	//(the removefromroot was crashing, presumably these objects are already removed earlier than the module on exit)
-#if false
+#if false //(code left in for completeness)
 	//clear object lookup cache
 	for (auto it = ObjectLookup.CreateIterator(); it; ++it)
 	{
@@ -151,7 +211,7 @@ FString MakeFilePathKey(FString path)
 	return path;
 }
 
-// ml objects : obtain path based ones here to track and synchronise globally
+// ml objects : obtain path based training set here to track and synchronise globally
 //
 UInteractMLTrainingSet* FInteractMLModule::GetTrainingSet( FString path_and_name )
 {
@@ -186,6 +246,8 @@ UInteractMLTrainingSet* FInteractMLModule::GetTrainingSet( FString path_and_name
 	return ptraining_set;
 }
 
+// ml objects : obtain path based model here to track and synchronise globally
+//
 UInteractMLModel* FInteractMLModule::GetModel( UClass* model_type, FString path_and_name)
 {
 	//determine extension (need to query model type dynamically)
@@ -222,9 +284,7 @@ UInteractMLModel* FInteractMLModule::GetModel( UClass* model_type, FString path_
 	return pmodel;
 }
 
-
-
-// ml objects : inform of any obtained from direct asset references here as we need to synchronise with path based ones
+// ml objects : inform of any training set obtained from direct asset references here as we need to synchronise with path based ones
 //
 void FInteractMLModule::SetTrainingSet(UInteractMLTrainingSet* training_set)
 {
@@ -246,6 +306,8 @@ void FInteractMLModule::SetTrainingSet(UInteractMLTrainingSet* training_set)
 	ObjectLookup.Add( file_key, training_set );
 }
 
+// ml objects : inform of any model obtained from direct asset references here as we need to synchronise with path based ones
+//
 void FInteractMLModule::SetModel(UInteractMLModel* model)
 {
 	//scan known objects for unsaved state
@@ -266,7 +328,6 @@ void FInteractMLModule::SetModel(UInteractMLModel* model)
 	//remember
 	ObjectLookup.Add( file_key, model );
 }
-
 
 
 ///////////////////////////////// STATE ////////////////////////////////////
@@ -337,8 +398,92 @@ bool FInteractMLModule::GetUnsavedAssets(TArray<UInteractMLStorage*>& changed_as
 	return found_any;
 }
 
+// regular frame ticks
+//
+bool FInteractMLModule::Tick(float DeltaTime)
+{
+	TickTasks( DeltaTime );
+	return true;
+}
 
+// register a new perf stat to have interactml tasks (train/run) appear in the perf diags tools
+//
+DECLARE_CYCLE_STAT( TEXT( "Run InteractML Task" ), STAT_RunInteractMLTask, STATGROUP_ThreadPoolAsyncTasks );
 
+// schedule task to run asynchronously
+//
+void FInteractMLModule::RunTask(FInteractMLTask::Ptr task)
+{
+	//mark pending
+	{
+		FScopeLock lock( &CompletedTaskInterlock );
+		check( !PendingTasks.Contains( task ) );
+		PendingTasks.Add( task );
+	}
+
+#if INTERACTML_ALLOW_MULTITHREADING
+	//Multithreading : ENABLED
+	//dispatch to process on another thread
+	//UE_LOG(LogInteractML, Display, TEXT("Queuing task on thread %08X"), FPlatformTLS::GetCurrentThreadId());
+	auto async_exec = Async(EAsyncExecution::ThreadPool, [&,task] () mutable //default pass by ref (class members, e.g. CompletedTask, passed by ref to allow modifications), task explicitly passed by value to prevent release during handover, mutable needed so task ptr isn't const inside lambda.
+		{
+			SCOPE_CYCLE_COUNTER( STAT_RunInteractMLTask );
+
+			//run the task on background thread (if not cancelled)
+			if(!task->bCancelled)
+			{
+				//UE_LOG(LogInteractML, Display, TEXT("Running task on thread %08X"), FPlatformTLS::GetCurrentThreadId());
+				task->Run();
+				//UE_LOG(LogInteractML, Display, TEXT("Run task on thread %08X"), FPlatformTLS::GetCurrentThreadId());
+			}
+
+			//queue for result handling
+			{
+				FScopeLock lock( &CompletedTaskInterlock );
+				check( PendingTasks.Contains( task ) );
+				PendingTasks.RemoveSingle( task );
+				check( !CompletedTasks.Contains( task ) );
+				CompletedTasks.Add( task );
+			}
+		});
+#else
+	{
+		SCOPE_CYCLE_COUNTER(STAT_RunInteractMLTask);
+		//Multithreading : DISABLED
+		//run the task now, blocking
+		//UE_LOG( LogInteractML, Display, TEXT( "Running task on thread %08X" ), FPlatformTLS::GetCurrentThreadId() );
+		task->Run();
+		//UE_LOG( LogInteractML, Display, TEXT( "Run task on thread %08X" ), FPlatformTLS::GetCurrentThreadId() );
+		CompletedTasks.Add(task);
+	}
+#endif
+}
+
+// poll for completed tasks
+//
+void FInteractMLModule::TickTasks(float dt)
+{
+	//extract completed tasks
+	TArray<FInteractMLTask::Ptr> Done;
+	CompletedTaskInterlock.Lock();
+	if (CompletedTasks.Num() > 0)
+	{
+		Done = CompletedTasks;
+		CompletedTasks.Empty();
+	}
+	CompletedTaskInterlock.Unlock();
+
+	//dispatch results on main thread
+	for (int i = 0; i < Done.Num(); i++)
+	{
+		//still ok?
+		if(!Done[i]->bCancelled)
+		{
+			//UE_LOG(LogInteractML, Display, TEXT("Applying task on thread %08X"), FPlatformTLS::GetCurrentThreadId());
+			Done[i]->Apply();
+		}
+	}
+}
 
 // EPILOGUE
 #undef LOCTEXT_NAMESPACE

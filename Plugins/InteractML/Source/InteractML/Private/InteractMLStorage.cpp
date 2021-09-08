@@ -7,6 +7,8 @@
 #include "InteractMLStorage.h"
 
 //unreal
+#include "Misc/EngineVersionComparison.h"
+#include "Misc/FileHelper.h"
 
 //module
 #include "InteractML.h"
@@ -95,6 +97,7 @@ void UInteractMLStorage::FInteracMLModule_SetBaseFilePath( FString base_file_pat
 }
 
 // is the base path being used for storage?
+//
 bool UInteractMLStorage::CheckBasePath(FString base_file_path) const
 {
 	FString model_file_extension = GetExtensionPrefix();
@@ -118,6 +121,7 @@ FString UInteractMLStorage::GetDirectoryPath() const
 
 // build full file path for storage
 // e.g. D:/MLProject/Content/Examples/HandGestures.19D38579C13759B1.training.json, although pure file-based ones may not have an ID
+//
 FString UInteractMLStorage::GetFilePath() const
 {
 	FString path;
@@ -233,8 +237,12 @@ bool UInteractMLStorage::Save() const
 	SaveJson( json_string );
 	
 	//write file
+#if UE_VERSION_OLDER_THAN(4,26,0)   //API change in SaveStringToFile
+	if(FFileHelper::SaveStringToFile( json_string, *path ))
+#else
 	FStringView whole_string( json_string );
 	if(FFileHelper::SaveStringToFile( whole_string, *path ))
+#endif
 	{
 		//nolonger needs save
 		bNeedsSave = false;
@@ -256,12 +264,9 @@ void UInteractMLStorage::MarkUnsavedData()
 	bNeedsSave = true;
 }
 
-
-
-
-
 //~ Begin UObject interface
 //good opportunity to load our model/example data too
+//
 void UInteractMLStorage::PostLoad()
 {
 	Super::PostLoad();
@@ -275,6 +280,10 @@ void UInteractMLStorage::PostLoad()
 	//this event could affect the derived storage path
 	UpdateDerivedState();
 }
+
+#if WITH_EDITOR
+// we can be notified after an undo (or redo actually)
+//
 void UInteractMLStorage::PostEditUndo()
 {
 	//this event could affect the derived storage path
@@ -282,6 +291,9 @@ void UInteractMLStorage::PostEditUndo()
 
 	Super::PostEditUndo();
 }
+
+// we can be notified after any editing/manipulation operation
+//
 void UInteractMLStorage::PostTransacted(const FTransactionObjectEvent& TransactionEvent)
 {
 	//this event could affect the derived storage path
@@ -289,6 +301,10 @@ void UInteractMLStorage::PostTransacted(const FTransactionObjectEvent& Transacti
 
 	Super::PostTransacted(TransactionEvent);
 }
+#endif
+
+// we can be notified of an asset rename
+//
 void UInteractMLStorage::PostRename(UObject* OldOuter, const FName OldName)
 {
 	//this event could affect the derived storage path
@@ -296,6 +312,9 @@ void UInteractMLStorage::PostRename(UObject* OldOuter, const FName OldName)
 
 	Super::PostRename(OldOuter, OldName);
 }
+
+// we can be notified of an import (might be cases where this is called that invalidates our state even though we aren't an importable asset type)
+//
 void UInteractMLStorage::PostEditImport()
 {
 	//this event could affect the derived storage path
@@ -303,7 +322,9 @@ void UInteractMLStorage::PostEditImport()
 
 	Super::PostEditImport();
 }
+
 //called once before object is serialised for saving, seems like the best time to save our externally stored data
+//
 void UInteractMLStorage::PreSave(const class ITargetPlatform* TargetPlatform)
 {
 	Super::PreSave(TargetPlatform);
@@ -374,7 +395,6 @@ FGuid UInteractMLStorage::ExtractGuidFromFile(FString full_file_path)
 	//none/empty
 	return FGuid();
 }
-
 
 // ensure just the base path/name are present
 //

@@ -169,7 +169,11 @@ bool svmClassification<T>::init(
 }
 
 template<typename T>
-void svmClassification<T>::train(const std::vector<trainingExampleTemplate<T> > &trainingSet) {
+void svmClassification<T>::train(const std::vector<trainingExampleTemplate<T> >& trainingSet) {
+    train(trainingSet, 0);
+}
+template<typename T>
+void svmClassification<T>::train(const std::vector<trainingExampleTemplate<T> > &trainingSet, const std::size_t whichOutput) { //FIXME: use whichOutput in this function
     //TODO: should be scaling data -1 to 1
     //Get normalization parameters
     std::vector<T> inMax = trainingSet[0].input;
@@ -226,7 +230,7 @@ void svmClassification<T>::train(const std::vector<trainingExampleTemplate<T> > 
 template<typename T>
 T svmClassification<T>::run(const std::vector<T> &inputVector) {
     if (trained) {
-        double predictedClass = 0.;
+        T predictedClass = 0.; //TODO: What type should this really be?
         
         //Change to LIBSVM format
         LIBSVM::svm_node *inputNodes = NULL;
@@ -247,13 +251,13 @@ T svmClassification<T>::run(const std::vector<T> &inputVector) {
 }
 
 template<typename T>
-int svmClassification<T>::getNumInputs() const {
+size_t svmClassification<T>::getNumInputs() const {
     return 0;
 };
 
 template<typename T>
-std::vector<int> svmClassification<T>::getWhichInputs() const {
-    std::vector<int> returnVec;
+std::vector<size_t> svmClassification<T>::getWhichInputs() const {
+    std::vector<size_t> returnVec;
     return returnVec;
 };
 

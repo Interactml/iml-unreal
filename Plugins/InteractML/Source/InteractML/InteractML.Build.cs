@@ -68,10 +68,22 @@ public class InteractML : ModuleRules
 
 		//config
 		bool is_lib_supported = false;
-		if((Target.Platform==UnrealTargetPlatform.Win64))// || (Target.Platform==UnrealTargetPlatform.Win32))
+		if((Target.Platform==UnrealTargetPlatform.Win64) || (Target.Platform==UnrealTargetPlatform.Win32))
 		{
 			//platform variants
-			string platform_string = "x64"; 	//NOTE: unlike x64, the Win32 platform is called "Win32"
+			string platform_string;
+			if(Target.Platform==UnrealTargetPlatform.Win64)
+			{
+				platform_string = "x64";
+			}
+			else if(Target.Platform==UnrealTargetPlatform.Win32)
+			{
+				platform_string = "Win32"; 	//NOTE: unlike x64, the Win32 platform is called "Win32"
+			}
+			else
+			{
+				throw new System.ApplicationException("Unsupported RapidLib build target platform "+Target.Platform );
+			}
 
 			//configuration
 			string config_string; //shipping/test has none

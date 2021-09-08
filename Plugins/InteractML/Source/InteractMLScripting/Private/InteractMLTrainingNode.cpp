@@ -13,10 +13,12 @@
 #include "KismetCompiler.h" //FKismetCompilerContext
 #include "K2Node_CallFunction.h" //UK2Node_Function
 #include "Engine/SimpleConstructionScript.h" //USimpleConstructionScript
-#include "BlueprintEditorUtils.h" //MarkBlueprintAsStructurallyModified
+#include "Kismet2/BlueprintEditorUtils.h" //MarkBlueprintAsStructurallyModified
 #include "ToolMenu.h" //UToolMenu
 #include "ScopedTransaction.h" //FScopedTransaction
 #include "K2Node_Self.h" //Self
+#include "K2Node_ExecutionSequence.h" //sequence intermediate
+#include "K2Node_IfThenElse.h" //branch intermediate
 
 //module
 #include "InteractMLModel.h"
@@ -33,10 +35,8 @@
 // LOCAL CLASSES & TYPES
 
 
-
 // pin and function name constants
 //
-
 namespace FInteractMLTrainingNodePinNames
 {
 	//in
@@ -46,10 +46,14 @@ namespace FInteractMLTrainingNodePinNames
 	static const FName ResetInputPinName("Reset");
 	//out
 	static const FName TrainedOutputPinName("Trained");
+	//async only
+	static const FName TrainingOutputPinName("Training");
+	static const FName CompletedOutputPinName("Completed");
 }  	
 namespace FInteractMLTrainingNodeFunctionNames
 {
 	static const FName TrainModelFunctionName(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, TrainModel));
+	static const FName TrainModelAsyncFunctionName(GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, TrainModelAsync));
 }
 //UInteractMLBlueprintLibrary::TrainModel(...)
 namespace FInteractMLTrainingNodeTrainModelPinNames
@@ -60,15 +64,17 @@ namespace FInteractMLTrainingNodeTrainModelPinNames
 	static const FName TrainPinName("Train");
 	static const FName ResetPinName("Reset");
 	static const FName NodeIDPinName("NodeID");
+	//async only
+	static const FName TrainingPinName("Training");
+	static const FName CompletedPinName("Completed");
 }
 
 /////////////////////////////////// HELPERS /////////////////////////////////////
 
 
-
 //////////////////////////////// TRAINING NODE CLASS ////////////////////////////////////
 
-// basic node properties
+// node title
 //
 FText UInteractMLTrainingNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
@@ -78,8 +84,16 @@ FText UInteractMLTrainingNode::GetNodeTitle(ENodeTitleType::Type TitleType) cons
 	switch (TitleType)
 	{
 		case ENodeTitleType::FullTitle:
-//			title.Append(TEXT("\n"));
-//			title.Append( LOCTEXT("ModelNodeSubTitle", "Machine Learning System").ToString() );
+			if (bBackgroundOperation)
+			{
+				title.Append(TEXT("\n"));
+				title.Append(LOCTEXT("TrainingNodeSubTitleAsync", "(in the background)").ToString());
+			}
+			else
+			{
+				title.Append(TEXT("\n"));
+				title.Append(LOCTEXT("TrainingNodeSubTitle", "Train a machine learning model").ToString());
+			}
 			break;
 
 		case ENodeTitleType::MenuTitle:
@@ -94,9 +108,28 @@ FText UInteractMLTrainingNode::GetNodeTitle(ENodeTitleType::Type TitleType) cons
 
 	return FText::FromString(title);
 }
+
+// node tooltip
+//
 FText UInteractMLTrainingNode::GetTooltipText() const
 {
 	return LOCTEXT("TrainingNodeTooltip", "Train a machine learning model using examples in a training set");
+}
+
+// monitor property changes that may invalidate node structure (e.g. exposed pins or title)
+//
+void UInteractMLTrainingNode::PostEditChangeProperty(struct FPropertyChangedEvent& e)
+{
+	const FName PropertyName = e.GetPropertyName();
+
+	//background operation affects pins	
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(UInteractMLTrainingNode, bBackgroundOperation))
+	{
+		//rebuild because async mode changed
+		ReconstructNode();
+	}
+	
+	Super::PostEditChangeProperty(e);
 }
 
 // custom pins
@@ -130,6 +163,17 @@ void UInteractMLTrainingNode::AllocateDefaultPins()
 	UEdGraphPin* trained_pin = CreatePin( EGPD_Output, UEdGraphSchema_K2::PC_Boolean, nullptr, FInteractMLTrainingNodePinNames::TrainedOutputPinName );
 	trained_pin->PinToolTip = LOCTEXT( "TrainingNodeTrainedPinTooltip", "Indicated whether the current model is trained or not." ).ToString();
 	
+	//optional pins (async operation)
+	if (bBackgroundOperation)
+	{
+		//training pin
+		UEdGraphPin* training_pin = CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Boolean, nullptr, FInteractMLTrainingNodePinNames::TrainingOutputPinName);
+		training_pin->PinToolTip = LOCTEXT("TrainingNodeTrainingPinTooltip", "Indicates that a background training operation is in progress.").ToString();
+
+		//completion pin
+		UEdGraphPin* completed_pin = CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Exec, nullptr, FInteractMLTrainingNodePinNames::CompletedOutputPinName);
+		completed_pin->PinToolTip = LOCTEXT("TrainingNodeCompletedPinTooltip", "Executes briefly when training has completed.").ToString();
+	}
 }
 
 
@@ -168,8 +212,18 @@ UEdGraphPin* UInteractMLTrainingNode::GetTrainedOutputPin() const
 	check( Pin == NULL || Pin->Direction == EGPD_Output );
 	return Pin;
 }
-
-
+UEdGraphPin* UInteractMLTrainingNode::GetTrainingOutputPin() const
+{
+	UEdGraphPin* Pin = FindPin( FInteractMLTrainingNodePinNames::TrainingOutputPinName );
+	check( Pin == NULL || Pin->Direction == EGPD_Output );
+	return Pin;
+}
+UEdGraphPin* UInteractMLTrainingNode::GetCompletedOutputPin() const
+{
+	UEdGraphPin* Pin = FindPin( FInteractMLTrainingNodePinNames::CompletedOutputPinName );
+	check( Pin == NULL || Pin->Direction == EGPD_Output );
+	return Pin;
+}
 
 // runtime node operation functionality hookup
 //
@@ -191,6 +245,14 @@ void UInteractMLTrainingNode::ExpandNode(class FKismetCompilerContext& CompilerC
 	UEdGraphPin* MainThenPin = FindPin( UEdGraphSchema_K2::PN_Then );	
 	//output pins : data
 	UEdGraphPin* MainTrainedOutputPin = GetTrainedOutputPin();
+	//output pins : async only
+	UEdGraphPin* MainTrainingOutputPin = nullptr; 
+	UEdGraphPin* MainCompletedOutputPin = nullptr; 
+	if (bBackgroundOperation)
+	{
+		MainTrainingOutputPin = GetTrainingOutputPin();
+		MainCompletedOutputPin = GetCompletedOutputPin();
+	}
 
 	//internal model training fn
 	UFunction* TrainFn = FindModelTrainFunction();
@@ -202,16 +264,42 @@ void UInteractMLTrainingNode::ExpandNode(class FKismetCompilerContext& CompilerC
 	UEdGraphPin* TrainFnExecPin = CallTrainFn->GetExecPin();
 	UEdGraphPin* TrainFnThenPin = CallTrainFn->GetThenPin();
 	UEdGraphPin* TrainFnResultPin = CallTrainFn->GetReturnValuePin();
+	UEdGraphPin* TrainFnTrainingPin = nullptr;
+	UEdGraphPin* TrainFnCompletedPin = nullptr;
 	UEdGraphPin* TrainFnActorPin = CallTrainFn->FindPinChecked( FInteractMLTrainingNodeTrainModelPinNames::ActorPinName );
 	UEdGraphPin* TrainFnModelPin = CallTrainFn->FindPinChecked( FInteractMLTrainingNodeTrainModelPinNames::ModelPinName );
 	UEdGraphPin* TrainFnTrainingSetPin = CallTrainFn->FindPinChecked( FInteractMLTrainingNodeTrainModelPinNames::TrainingSetPinName);
 	UEdGraphPin* TrainFnTrainPin = CallTrainFn->FindPinChecked( FInteractMLTrainingNodeTrainModelPinNames::TrainPinName );
 	UEdGraphPin* TrainFnResetPin = CallTrainFn->FindPinChecked( FInteractMLTrainingNodeTrainModelPinNames::ResetPinName );
 	UEdGraphPin* TrainFnNodeIDPin = CallTrainFn->FindPinChecked( FInteractMLTrainingNodeTrainModelPinNames::NodeIDPinName );
+	if (bBackgroundOperation)
+	{
+		TrainFnTrainingPin = CallTrainFn->FindPinChecked(FInteractMLTrainingNodeTrainModelPinNames::TrainingPinName);
+		TrainFnCompletedPin = CallTrainFn->FindPinChecked(FInteractMLTrainingNodeTrainModelPinNames::CompletedPinName);
+	}
 
 	//chain functionality together
 	CompilerContext.MovePinLinksToIntermediate(*MainExecPin, *TrainFnExecPin);
-	CompilerContext.MovePinLinksToIntermediate(*MainThenPin, *TrainFnThenPin);
+	UEdGraphPin* SequenceSecondExePin = nullptr;
+	if (bBackgroundOperation)
+	{
+		//insert sequence node to drive the two exec outputs (defaults to two output pins)
+		//NOTE: this is needed to drive the main then as well as the optional completed exec pin (via the branch below)
+		UK2Node_ExecutionSequence* SequenceNode = CompilerContext.SpawnIntermediateNode<UK2Node_ExecutionSequence>(this, SourceGraph);
+		SequenceNode->AllocateDefaultPins();
+		UEdGraphPin* SequenceInputExePin = SequenceNode->GetExecPin();
+		UEdGraphPin* SequenceFirstExePin = SequenceNode->GetThenPinGivenIndex(0);
+		SequenceSecondExePin = SequenceNode->GetThenPinGivenIndex(1);
+
+		//hook up
+		TrainFnThenPin->MakeLinkTo( SequenceInputExePin );
+		CompilerContext.MovePinLinksToIntermediate(*MainThenPin, *SequenceFirstExePin);
+	}
+	else
+	{
+		//straight through
+		CompilerContext.MovePinLinksToIntermediate(*MainThenPin, *TrainFnThenPin);
+	}
 	
 	//hook up train fn pins
 	ConnectContextActor(CompilerContext, SourceGraph, TrainFnActorPin);
@@ -221,6 +309,23 @@ void UInteractMLTrainingNode::ExpandNode(class FKismetCompilerContext& CompilerC
 	CompilerContext.MovePinLinksToIntermediate(*MainResetPin, *TrainFnResetPin);
 	TrainFnNodeIDPin->DefaultValue = NodeID;
 	CompilerContext.MovePinLinksToIntermediate( *MainTrainedOutputPin, *TrainFnResultPin );
+
+	//hook up and handle extra training outputs
+	if (bBackgroundOperation)
+	{
+		//training indicator
+		CompilerContext.MovePinLinksToIntermediate(*MainTrainingOutputPin, *TrainFnTrainingPin);
+
+		//need branch to operate the completed exec output pin
+		//NOTE: This causes the completed exec output to execute when the training function returns true from the Completed (bool) output (pulses a single frame on completion)
+		UK2Node_IfThenElse* BranchNode = CompilerContext.SpawnIntermediateNode<UK2Node_IfThenElse>(this, SourceGraph);
+		BranchNode->AllocateDefaultPins();
+		
+		//hook up
+		SequenceSecondExePin->MakeLinkTo( BranchNode->GetExecPin() );
+		TrainFnCompletedPin->MakeLinkTo( BranchNode->GetConditionPin() );
+		CompilerContext.MovePinLinksToIntermediate(*MainCompletedOutputPin, *BranchNode->GetThenPin());
+	}
 
 	//After we are done we break all links to this node (not the internally created one)
 	//leaving the newly created internal nodes left to do the work
@@ -232,7 +337,14 @@ void UInteractMLTrainingNode::ExpandNode(class FKismetCompilerContext& CompilerC
 UFunction* UInteractMLTrainingNode::FindModelTrainFunction() const
 {
 	UClass* LibraryClass = UInteractMLBlueprintLibrary::StaticClass();
-	return LibraryClass->FindFunctionByName( FInteractMLTrainingNodeFunctionNames::TrainModelFunctionName );
+	if (bBackgroundOperation)
+	{
+		return LibraryClass->FindFunctionByName(FInteractMLTrainingNodeFunctionNames::TrainModelAsyncFunctionName);
+	}
+	else
+	{
+		return LibraryClass->FindFunctionByName(FInteractMLTrainingNodeFunctionNames::TrainModelFunctionName);
+	}
 }
 
 #undef LOCTEXT_NAMESPACE

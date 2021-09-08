@@ -8,6 +8,11 @@
 
 #include "AssetTypeActions_Base.h"
 
+
+////////////////////////////// TRAINING SET /////////////////////////////
+
+// expose our training set asset type to various editor systems
+//
 class FInteractMLTrainingSetActions : public FAssetTypeActions_Base
 {
 	uint32 RegisteredCategoryHandle;
@@ -24,7 +29,7 @@ public:
 	virtual FColor GetTypeColor() const override;
 	virtual UClass* GetSupportedClass() const override;
 	virtual uint32 GetCategories() override;
-//	virtual void OpenAssetEditor( const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor = TSharedPtr<IToolkitHost>() ) override;
+	virtual void OpenAssetEditor( const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor = TSharedPtr<IToolkitHost>() ) override;
 	// End IAssetTypeActions
 	
 };

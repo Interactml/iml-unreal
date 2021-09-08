@@ -11,6 +11,8 @@
 
 ////////////////////////////// CLASSIFICATION MODEL /////////////////////////////
 
+// expose our classification model asset type to various editor systems
+//
 class FInteractMLClassificationModelActions : public FAssetTypeActions_Base
 {
 	uint32 RegisteredCategoryHandle;
@@ -27,7 +29,6 @@ public:
 	virtual FColor GetTypeColor() const override;
 	virtual UClass* GetSupportedClass() const override;
 	virtual uint32 GetCategories() override;
-//	virtual void OpenAssetEditor( const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor = TSharedPtr<IToolkitHost>() ) override;
 	// End IAssetTypeActions
 	
 };
@@ -35,6 +36,8 @@ public:
 
 ////////////////////////////// REGRESSION MODEL /////////////////////////////
 
+// expose our regression model asset type to various editor systems
+//
 class FInteractMLRegressionModelActions : public FAssetTypeActions_Base
 {
 	uint32 RegisteredCategoryHandle;
@@ -51,7 +54,6 @@ public:
 	virtual FColor GetTypeColor() const override;
 	virtual UClass* GetSupportedClass() const override;
 	virtual uint32 GetCategories() override;
-	//	virtual void OpenAssetEditor( const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor = TSharedPtr<IToolkitHost>() ) override;
 	// End IAssetTypeActions
 	
 };
@@ -59,6 +61,8 @@ public:
 
 ////////////////////////////// DTW MODEL /////////////////////////////
 
+// expose our DTW model asset type to various editor systems
+//
 class FInteractMLDynamicTimewarpModelActions : public FAssetTypeActions_Base
 {
 	uint32 RegisteredCategoryHandle;
@@ -75,7 +79,6 @@ public:
 	virtual FColor GetTypeColor() const override;
 	virtual UClass* GetSupportedClass() const override;
 	virtual uint32 GetCategories() override;
-	//	virtual void OpenAssetEditor( const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor = TSharedPtr<IToolkitHost>() ) override;
 	// End IAssetTypeActions
 	
 };

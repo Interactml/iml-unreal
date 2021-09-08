@@ -13,7 +13,7 @@
 #include "KismetCompiler.h" //FKismetCompilerContext
 #include "K2Node_CallFunction.h" //UK2Node_Function
 #include "Engine/SimpleConstructionScript.h" //USimpleConstructionScript
-#include "BlueprintEditorUtils.h" //MarkBlueprintAsStructurallyModified
+#include "Kismet2/BlueprintEditorUtils.h" //MarkBlueprintAsStructurallyModified
 #include "ToolMenu.h" //UToolMenu
 #include "ScopedTransaction.h" //FScopedTransaction
 
@@ -32,10 +32,8 @@
 // LOCAL CLASSES & TYPES
 
 
-
 // pin and function name constants
 //
-
 namespace FInteractMLExternalModelNodePinNames
 {
 	//in
@@ -65,7 +63,7 @@ namespace FInteractMLExternalModelNodeModelAccessFunctionPinNames
 
 ////////////////////// EXTERNAL TRAINING SET NODE CLASS /////////////////////////
 
-// basic node properties
+// node title
 //
 FText UInteractMLExternalModelNode::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
@@ -76,7 +74,7 @@ FText UInteractMLExternalModelNode::GetNodeTitle(ENodeTitleType::Type TitleType)
 	{
 		case ENodeTitleType::FullTitle:
 			title.Append(TEXT("\n"));
-			title.Append( LOCTEXT("ExternalModelNodeSubTitle", "External Data File").ToString() );
+			title.Append( LOCTEXT("ExternalModelNodeSubTitle", "External model data file").ToString() );
 			break;
 			
 		case ENodeTitleType::MenuTitle:
@@ -94,6 +92,9 @@ FText UInteractMLExternalModelNode::GetNodeTitle(ENodeTitleType::Type TitleType)
 	
 	return FText::FromString(title);
 }
+
+// node tooltip
+//
 FText UInteractMLExternalModelNode::GetTooltipText() const
 {
 	return LOCTEXT("ExternalModelNodeTooltip", "Directly access an external model data file");
@@ -129,7 +130,6 @@ void UInteractMLExternalModelNode::AllocateDefaultPins()
 	
 }
 
-
 // pin access helpers : inputs
 //
 UEdGraphPin* UInteractMLExternalModelNode::GetDataPathInputPin() const
@@ -159,8 +159,6 @@ UEdGraphPin* UInteractMLExternalModelNode::GetIsTrainedOutputPin() const
 	check( Pin == NULL || Pin->Direction == EGPD_Output );
 	return Pin;
 }
-
-
 
 // runtime node operation functionality hookup
 //

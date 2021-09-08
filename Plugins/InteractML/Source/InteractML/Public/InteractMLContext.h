@@ -8,6 +8,7 @@
 
 //unreal
 #include "CoreMinimal.h"
+#include "Components/ActorComponent.h"
 
 //module
 #include "InteractMLTrainingSet.h"
@@ -75,8 +76,6 @@ public:
 	// notify use of a model asset
 	void SetModel( TGraphNodeID node_id, UInteractMLModel* model );
 	
-
-
 private:
 
 };
