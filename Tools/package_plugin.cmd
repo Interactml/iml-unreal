@@ -74,8 +74,9 @@ echo ZIP = %ZIP_FILE%
 echo -------- Modifying build for UE %UE_VERSION% --------
 set SAVED_PLUGIN_FILE=%BUILDS_DIR%\original_uplugin_file.txt
 copy /Y %PLUGIN_FILE% %SAVED_PLUGIN_FILE%
-call %TOOLS_DIR%\set_engineversion.cmd %PLUGIN_FILE% %UE_VERSION%
-
+call %TOOLS_DIR%\set_uplugin_var.cmd %PLUGIN_FILE% EngineVersion %UE_VERSION%
+call %TOOLS_DIR%\set_uplugin_var.cmd %PLUGIN_FILE% Version %IML_VERSION%
+call %TOOLS_DIR%\set_uplugin_var.cmd %PLUGIN_FILE% VersionName %IML_VERSION%
 
 echo -------- Packaging Plugin --------
 echo CMDLINE: %UAT% BuildPlugin -Plugin=%PLUGIN_FILE% -Package=%STAGING_DIR% -CreateSubFolder

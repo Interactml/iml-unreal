@@ -3,13 +3,10 @@ set BRANCH_DIR=%~dp0\..
 set BUILDS_DIR=%BRANCH_DIR%\Builds
 set TOOLS_DIR=%BRANCH_DIR%\Tools
 
+REM ---- EDIT PLUGIN VERSION HERE ----
 REM increment IML version for each new release of the plugin to Marketplace
 REM (not for for re-submission cycle, only for feature changes and fixes)
-REM Typically major version change is for bit features changes or breaking changes
-REM Typically minor version change is for fixes and improvements and non-breaking changes
-
-REM ---- EDIT PLUGIN VERSION HERE ----
-set IML_VERSION=1.0
+set IML_VERSION=1
 REM ----------------------------------
 
 REM ---- 4.25 ----
@@ -27,6 +24,7 @@ set UE_VERSION=4.27
 call %TOOLS_DIR%\package_plugin.cmd
 if ERRORLEVEL 1 goto error
 
+REM ----------------------------------
 REM Built versions can be found in the Builds directory
 explorer.exe %BUILDS_DIR%
 goto end
