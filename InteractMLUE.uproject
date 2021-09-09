@@ -3,16 +3,6 @@
 	"EngineAssociation": "4.26",
 	"Category": "",
 	"Description": "",
-	"Modules": [
-		{
-			"Name": "InteractMLUE",
-			"Type": "Runtime",
-			"LoadingPhase": "Default",
-			"AdditionalDependencies": [
-				"Engine"
-			]
-		}
-	],
 	"TargetPlatforms": [
 		"WindowsNoEditor"
 	]
