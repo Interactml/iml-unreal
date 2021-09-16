@@ -31,7 +31,6 @@ set UE_PATH_UAT=Engine\Binaries\DotNET\AutomationTool\AutomationTool.exe
 call %TOOLS_DIR%\package_plugin.cmd
 if ERRORLEVEL 1 goto error
 
-
 REM ----------------------------------
 REM Built versions can be found in the Builds directory
 explorer.exe %BUILDS_DIR%

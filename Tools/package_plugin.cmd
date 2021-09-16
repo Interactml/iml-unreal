@@ -38,12 +38,12 @@ set PLUGIN_DIR=%BRANCH_DIR%\Plugins\InteractML
 set PLUGIN_FILE=%PLUGIN_DIR%\InteractML.uplugin
 REM --ue tooling--
 set UE_DIR=c:\Program Files\Epic Games\UE_%UE_PATH_UE%
-set UAT="%UE_DIR%\%UE_PATH_UAT%"
+set UE_UAT="%UE_DIR%\%UE_PATH_UAT%"
 
 REM ---- SOURCE CHECKS ----
-if not exist %UAT% (
+if not exist %UE_UAT% (
 	echo ERROR: Unable to locate Unreal Automation Tool, is UE %UE_VERSION% installed?
-	echo PATH: %UAT%
+	echo PATH: %UE_UAT%
 	call :cleanup
 	exit /b 3
 )
@@ -70,7 +70,7 @@ echo Version: %IML_VERSION%
 echo Unreal:  %UE_VERSION%
 echo Date:    %IML_DATE%
 goto no_status
-echo UAT = %UAT%
+echo UAT = %UE_UAT%
 echo PLUGIN = %PLUGIN_FILE%
 echo STAGING = %STAGING_DIR%
 echo ZIP = %ZIP_FILE%
@@ -85,8 +85,8 @@ call %TOOLS_DIR%\set_uplugin_var.cmd %PLUGIN_FILE% Version %IML_VERSION%
 call %TOOLS_DIR%\set_uplugin_var.cmd %PLUGIN_FILE% VersionName %IML_VERSION%
 
 echo -------- Packaging Plugin --------
-echo CMDLINE: %UAT% BuildPlugin -Plugin=%PLUGIN_FILE% -Package=%STAGING_DIR% -CreateSubFolder
-%UAT% BuildPlugin -Plugin=%PLUGIN_FILE% -Package=%STAGING_DIR% -CreateSubFolder
+echo CMDLINE: %UE_UAT% BuildPlugin -Plugin=%PLUGIN_FILE% -Package=%STAGING_DIR% -CreateSubFolder
+%UE_UAT% BuildPlugin -Plugin=%PLUGIN_FILE% -Package=%STAGING_DIR% -CreateSubFolder
 if ERRORLEVEL 1 (
 	echo ERROR: Package failed, check output above for errors
 	call :cleanup
@@ -100,7 +100,9 @@ if exist %STAGING_DIR%\Binaries (
 if exist %STAGING_DIR%\Intermediate (
 	RMDIR /S /Q %STAGING_DIR%\Intermediate
 )
-
+if exist %STAGING_DIR%\Source\3rdParty\RapidLib\vs2019 (
+	RMDIR /S /Q %STAGING_DIR%\Source\3rdParty\RapidLib\vs2019
+)
 
 echo -------- Zipping --------
 call %TOOLS_DIR%\zip_folder.cmd %STAGING_DIR% %ZIP_FILE%
@@ -120,6 +122,10 @@ if exist %SAVED_PLUGIN_FILE% (
 if exist %STAGING_DIR% (
 	rmdir /S /Q %STAGING_DIR%
 )
+set UE_PATH_UE=
+set UE_PATH_UAT=
+set UE_UAT=
+
 exit /b
 
 
