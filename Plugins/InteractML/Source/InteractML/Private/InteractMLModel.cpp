@@ -90,13 +90,21 @@ bool UInteractMLModel::SaveJson(FString& json_string) const
 bool UInteractMLModel::RunModel(FInteractMLParameterCollection* parameters, TArray<float>& outputs)
 {
 	FInteractMLTask::Ptr task = BeginRunningModel( parameters );
-	//train now, blocking execution until complete
-	UE_LOG( LogInteractML, Display, TEXT( "Running model '%s' synchronously" ), *GetName() );
-	task->Run();
-	task->Apply();
-	//results
-	outputs = task->Outputs;
-	return task->bSuccess;
+	if(task.IsValid())
+	{
+		//train now, blocking execution until complete
+		//UE_LOG( LogInteractML, Display, TEXT( "Running model '%s' synchronously" ), *GetName() );
+		task->Run();
+		task->Apply();
+		//results
+		outputs = task->Outputs;
+		return task->bSuccess;
+	}
+	else
+	{
+		outputs.Empty();
+		return false;
+	}
 }
 
 // run the model against the provided series of parameter sets
@@ -106,13 +114,21 @@ bool UInteractMLModel::RunModel(FInteractMLParameterCollection* parameters, TArr
 bool UInteractMLModel::RunModel(FInteractMLParameterSeries* parameter_series, TArray<float>& outputs )
 {
 	FInteractMLTask::Ptr task = BeginRunningModel( parameter_series );
-	//train now, blocking execution until complete
-	UE_LOG( LogInteractML, Display, TEXT( "Running model '%s' synchronously" ), *GetName() );
-	task->Run();
-	task->Apply();
-	//results
-	outputs = task->Outputs;
-	return task->bSuccess;
+	if (task.IsValid())
+	{
+		//train now, blocking execution until complete
+		//UE_LOG( LogInteractML, Display, TEXT( "Running model '%s' synchronously" ), *GetName() );
+		task->Run();
+		task->Apply();
+		//results
+		outputs = task->Outputs;
+		return task->bSuccess;
+	}
+	else
+	{
+		outputs.Empty();
+		return false;
+	}
 }
 
 // run the model against the single provided parameter set
@@ -121,9 +137,16 @@ bool UInteractMLModel::RunModel(FInteractMLParameterSeries* parameter_series, TA
 FInteractMLTask::Ptr UInteractMLModel::RunModelAsync(FInteractMLParameterCollection* parameters)
 {
 	FInteractMLTask::Ptr task = BeginRunningModel(parameters);
-	if (CheckAddTask(task))
+	if (task.IsValid())
 	{
-		return task;
+		if (CheckAddTask(task))
+		{
+			return task;
+		}
+	}
+	else
+	{
+		return nullptr;
 	}
 
 	//can't run concurrently
@@ -137,11 +160,18 @@ FInteractMLTask::Ptr UInteractMLModel::RunModelAsync(FInteractMLParameterCollect
 FInteractMLTask::Ptr UInteractMLModel::RunModelAsync(FInteractMLParameterSeries* parameter_series)
 {
 	FInteractMLTask::Ptr task = BeginRunningModel(parameter_series);
-	if (CheckAddTask(task))
+	if (task.IsValid())
 	{
-		return task;
+		if (CheckAddTask(task))
+		{
+			return task;
+		}
 	}
-	
+	else
+	{
+		return nullptr;
+	}
+
 	//can't run concurrently
 	UE_LOG(LogInteractML, Error, TEXT("Unable to run model %s concurrently because the RapidLib library doesn't support it yet for %s."), *GetName(), *GetClass()->GetName() );
 	return nullptr;
