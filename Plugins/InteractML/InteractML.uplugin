@@ -20,10 +20,7 @@
 			"Name": "InteractML",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
-			"WhitelistPlatforms": [
-				"Win64",
-				"Win32"
-			]
+			"WhitelistPlatforms": [	"Win64" ]
 		},
 		{
 			"Name": "InteractMLScripting",

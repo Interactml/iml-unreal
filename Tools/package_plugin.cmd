@@ -13,7 +13,7 @@ if '%UE_VERSION%'=='' (
 	exit /b 1
 )
 if '%IML_VERSION%'=='' (
-	echo ERROR: IML_VERSION expected in form MAJOR.MINOR, e.g. 1.0
+	echo ERROR: IML_VERSION expected in form MAJOR, e.g. 1
 	exit /b 1
 )
 if '%IML_DATE%'=='' (
@@ -22,17 +22,23 @@ if '%IML_DATE%'=='' (
 	call %BUILDS_DIR%\set_date.cmd
 	del /Q %BUILDS_DIR%\set_date.cmd
 )
+if '%UE_PATH_UE%'=='' (
+	set UE_PATH_UE=%UE_VERSION%
+)
+if '%UE_PATH_UAT%'=='' (
+	set UE_PATH_UAT=Engine\Binaries\DotNET\AutomationTool.exe
+)
 
 REM ---- DEPENDENT PATHS ----
 REM --package--
-set ZIP_NAME=InteractML_%IML_VERSION%_%IML_DATE%_UE%UE_VERSION%.zip
+set ZIP_NAME=InteractML_%IML_VERSION%_%IML_DATE%_UE%UE_PATH_UE%.zip
 set ZIP_FILE=%BUILDS_DIR%\%ZIP_NAME%
 REM --plugin--
 set PLUGIN_DIR=%BRANCH_DIR%\Plugins\InteractML
 set PLUGIN_FILE=%PLUGIN_DIR%\InteractML.uplugin
 REM --ue tooling--
-set UE_DIR=c:\Program Files\Epic Games\UE_%UE_VERSION%
-set UAT="%UE_DIR%\Engine\Binaries\DotNET\AutomationTool.exe"
+set UE_DIR=c:\Program Files\Epic Games\UE_%UE_PATH_UE%
+set UAT="%UE_DIR%\%UE_PATH_UAT%"
 
 REM ---- SOURCE CHECKS ----
 if not exist %UAT% (
