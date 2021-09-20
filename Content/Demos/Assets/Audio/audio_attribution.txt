@@ -1,0 +1,34 @@
+
+File:	51360__thecheeseman__camera-snap1.wav
+Desc:	The sound of a snapshot from a Minolta X-700 with attached Minolta Motor Drive.
+Author:	thecheeseman
+Link:	https://freesound.org/people/thecheeseman/sounds/51360/
+
+File:	473911__leejunip__close.mp3
+Desc:	shortened from 383816__deleted-user-7146007__old-creaky-door-2.wav
+Author:	leejunip
+Link:	https://freesound.org/people/leejunip/sounds/473911/
+Mods:	Converted to .WAV
+
+File:	397355__plasterbrain__tada-fanfare-a.flac
+Desc:	"Tada!" in A major. Made with Bravura Scoring Brass and Kontakt Factory Library, with BitterSweet 3 and Maximal 2 put on the mix.
+Author:	plasterbrain
+Link:	https://freesound.org/people/plasterbrain/sounds/397355/
+Mods:	Converted to .WAV
+
+File:	459950__saltbearer__heirkick-nep1.wav
+Desc:	Plucky, resonant bass stab "kick" taken from some doodle I made a couple years ago.
+Author:	Saltbearer
+Link:	https://freesound.org/people/Saltbearer/sounds/459950/
+
+File:	33873__pempi__elevator-motor.wav
+Desc:	circa 20-25 years old, heavy, out of date elevator motor, 
+Author:	pempi
+Link:	https://freesound.org/people/pempi/sounds/33873/
+Mods:	Chopped out motor start/stop portions
+
+File:	173932__johnsonbrandediting__ding-ding-small-bell.wav
+Desc:	Ding Ding Small Bell
+Author:	JohnsonBrandEditing
+Link:	https://freesound.org/people/JohnsonBrandEditing/sounds/173932/
+Mods:	Chopped out single bell
