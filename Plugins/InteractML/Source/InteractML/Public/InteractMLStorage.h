@@ -87,14 +87,17 @@ public:
 
 	// a new storage object, chance to init when not loaded
 	virtual void Create() {}
-	
+
+	// collect names of all the sub-objects for json serialisation
+	virtual void GetStorageNames( TArray<FName>& Names ) const {}
+
 	// load existing ML state from disk
 	virtual bool Load(); //override Load to completely control loading of Json file data
-	virtual bool LoadJson( const FString& json_string ) { check(false); return false; } //or override LoadJson to just parse Json
+	virtual bool LoadJson( const FName StorageName, const FString& json_string ) { check(false); return false; } //or override LoadJson to just parse Json for each subobject
 
 	// persist current ML state to disk
 	virtual bool Save() const; //override Save to completely control saving of Json file data
-	virtual bool SaveJson( FString& json_string ) const { check(false); return false; } //or override SaveJson to just have to generate Json
+	virtual bool SaveJson( const FName StorageName, FString& json_string ) const { check(false); return false; } //or override SaveJson to just have to generate Json for each subobject
 
 	// is there unsaved state in this object?
 	bool HasUnsavedData() const { return bNeedsSave; }
@@ -117,7 +120,10 @@ public:
 
 	// extract/ensure just path and base file name from a path
 	static FString SanitisePathAndName( FString path_and_name, FString optional_model_type_extension="" );
-		
+
+	// locate where a sub-objects json text is within a json string
+	static bool FindJsonSubObject( const FString json_string, const FString object_name, int& sub_object_start_out, int& sub_object_length_out );
+
 	// extract numerical ID from file
 	FGuid ExtractGuidFromFile(FString full_file_path);
 

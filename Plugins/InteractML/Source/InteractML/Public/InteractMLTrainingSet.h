@@ -122,6 +122,9 @@ public:
 	// extension prefix for example/training data files
 	static FString cExtensionPrefix;
 
+	// JSON section name for persistence
+	static FName cStorageName;
+
 	//---- access ----
 	bool HasBeenReset() const { return !HasExamples() && SampleMode==EInteractMLSampleMode::Unknown && ParameterCount==0 && LabelCount==0; }
 	bool HasExamples() const { return Examples.Num()>0; }
@@ -155,9 +158,11 @@ public:
 	//each type provides qualifying extension prefix
 	virtual FString GetExtensionPrefix() const { return cExtensionPrefix; }
 
+	//---- persistence ----
 	// Begin UInteractMLStorage overrides
-	virtual bool LoadJson(const FString& json_string) override;
-	virtual bool SaveJson(FString& json_string) const override;
+	virtual void GetStorageNames( TArray<FName>& Names ) const override; // collect names of all the sub-objects for json serialisation
+	virtual bool LoadJson( const FName StorageName, const FString& json_string ) override;
+	virtual bool SaveJson( const FName StorageName, FString& json_string ) const override;
 	// End UInteractMLStorage overrides
 	
 	// Begin UObject overrides

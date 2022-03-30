@@ -32,7 +32,7 @@ class INTERACTML_API UInteractMLModel
 	: public UInteractMLStorage
 {
 	GENERATED_BODY()	
-		
+
 	//---- persistent state ----
 	
 	//label information
@@ -60,7 +60,10 @@ public:
 	
 	// extension prefix part used for ALL model data files
 	static FString cExtensionPrefix;
-	
+
+	// JSON section name for persistence
+	static FName cStorageName;
+
 	//---- access ----
 	bool IsTrained() const { return bIsTrained; } //has been trained in the past, model is runnable, not true during async training
 	bool IsTraining() const { return TrainingTask.IsValid(); } //background training in progress
@@ -78,9 +81,12 @@ public:
 	void HandleCompletedTask( FInteractMLTask::Ptr task );
 	
 	//---- persistence ----
+	// Begin UInteractMLStorage overrides
 	virtual void Create() override; //nothing to load, created a new one
-	virtual bool LoadJson(const FString& json_string) override;
-	virtual bool SaveJson(FString& json_string) const override;
+	virtual void GetStorageNames( TArray<FName>& Names ) const override; // collect names of all the sub-objects for json serialisation
+	virtual bool LoadJson( const FName StorageName, const FString& json_string ) override;
+	virtual bool SaveJson( const FName StorageName, FString& json_string ) const override;
+	// End UInteractMLStorage overrides
 
 	//---- access ----
 	

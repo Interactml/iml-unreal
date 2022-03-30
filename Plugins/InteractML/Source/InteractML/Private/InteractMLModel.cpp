@@ -23,6 +23,9 @@
 // extension prefix for model data files
 FString UInteractMLModel::cExtensionPrefix(TEXT(".model"));
 
+// JSON section name for persistence
+FName UInteractMLModel::cStorageName = FName( "InteractMLModel" );
+
 // LOCAL CLASSES & TYPES
 
 // nothing to load, created a new one
@@ -33,54 +36,88 @@ void UInteractMLModel::Create()
 	ResetModel();
 }
 
+
+// collect names of all the sub-objects for json serialisation
+//
+void UInteractMLModel::GetStorageNames( TArray<FName>& Names ) const
+{
+	//persist model
+	Names.Add( UInteractMLModel::cStorageName );
+
+	//persist label cache if used
+	if(!LabelCache.IsEmpty())
+	{
+		Names.Add( FInteractMLLabelCache::cStorageName );
+	}
+}
+
 // read and restore stored model state into actual RapidLib model
 //
-bool UInteractMLModel::LoadJson( const FString& json_string )
+bool UInteractMLModel::LoadJson( const FName StorageName, const FString& json_string )
 {
-	//ensure model initialised and clear
-	ResetModel();
-
-	//set up model from json
-	modelSetFloat* model = GetModelInstance();
-
-	//anything to do?
-	bool ok = true;
-	if(model && !json_string.IsEmpty())
+	if(StorageName == UInteractMLModel::cStorageName)
 	{
-		//unfortunately we need to convert FString to std::string for this
-		auto ansi_json = StringCast<ANSICHAR>( *json_string );
-		std::string std_json = ansi_json.Get();
+		//ensure model initialised and clear
+		ResetModel();
 
-		//apply
-		ok = model->putJSON( std_json );
+		//set up model from json
+		modelSetFloat* model = GetModelInstance();
 
-		//TODO: shouldn't assume that a loaded model is trained, currently can't tell
-		bIsTrained = true;
+		//anything to do?
+		bool ok = true;
+		if(model && !json_string.IsEmpty())
+		{
+			//unfortunately we need to convert FString to std::string for this
+			auto ansi_json = StringCast<ANSICHAR>( *json_string );
+			std::string std_json = ansi_json.Get();
+
+			//apply
+			ok = model->putJSON( std_json );
+
+			//TODO: shouldn't assume that a loaded model is trained, currently can't tell
+			bIsTrained = true;
+		}
+		return ok;
 	}
-	return ok;
+	else if(StorageName == FInteractMLLabelCache::cStorageName)
+	{
+		return LabelCache.LoadJson( json_string );
+	}
+	
+	//failed
+	return false;
 }
 
 // save out RapidLib model state
 //
-bool UInteractMLModel::SaveJson(FString& json_string) const
+bool UInteractMLModel::SaveJson( const FName StorageName, FString& json_string) const
 {
-	//extract json
-	modelSetFloat* model = GetModelInstance();
-	if(model)
+	if(StorageName == UInteractMLModel::cStorageName)
 	{
-		std::string std_json = model->getJSON();
+		//extract json
+		modelSetFloat* model = GetModelInstance();
+		if(model)
+		{
+			std::string std_json = model->getJSON();
 
-		//unfortunately we need to convert the std::string back to an FString for this
-		auto tchar_json = StringCast<TCHAR>( std_json.c_str() );
-		json_string = tchar_json.Get();
+			//unfortunately we need to convert the std::string back to an FString for this
+			auto tchar_json = StringCast<TCHAR>( std_json.c_str() );
+			json_string = tchar_json.Get();
+		}
+		else
+		{
+			//nothing to save
+			json_string.Empty();
+		}
+		return true;
 	}
-	else
+	else if(StorageName == FInteractMLLabelCache::cStorageName)
 	{
-		//nothing to save
-		json_string.Empty();
+		return LabelCache.SaveJson( json_string );
 	}
 
-	return true;
+	//failed
+	return false;
 }
 
 // run the model against the single provided parameter set

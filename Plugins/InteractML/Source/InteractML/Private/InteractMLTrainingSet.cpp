@@ -25,20 +25,47 @@
 // extension prefix for example/training data files
 FString UInteractMLTrainingSet::cExtensionPrefix(TEXT(".training"));
 
+// JSON section name for persistence
+FName UInteractMLTrainingSet::cStorageName = FName( "InteractMLTrainingSet" );
+
 
 // LOCAL CLASSES & TYPES
 
+// collect names of all the sub-objects for json serialisation
+//
+void UInteractMLTrainingSet::GetStorageNames( TArray<FName>& Names ) const
+{
+	//persist training set
+	Names.Add( UInteractMLTrainingSet::cStorageName );
+
+	//persist label cache if used
+	if(!LabelCache.IsEmpty())
+	{
+		Names.Add( FInteractMLLabelCache::cStorageName );
+	}
+}
+
 // recreate training set state from Json
 //
-bool UInteractMLTrainingSet::LoadJson(const FString& json_string)
+bool UInteractMLTrainingSet::LoadJson( const FName StorageName, const FString& json_string)
 {
-	if (LoadExamplesFromJson(json_string, Examples))
+	if(StorageName == UInteractMLTrainingSet::cStorageName)
 	{
-		//post-load analysis/fixups
-		ValidateExamples();
-		RefreshDerivedState();
-		
-		return true;		
+		if(LoadExamplesFromJson( json_string, Examples ))
+		{
+			//post-load analysis/fixups
+			ValidateExamples();
+			RefreshDerivedState();
+
+			return true;
+		}
+	}
+	else if(StorageName == FInteractMLLabelCache::cStorageName)
+	{
+		if(LabelCache.LoadJson( json_string ))
+		{
+			return true;
+		}
 	}
 	
 	//failed
@@ -47,9 +74,19 @@ bool UInteractMLTrainingSet::LoadJson(const FString& json_string)
 
 // turn training set state into Json
 //
-bool UInteractMLTrainingSet::SaveJson(FString& json_string) const
+bool UInteractMLTrainingSet::SaveJson( const FName StorageName, FString& json_string) const
 {
-	return SaveExamplesToJson(Examples, json_string);
+	if(StorageName == UInteractMLTrainingSet::cStorageName)
+	{
+		return SaveExamplesToJson( Examples, json_string );
+	}
+	else if(StorageName == FInteractMLLabelCache::cStorageName)
+	{
+		return LabelCache.SaveJson( json_string );
+	}
+
+	//failed
+	return false;
 }
 
 #if WITH_EDITOR

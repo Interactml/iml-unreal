@@ -65,6 +65,13 @@ struct INTERACTML_API FInteractMLLabelCache
 	GENERATED_BODY()
 
 public:
+	//---- constants ----
+
+	// JSON section name for persistence
+	static FName cStorageName;
+
+	//---- persistence ----
+
 	//the type of composite label we are caching for (simple numeric/float label assumed if this not set)
 	UPROPERTY()
 	const class UInteractMLLabel* LabelType;
@@ -88,6 +95,9 @@ public:
 
 	//how many float values does this label map to/contain?
 	int GetNumValues() const;
+
+	//not in use?
+	bool IsEmpty() const { return Labels.Num() == 0; }
 
 	/////////////// OPERATION ///////////////
 
@@ -113,6 +123,14 @@ public:
 
 	// lookup a string previously cached
 	FText GetString(int property_slot, float label_value) const;
+
+	////////////// PERSISTENCE ///////////////
+
+	// initialise from json data
+	bool LoadJson( const FString& json_string );
+
+	// store as json data
+	bool SaveJson( FString& json_string ) const;
 
 private:
 	

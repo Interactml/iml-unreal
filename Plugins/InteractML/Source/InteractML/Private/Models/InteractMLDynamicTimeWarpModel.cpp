@@ -198,27 +198,37 @@ bool UInteractMLDynamicTimeWarpModel::ApplyExamples()
 
 // read and restore stored model state into actual RapidLib model
 //
-bool UInteractMLDynamicTimeWarpModel::LoadJson(const FString& json_string)
+bool UInteractMLDynamicTimeWarpModel::LoadJson( const FName StorageName, const FString& json_string)
 {
-	ResetModel();
+	if(StorageName == UInteractMLModel::cStorageName)
+	{
+		ResetModel();
 
-	//trained state is stored as training set
-	bool ok = UInteractMLTrainingSet::LoadExamplesFromJson( json_string, Examples );
-	
-	//gather and load new training state into model when it is applied
-	bIsTrained = ApplyExamples();
-	
-	return ok;
+		//trained state is stored as training set
+		bool ok = UInteractMLTrainingSet::LoadExamplesFromJson( json_string, Examples );
+
+		//gather and load new training state into model when it is applied
+		bIsTrained = ApplyExamples();
+
+		return ok;
+	}
+
+	return Super::LoadJson( StorageName, json_string );
 }
 
 // save out RapidLib model state
 //
-bool UInteractMLDynamicTimeWarpModel::SaveJson(FString& json_string) const
+bool UInteractMLDynamicTimeWarpModel::SaveJson( const FName StorageName, FString& json_string) const
 {
-	//trained state is stored as training set
-	bool ok = UInteractMLTrainingSet::SaveExamplesToJson( Examples, json_string );
-	
-	return ok;
+	if(StorageName == UInteractMLModel::cStorageName)
+	{
+		//trained state is stored as training set
+		bool ok = UInteractMLTrainingSet::SaveExamplesToJson( Examples, json_string );
+
+		return ok;
+	}
+
+	return Super::SaveJson( StorageName, json_string );
 }
 
 // EPILOGUE

@@ -7,6 +7,8 @@
 #include "InteractMLLabelCache.h"
 
 //unreal
+#include "JsonObjectConverter.h"
+#include "Misc/EngineVersionComparison.h"
 
 //module
 #include "InteractML.h"
@@ -16,6 +18,12 @@
 #define LOCTEXT_NAMESPACE "InteractML"
 
 // CONSTANTS & MACROS
+
+//utility
+#define UE_VERSION_AT_LEAST(a,b,c) (!UE_VERSION_OLDER_THAN(a,b,c))
+
+// JSON section name for persistence
+FName FInteractMLLabelCache::cStorageName = FName( "InteractMLLabelCache" );
 
 // LOCAL CLASSES & TYPES
 
@@ -209,6 +217,115 @@ FText FInteractMLLabelCache::GetString(int property_slot, float label_value) con
 
 	//no string found
 	return FText();
+}
+
+// initialise from json data
+bool FInteractMLLabelCache::LoadJson( const FString& json_string )
+{
+	//read
+	TSharedPtr<FJsonObject> RootJsonObject;
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create( json_string );
+	if(!FJsonSerializer::Deserialize( Reader, RootJsonObject ))
+	{
+		return false;
+	}
+
+	//type
+	FString type_asset_path_string = RootJsonObject->GetStringField( TEXT( "LabelType" ) );
+	if(!type_asset_path_string.IsEmpty())
+	{
+		//resolve to label asset if possible
+#if UE_VERSION_AT_LEAST(5,0,0)
+		FSoftObjectPath type_asset_path( *type_asset_path_string );
+#else
+		FStringAssetReference type_asset_path( *type_asset_path_string );
+#endif
+		UInteractMLLabel* label_asset = Cast<UInteractMLLabel>( type_asset_path.TryLoad() );
+		if(label_asset)
+		{
+			LabelType = label_asset;
+		}
+	}
+
+	//labels
+	const TArray<TSharedPtr<FJsonValue>> label_values = RootJsonObject->GetArrayField( TEXT( "Labels" ) );
+	if(label_values.Num() > 0)
+	{
+		Labels.Empty();
+		for(int i = 0; i < label_values.Num(); i++)
+		{	
+			Labels.Emplace();
+			if(!FJsonObjectConverter::JsonObjectToUStruct<FInteractMLLabelCapture>( label_values[i]->AsObject().ToSharedRef(), &Labels.Last() ))
+			{
+				return false;
+			}
+		}
+	}
+
+	//strings
+	const TArray<TSharedPtr<FJsonValue>> string_values = RootJsonObject->GetArrayField( TEXT( "StringsMap" ) );
+	if(string_values.Num() > 0)
+	{
+		StringsMap.Empty();
+		for(int i = 0; i < string_values.Num(); i++)
+		{
+			StringsMap.Emplace();
+			if(!FJsonObjectConverter::JsonObjectToUStruct<FInteractMLStringMapping>( string_values[i]->AsObject().ToSharedRef(), &StringsMap.Last() ))
+			{
+				return false;
+			}
+		}
+	}
+
+	return false;
+}
+
+// store as json data
+bool FInteractMLLabelCache::SaveJson( FString& json_string ) const
+{
+	//reset
+	json_string = "";
+	TSharedRef<FJsonObject> RootJsonObject = MakeShareable( new FJsonObject() );
+
+	//type
+	if(LabelType)
+	{
+		RootJsonObject->SetStringField( TEXT( "LabelType" ), LabelType->GetPathName() );
+	}
+
+	//Labels
+	TArray<TSharedPtr<FJsonValue>> label_values;
+	for(const FInteractMLLabelCapture& label : Labels)
+	{
+		TSharedPtr<FJsonObject> label_object = FJsonObjectConverter::UStructToJsonObject( label );
+		if(label_object.IsValid())
+		{
+			label_values.Add( MakeShared<FJsonValueObject>( label_object ) );
+		}
+	}
+	RootJsonObject->SetArrayField( TEXT( "Labels" ), label_values );
+
+	//Strings
+	TArray<TSharedPtr<FJsonValue>> string_values;
+	for(const FInteractMLStringMapping& string : StringsMap)
+	{
+		TSharedPtr<FJsonObject> string_object = FJsonObjectConverter::UStructToJsonObject( string );
+		if(string_object.IsValid())
+		{
+			string_values.Add( MakeShared<FJsonValueObject>( string_object ) );
+		}
+	}
+	RootJsonObject->SetArrayField( TEXT( "StringsMap" ), string_values );
+
+	//write
+	TSharedRef<TJsonWriter<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>> JsonWriter = TJsonWriterFactory<TCHAR, TPrettyJsonPrintPolicy<TCHAR>>::Create( &json_string );
+	if(FJsonSerializer::Serialize( RootJsonObject, JsonWriter ))
+	{
+		return true;
+	}
+
+	//failed
+	return false;
 }
 
 

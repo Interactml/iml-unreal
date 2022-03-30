@@ -42,8 +42,8 @@ public:
 	static FString cExtensionPrefix;
 	
 	//---- persistence ----
-	virtual bool LoadJson(const FString& json_string) override;
-	virtual bool SaveJson(FString& json_string) const override;
+	virtual bool LoadJson( const FName StorageName, const FString& json_string) override;
+	virtual bool SaveJson( const FName StorageName, FString& json_string) const override;
 
 	//---- access ----
 	

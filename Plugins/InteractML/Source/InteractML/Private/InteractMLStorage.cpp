@@ -190,6 +190,14 @@ FString UInteractMLStorage::GetBaseFilePathNamePart() const
 //
 bool UInteractMLStorage::Load()
 {
+	//expected json sub-objects
+	TArray<FName> storage_names;
+	GetStorageNames( storage_names );
+	if(storage_names.Num() == 0)
+	{
+		return false;
+	}
+
 	//gather
 	FString path = GetFilePath();
 	IPlatformFile& file_system = FPlatformFileManager::Get().GetPlatformFile();
@@ -197,26 +205,66 @@ bool UInteractMLStorage::Load()
 	//file exists?
 	if (!file_system.FileExists(*path))
 	{
-		//no file, empty json
+		//no file, empty json for all sub-objects
 		FString none;
-		return LoadJson( none );
+		for(int i = 0; i < storage_names.Num(); i++)
+		{
+			if(!LoadJson( storage_names[i], none ))
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 	//have file, load that
 	FString json_string;
-	if(FFileHelper::LoadFileToString( json_string, *path ))
+	if(!FFileHelper::LoadFileToString( json_string, *path ))
 	{
-		return LoadJson( json_string );
-	}		
+		//failed to load
+		return false;
+	}
 
-	//failed
-	return false;
+	//identify legacy format
+	FString primary_subobject = FString::Printf( TEXT( "\"%s\"" ), *storage_names[0].ToString() );	//(quoted to ensure matches field name and not some random string content)
+	if(!json_string.Contains( primary_subobject ))
+	{
+		//LEGACY LOAD
+		//not a segmented file so assume this is just the primary sub-object
+		return LoadJson( storage_names[0], json_string );
+	}
+	else
+	{
+		//load by sub-object
+		int sub_object_start, sub_object_length;
+		int current_sub_object = 0;
+		while(current_sub_object < storage_names.Num() && FindJsonSubObject( json_string, storage_names[current_sub_object].ToString(), sub_object_start, sub_object_length ))
+		{
+			//extract sub-object data
+			FString sub_object_json = json_string.Mid( sub_object_start, sub_object_length );
+			if(!LoadJson( storage_names[current_sub_object], sub_object_json ))
+			{
+				return false;
+			}
+			current_sub_object++;
+		}
+	}
+
+	return true;
 }
 
 // save this ML objects internal state to disk
 //
 bool UInteractMLStorage::Save() const
 {
+	//expected json sub-objects
+	TArray<FName> storage_names;
+	GetStorageNames( storage_names );
+	if(storage_names.Num() == 0)
+	{
+		return false;
+	}
+
 	//gather
 	FString path = GetFilePath();
 	IPlatformFile& file_system = FPlatformFileManager::Get().GetPlatformFile();
@@ -232,9 +280,25 @@ bool UInteractMLStorage::Save() const
 		return false;
 	}
 
-	//generate Json
-	FString json_string; 
-	SaveJson( json_string );
+	//generate composite Json file from sub-object json sections (replaces single object format to aid future expansion)
+	FString json_string = "{\n";
+	for(int i = 0; i < storage_names.Num(); i++)
+	{
+		//object
+		json_string += FString::Printf( TEXT( "\t\"%s\" :\n" ), *storage_names[i].ToString() );
+
+		//sub-object json
+		FString json_subobject_string;
+		SaveJson( storage_names[i], json_subobject_string );
+		json_string += json_subobject_string;
+
+		if(i < (storage_names.Num() - 1))
+		{
+			json_string += ",";
+		}
+		json_string += "\n";
+	}
+	json_string += "}\n";
 	
 	//write file
 #if UE_VERSION_OLDER_THAN(4,26,0)   //API change in SaveStringToFile
@@ -396,7 +460,7 @@ FGuid UInteractMLStorage::ExtractGuidFromFile(FString full_file_path)
 	return FGuid();
 }
 
-// ensure just the base path/name are present
+// UTILITY: ensure just the base path/name are present
 //
 FString UInteractMLStorage::SanitisePathAndName(FString path_and_name, FString optional_model_type_extension)
 {
@@ -455,6 +519,96 @@ FString UInteractMLStorage::SanitisePathAndName(FString path_and_name, FString o
 
 	return path_and_name;
 }
+
+
+
+// UTILITY: locate where a sub-objects json text is within a json string
+//
+bool UInteractMLStorage::FindJsonSubObject( const FString json_string, const FString object_name, int& sub_object_start_out, int& sub_object_length_out )
+{
+	//look for sub-object by name
+	FString quoted_name = FString::Printf( TEXT( "\"%s\"" ), *object_name );	//(quoted to ensure matches field name and not some random string content)
+	int iname = json_string.Find( quoted_name );
+	if(iname == INDEX_NONE)
+	{
+		//sub-object not present
+		return false;
+	}
+
+	//search for start of object data
+	int istart = json_string.Find( TEXT( ":" ), ESearchCase::IgnoreCase, ESearchDir::FromStart, iname+quoted_name.Len() );
+	if(istart == INDEX_NONE)
+	{
+		//mal-formed JSON
+		return false;
+	}
+	istart++; //after the field separator
+
+	//search for the end of the object data
+	int i = istart;
+	TArray<TCHAR> stack; //object/array/string tracking stack
+	while(i<json_string.Len())
+	{
+		TCHAR c = json_string[i];
+		if(c == TCHAR( '[' ))
+		{
+			//start of array
+			stack.Add( TCHAR( ']' ) );	//expect a closing bracket
+		}
+		else if(c == TCHAR( '{' ))
+		{
+			//start of object
+			stack.Add( TCHAR( '}' ) ); //expect a closing brace
+		}
+		else if(c == TCHAR( '\"' ))
+		{
+			//already in a string?
+			if(stack.Num() > 0 && stack.Last() == TCHAR('\"'))
+			{
+				//found end of string
+				stack.Pop( false );
+			}
+			else
+			{
+				//start of string
+				stack.Add( TCHAR( '\"' ) ); //expect a closing quote
+			}
+		}
+		else if(c == TCHAR( '\\' ))
+		{
+			i++; //skip next escaped character
+		}
+		else if(c == TCHAR( ']' ) || c==TCHAR('}'))
+		{
+			//end of sub-section
+			if(stack.Num() > 0 && stack.Last() == c)
+			{
+				//closed properly
+				stack.Pop( false );
+			}
+			else
+			{
+				//malformed JSON
+				return false;
+			}
+
+			//done?
+			if(stack.Num() == 0)
+			{
+				//found!
+				sub_object_start_out = istart;
+				sub_object_length_out = i - istart + 1;
+				return true;
+			}
+		}
+		//next char
+		i++;
+	}
+
+	//failed
+	return false;
+}
+
 
 //rebuild any derived state, e.g. filename, etc
 //
