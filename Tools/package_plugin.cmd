@@ -18,7 +18,7 @@ if '%IML_VERSION%'=='' (
 )
 if '%IML_DATE%'=='' (
 	REM generate datestamp in the form YYMMDD
-	powershell.exe -nologo -noprofile -command "Get-Date -Format '\"SET IML_DATE=\"yyMMdd'">%BUILDS_DIR%\set_date.cmd
+	powershell.exe -nologo -noprofile -executionpolicy bypass -command "Get-Date -Format '\"SET IML_DATE=\"yyMMdd'">%BUILDS_DIR%\set_date.cmd
 	call %BUILDS_DIR%\set_date.cmd
 	del /Q %BUILDS_DIR%\set_date.cmd
 )

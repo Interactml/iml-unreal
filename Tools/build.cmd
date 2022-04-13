@@ -6,7 +6,7 @@ set TOOLS_DIR=%BRANCH_DIR%\Tools
 REM ---- EDIT PLUGIN VERSION HERE ----
 REM increment IML version for each new release of the plugin to Marketplace
 REM (not for for re-submission cycle, only for feature changes and fixes)
-set IML_VERSION=2
+set IML_VERSION=3
 REM ----------------------------------
 
 REM ---- 4.25 ----
@@ -26,7 +26,7 @@ if ERRORLEVEL 1 goto error
 
 REM ---- 5.0 ----
 set UE_VERSION=5.0
-set UE_PATH_UE=5.0EA
+set UE_PATH_UE=5.0
 set UE_PATH_UAT=Engine\Binaries\DotNET\AutomationTool\AutomationTool.exe
 call %TOOLS_DIR%\package_plugin.cmd
 if ERRORLEVEL 1 goto error
