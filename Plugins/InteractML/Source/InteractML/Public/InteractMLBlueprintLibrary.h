@@ -14,6 +14,7 @@
 
 //module
 #include "InteractMLParameters.h"
+#include "InteractMLVersioning.h"
 #include "InteractMLBlueprintLibrary.generated.h"
 
 //general declarations

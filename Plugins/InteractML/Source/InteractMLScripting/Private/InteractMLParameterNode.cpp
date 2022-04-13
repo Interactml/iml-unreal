@@ -21,6 +21,7 @@
 #include "InteractMLParameters.h"
 #include "InteractMLBlueprintLibrary.h"
 #include "InteractMLConstants.h"
+#include "InteractMLVersioning.h"
 
 // PROLOGUE
 #define LOCTEXT_NAMESPACE "InteractML"
@@ -85,6 +86,15 @@ static bool IsCompatibleInputParameterType(FEdGraphPinType type)
 		{
 			return true;
 		}
+
+#if UE_VERSION_AT_LEAST(5,0,0)
+		//handle 'real' type
+		if(type.PinCategory == UEdGraphSchema_K2::PC_Real
+			&& list[i].Type == type.PinSubCategory)
+		{
+			return true;
+		}
+#endif
 	}
 	return false;
 }
@@ -101,6 +111,15 @@ static FInputParameterInfo& GetInputParameterInfo(FEdGraphPinType type)
 		{
 			return list[i];
 		}
+
+#if UE_VERSION_AT_LEAST(5,0,0)
+		//handle 'real' type
+		if(type.PinCategory == UEdGraphSchema_K2::PC_Real
+			&& list[i].Type == type.PinSubCategory)
+		{
+			return list[i];
+		}
+#endif
 	}
 	return FInputParameterInfo::None;
 }
