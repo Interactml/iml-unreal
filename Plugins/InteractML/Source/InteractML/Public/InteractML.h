@@ -16,6 +16,7 @@
 //module
 #include "Modules/ModuleInterface.h"
 #include "InteractMLTask.h"
+#include "InteractMLVersioning.h"
 
 
 // CONFIGURATION
@@ -29,7 +30,6 @@
 #else
 #define INTERACTML_TRAP_CPP_EXCEPTIONS		0
 #endif
-
 
 // general declarations
 DECLARE_LOG_CATEGORY_EXTERN(LogInteractML, Log, All);
@@ -51,7 +51,7 @@ class INTERACTML_API FInteractMLModule
 
 	//tick
 	FTickerDelegate TickDelegate;
-	FDelegateHandle TickDelegateHandle;
+	TICKER_HANDLE TickDelegateHandle;
 
 	//async support
 	TArray<FInteractMLTask::Ptr>	PendingTasks;

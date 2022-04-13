@@ -67,7 +67,11 @@ void FInteractMLEditorModule::ShutdownModule()
 void FInteractMLEditorModule::InitHooks()
 {
 	FEditorDelegates::EndPIE.AddRaw(this, &FInteractMLEditorModule::OnEndPIE);
+#if UE_VERSION_AT_LEAST(5,0,0)
+	FEditorDelegates::PostSaveWorldWithContext.AddRaw( this, &FInteractMLEditorModule::OnWorldSaved );
+#else //4.27 and older
 	FEditorDelegates::PostSaveWorld.AddRaw(this, &FInteractMLEditorModule::OnWorldSaved);
+#endif
 }
 
 // stop monitoring global editor events we were interested in
@@ -75,7 +79,11 @@ void FInteractMLEditorModule::InitHooks()
 void FInteractMLEditorModule::ShutdownHooks()
 {
 	FEditorDelegates::EndPIE.RemoveAll(this);
-	FEditorDelegates::PostSaveWorld.RemoveAll(this);
+#if UE_VERSION_AT_LEAST(5,0,0)
+	FEditorDelegates::PostSaveWorldWithContext.RemoveAll(this);
+#else //4.27 and older
+	FEditorDelegates::PostSaveWorld.RemoveAll( this );
+#endif
 }
 
 // register asset types with the editor
@@ -226,7 +234,11 @@ void FInteractMLEditorModule::OnEndPIE(const bool bIsSimulating)
 
 // a 'global' save has happened.  a chance to save our unsaved training/model state
 //
+#if UE_VERSION_AT_LEAST(5,0,0)
+void FInteractMLEditorModule::OnWorldSaved( UWorld* World, FObjectPostSaveContext ObjectSaveContext )
+#else //4.27 and older
 void FInteractMLEditorModule::OnWorldSaved(uint32 SaveFlags, UWorld* World, bool bSuccess)
+#endif
 {
 	//request runtime save any unsaved state
 	FInteractMLModule::Get().Save();	

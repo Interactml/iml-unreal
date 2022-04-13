@@ -82,7 +82,7 @@ void FInteractMLModule::ShutdownModule()
 void FInteractMLModule::InitTick()
 {
 	TickDelegate = FTickerDelegate::CreateRaw( this, &FInteractMLModule::Tick );
-	TickDelegateHandle = FTicker::GetCoreTicker().AddTicker( TickDelegate );
+	TickDelegateHandle = TICKER_TYPE::GetCoreTicker().AddTicker( TickDelegate );
 }
 
 // resolve and store ML data storage root path
@@ -138,7 +138,7 @@ void FInteractMLModule::InitPaths()
 //
 void FInteractMLModule::ShutdownTick()
 {
-	FTicker::GetCoreTicker().RemoveTicker( TickDelegateHandle );
+	TICKER_TYPE::GetCoreTicker().RemoveTicker( TickDelegateHandle );
 }
 
 // clean up any outstanding tasks that may still be running

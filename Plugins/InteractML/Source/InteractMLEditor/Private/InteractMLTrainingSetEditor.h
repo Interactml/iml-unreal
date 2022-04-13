@@ -14,7 +14,7 @@
 #include "SDropTarget.h"
 
 //module
-
+#include "InteractMLVersioning.h"
 
 //types of property to show
 enum class EInteractMLTrainingSetProperty
@@ -114,7 +114,7 @@ class FTrainingSetEditor
 
 	// tick management
 	FTickerDelegate TickDelegate;
-	FDelegateHandle TickDelegateHandle;
+	TICKER_HANDLE TickDelegateHandle;
 
 	//tracking
 	int PrevExampleCount;
@@ -342,6 +342,7 @@ public:
 					
 protected:
 	FReply OnDropped(TSharedPtr<FDragDropOperation> DragDropOperation);
+	FReply OnDropped2( const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent );
 	virtual bool OnAllowDrop(TSharedPtr<FDragDropOperation> DragDropOperation) const override;
 	virtual bool OnIsRecognized(TSharedPtr<FDragDropOperation> DragDropOperation) const override;
 	

@@ -11,6 +11,7 @@
 #include "CoreMinimal.h"
 
 //module
+#include "InteractMLVersioning.h"
 #include "InteractMLStorage.generated.h"
 
 //general declarations
@@ -39,7 +40,7 @@ class INTERACTML_API UInteractMLStorage	: public UObject
 
 	//file path/id/name/ext/etc this is derived from file search and object state and not editable
 	//TODO: Spot changes to file location and update/sync, update file when object renamed
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere,Category="InteractML")
 	FString DisplayDataFilePath;
 
 	//actual root of file path, e.g. Examples/HandGestures, the rest comes from ID (if it has one) and actual type
@@ -113,7 +114,11 @@ public:
 	virtual void PostRename(UObject* OldOuter, const FName OldName) override;
 	virtual void PostEditImport() override;
 	//save hook
+#if UE_VERSION_AT_LEAST(5,0,0)
+	virtual void PreSave( FObjectPreSaveContext SaveContext ) override;
+#else //4.27 and older
 	virtual void PreSave(const class ITargetPlatform* TargetPlatform) override;
+#endif
 	//~ End UObject interface
 	
 	//---- utility ----

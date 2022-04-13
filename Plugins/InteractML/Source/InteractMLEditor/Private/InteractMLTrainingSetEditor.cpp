@@ -161,7 +161,7 @@ FTrainingSetEditor::FTrainingSetEditor()
 	
 	// we want to be updated regularly
 	TickDelegate = FTickerDelegate::CreateRaw(this, &FTrainingSetEditor::Tick);
-	TickDelegateHandle = FTicker::GetCoreTicker().AddTicker(TickDelegate);	
+	TickDelegateHandle = TICKER_TYPE::GetCoreTicker().AddTicker(TickDelegate);
 }
 
 // raw shutdown, maybe a better place for editor closing
@@ -169,7 +169,7 @@ FTrainingSetEditor::FTrainingSetEditor()
 FTrainingSetEditor::~FTrainingSetEditor()
 {
 	//shut down timers
-	FTicker::GetCoreTicker().RemoveTicker(TickDelegateHandle);
+	TICKER_TYPE::GetCoreTicker().RemoveTicker(TickDelegateHandle);
 	TickDelegateHandle.Reset();
 	TickDelegate = nullptr;
 
@@ -193,6 +193,7 @@ void FTrainingSetEditor::InitTrainingSetEditor(const EToolkitMode::Type Mode, co
 		->AddArea
 		(
 			FTabManager::NewPrimaryArea()->SetOrientation(Orient_Vertical)
+#if UE_VERSION_OLDER_THAN(5,0,0) //used to need to manually add toolbar
 			->Split
 			(
 				FTabManager::NewStack()
@@ -200,6 +201,7 @@ void FTrainingSetEditor::InitTrainingSetEditor(const EToolkitMode::Type Mode, co
 				->SetHideTabWell(true)
 				->AddTab(GetToolbarTabId(), ETabState::OpenedTab)
 			)
+#endif
 			->Split
 			(
 				FTabManager::NewSplitter()
@@ -651,7 +653,6 @@ TSharedRef<SDockTab> FTrainingSetEditor::SpawnTab_TrainingSetHierarchy( const FS
 
 	TSharedRef<SDockTab> tab = SNew(SDockTab)
 		//.Icon( FEditorStyle::GetBrush("GenericEditor.Tabs.Properties") )
-		.Icon( FEditorStyle::GetBrush("LevelEditor.Tabs.ContentBrowser") )
 		.Label( LOCTEXT("TrainingSetHierarcyTitle", "Examples") )
 		.TabColorScale( GetTabColorScale() )
 		//.OnTabActivated( this, &FTrainingSetEditor::OnHierarchyTabActivated )	//this doesn't appear to work, see below
@@ -663,6 +664,9 @@ TSharedRef<SDockTab> FTrainingSetEditor::SpawnTab_TrainingSetHierarchy( const FS
 				TrainingSetHierarchyTabWidget.ToSharedRef()
 			]
 		];
+
+	//set explicitly for now to avoid warning (supposed to be handled by spawner)
+	tab->SetTabIcon( FEditorStyle::GetBrush( "LevelEditor.Tabs.ContentBrowser" ) );
 
 	//BUG?: the imperitive event setter above doesn't appear to work, direct setter does however
 	tab->SetOnTabActivated( SDockTab::FOnTabActivatedCallback::CreateSP( this, &FTrainingSetEditor::OnHierarchyTabActivated ) );
@@ -1072,7 +1076,11 @@ void STrainingSetItemDropTarget::Construct(const FArguments& InArgs )
 	
 	SDropTarget::Construct(
 		SDropTarget::FArguments()
-		.OnDrop(this, &STrainingSetItemDropTarget::OnDropped)
+#if UE_VERSION_AT_LEAST(5,0,0) 
+		.OnDropped( this, &STrainingSetItemDropTarget::OnDropped2 )
+#else //used to only support single object
+		.OnDrop( this, &STrainingSetItemDropTarget::OnDropped )
+#endif
 		[
 		InArgs._Content.Widget
 		]);
@@ -1080,6 +1088,10 @@ void STrainingSetItemDropTarget::Construct(const FArguments& InArgs )
 
 // drop operation entry point
 //
+FReply STrainingSetItemDropTarget::OnDropped2( const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent )
+{
+	return OnDropped( DragDropEvent.GetOperation() );
+}
 FReply STrainingSetItemDropTarget::OnDropped(TSharedPtr<FDragDropOperation> DragDropOperation)
 {
 	bool bUnused;

@@ -7,8 +7,10 @@
 #include "InteractMLStorage.h"
 
 //unreal
-#include "Misc/EngineVersionComparison.h"
 #include "Misc/FileHelper.h"
+#if UE_VERSION_AT_LEAST(5,0,0)
+#include "UObject/ObjectSaveContext.h"
+#endif
 
 //module
 #include "InteractML.h"
@@ -389,9 +391,15 @@ void UInteractMLStorage::PostEditImport()
 
 //called once before object is serialised for saving, seems like the best time to save our externally stored data
 //
+#if UE_VERSION_AT_LEAST(5,0,0)
+void UInteractMLStorage::PreSave( FObjectPreSaveContext SaveContext )
+{
+	Super::PreSave( SaveContext );
+#else //4.27 and older
 void UInteractMLStorage::PreSave(const class ITargetPlatform* TargetPlatform)
 {
 	Super::PreSave(TargetPlatform);
+#endif
 
 	//our save
 	if(HasUnsavedData())
