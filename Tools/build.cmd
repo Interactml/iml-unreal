@@ -9,10 +9,12 @@ REM (not for for re-submission cycle, only for feature changes and fixes)
 set IML_VERSION=3
 REM ----------------------------------
 
+GOTO skip
 REM ---- 4.25 ----
 set UE_VERSION=4.25
 call %TOOLS_DIR%\package_plugin.cmd
 if ERRORLEVEL 1 goto error
+:skip
 
 REM ---- 4.26 ----
 set UE_VERSION=4.26
