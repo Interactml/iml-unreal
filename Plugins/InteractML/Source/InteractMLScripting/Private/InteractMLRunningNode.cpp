@@ -170,7 +170,11 @@ void UInteractMLRunningNode::AllocateDefaultPins()
 	else
 	{
 		//simple numerical label
-		UEdGraphPin* label_pin = CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Float, nullptr, FInteractMLRunningNodePinNames::LabelOutputPinName);
+#if UE_VERSION_AT_LEAST(5,0,0)
+		UEdGraphPin* label_pin = CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Real, UEdGraphSchema_K2::PC_Float, FInteractMLRunningNodePinNames::LabelOutputPinName);
+#else
+		UEdGraphPin* label_pin = CreatePin( EGPD_Output, UEdGraphSchema_K2::PC_Float, nullptr, FInteractMLRunningNodePinNames::LabelOutputPinName );
+#endif
 		label_pin->PinToolTip = LOCTEXT("RecordingNodeSimpleNumericLabelPinTooltip", "Result of running the model on the input parameters.").ToString();
 		label_pin->PinFriendlyName = LOCTEXT("LabelOutputPinName", "Output");
 	}

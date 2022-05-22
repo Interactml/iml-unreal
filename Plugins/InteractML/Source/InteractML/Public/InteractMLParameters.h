@@ -54,6 +54,7 @@ struct INTERACTML_API FInteractMLParameterCollection
 	//accumulation
 	void Add(bool value);
 	void Add(float value);
+	void Add(double value);
 	void Add(int value);
 	void Add(FVector2D value);
 	void Add(FVector value);

@@ -180,7 +180,11 @@ void UInteractMLRecordingNode::AllocateDefaultPins()
 	else
 	{
 		//simple numerical label
-		UEdGraphPin* label_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Float, nullptr, FInteractMLRecordingNodePinNames::LabelInputPinName);
+#if UE_VERSION_AT_LEAST(5,0,0)
+		UEdGraphPin* label_pin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Real, UEdGraphSchema_K2::PC_Float, FInteractMLRecordingNodePinNames::LabelInputPinName);
+#else
+		UEdGraphPin* label_pin = CreatePin( EGPD_Input, UEdGraphSchema_K2::PC_Float, nullptr, FInteractMLRecordingNodePinNames::LabelInputPinName );
+#endif
 		label_pin->PinToolTip = LOCTEXT("RecordingNodeNumericLabelPinTooltip", "The numeric label expected as output to be associated with the current recorded parameters.").ToString();
 		label_pin->PinFriendlyName = LOCTEXT("RecordingNodeLabelInputPinName", "Expected Output");
 	}

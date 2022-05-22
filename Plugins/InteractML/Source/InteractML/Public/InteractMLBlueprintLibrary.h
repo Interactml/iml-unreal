@@ -51,6 +51,13 @@ public:
 	static void AddIntegerParameter( FInteractMLParameters Parameters, int Value );
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
 	static void AddFloatParameter( FInteractMLParameters Parameters, float Value );
+//#if UE_VERSION_AT_LEAST(5,0,0) 
+// NOTE: We can't currently support doubles in the same codebase used for UE4, so have to rely on auto-conversion of double to float by Blueprint bytecode compiler.
+//       This is handled for us when we say we support double but hook it up to a function taking a float value it seems.
+//       See https://forums.unrealengine.com/t/blueprint-function-taking-double-for-ue5-not-possible-in-code-targetting-both-ue4-and-ue5/563502
+//	UFUNCTION( BlueprintCallable, BlueprintInternalUseOnly )
+//	static void AddDoubleParameter( FInteractMLParameters Parameters, double Value );
+//#endif
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
 	static void AddBooleanParameter( FInteractMLParameters Parameters, bool Value );
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)

@@ -94,6 +94,15 @@ void UInteractMLBlueprintLibrary::AddFloatParameter( FInteractMLParameters Param
 		Parameters.Ptr->Add( Value );
 	}
 }
+#if false //UE_VERSION_AT_LEAST(5,0,0)
+void UInteractMLBlueprintLibrary::AddDoubleParameter( FInteractMLParameters Parameters, double Value )
+{
+	if(Parameters.Ptr.IsValid())
+	{
+		Parameters.Ptr->Add( Value );
+	}
+}
+#endif
 void UInteractMLBlueprintLibrary::AddBooleanParameter( FInteractMLParameters Parameters, bool Value )
 {
 	if(Parameters.Ptr.IsValid())

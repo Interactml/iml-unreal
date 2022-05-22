@@ -49,6 +49,10 @@ void FInteractMLParameterCollection::Add(float value)
 {
 	AccumulateValue(value);
 }
+void FInteractMLParameterCollection::Add(double value)
+{
+	AccumulateValue((float)value);
+}
 void FInteractMLParameterCollection::Add(int value)
 {
 	AccumulateValue((float)value);

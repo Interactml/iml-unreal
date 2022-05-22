@@ -64,6 +64,9 @@ static TArray<FInputParameterInfo>& GetInputParameterInfoList()
 	{
 		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameInt","Integer"),        UEdGraphSchema_K2::PC_Int,     GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddIntegerParameter),    nullptr,                             1));
 		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameFloat","Float"),        UEdGraphSchema_K2::PC_Float,   GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddFloatParameter),      nullptr,                             1));
+#if UE_VERSION_AT_LEAST(5,0,0)
+		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameDouble","Double"),      UEdGraphSchema_K2::PC_Double,  GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddFloatParameter),      nullptr,                             1));
+#endif
 		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameBool","Boolean"),       UEdGraphSchema_K2::PC_Boolean, GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddBooleanParameter),    nullptr,                             1));
 		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameVector2D","2D Vector"), UEdGraphSchema_K2::PC_Struct,  GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddVector2Parameter),    TBaseStructure<FVector2D>::Get(),    2));
 		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameVector","3D Vector"),   UEdGraphSchema_K2::PC_Struct,  GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddVector3Parameter),    TBaseStructure<FVector>::Get(),      3));
