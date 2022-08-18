@@ -26,9 +26,9 @@ set UE_VERSION=4.27
 call %TOOLS_DIR%\package_plugin.cmd
 if ERRORLEVEL 1 goto error
 
-REM ---- 5.0 ----
-set UE_VERSION=5.0
-set UE_PATH_UE=5.0
+REM ---- 5.0.3 ----
+set UE_VERSION=5.0.3
+set UE_PATH_UE=5.0.3
 set UE_PATH_UAT=Engine\Binaries\DotNET\AutomationTool\AutomationTool.exe
 call %TOOLS_DIR%\package_plugin.cmd
 if ERRORLEVEL 1 goto error

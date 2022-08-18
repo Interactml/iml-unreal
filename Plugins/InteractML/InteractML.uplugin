@@ -19,18 +19,20 @@
 		{
 			"Name": "InteractML",
 			"Type": "Runtime",
-			"LoadingPhase": "Default",
-			"WhitelistPlatforms": [	"Win64" ]
+			"LoadingPhase": "PreDefault",
+			"WhitelistPlatforms": [ "Win64" ]
 		},
 		{
 			"Name": "InteractMLScripting",
 			"Type": "UncookedOnly",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "PreDefault",
+			"WhitelistPlatforms": [ "Win64" ]
 		},
 		{
 			"Name": "InteractMLEditor",
 			"Type": "Editor",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": [ "Win64" ]
 		}
 	]
 }
