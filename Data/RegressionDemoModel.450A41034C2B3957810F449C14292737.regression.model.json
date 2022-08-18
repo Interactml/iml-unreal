@@ -1,7 +1,11 @@
 {
+	"InteractMLModel" :
+{
    "metadata" : {
       "creator" : "Rapid API C++",
       "inputNames" : [
+         "inputs-1",
+         "inputs-2",
          "inputs-1",
          "inputs-2",
          "inputs-1",
@@ -167,26 +171,28 @@
             "inputs-1",
             "inputs-2",
             "inputs-1",
+            "inputs-2",
+            "inputs-1",
             "inputs-2"
          ],
          "modelType" : "Neural Network",
          "nodes" : [
             {
-               "Node 1" : 0.56294894218444824,
-               "Node 2" : -2.2821509838104248,
-               "Threshold" : 0.85020893812179565,
+               "Node 1" : -4.6384716033935547,
+               "Node 2" : -5.1686687469482422,
+               "Threshold" : 4.0271658897399902,
                "name" : "Linear Node 0"
             },
             {
-               "Attrib inputs-1" : 0.52584463357925415,
-               "Attrib inputs-2" : -0.32493725419044495,
-               "Threshold" : -0.014018230140209198,
+               "Attrib inputs-1" : -0.83724147081375122,
+               "Attrib inputs-2" : 10.524029731750488,
+               "Threshold" : -5.7186532020568848,
                "name" : "Sigmoid Node 1"
             },
             {
-               "Attrib inputs-1" : 0.93382036685943604,
-               "Attrib inputs-2" : -3.5742423534393311,
-               "Threshold" : -0.27988636493682861,
+               "Attrib inputs-1" : 4.1468157768249512,
+               "Attrib inputs-2" : -8.0638132095336914,
+               "Threshold" : -2.7514419555664062,
                "name" : "Sigmoid Node 2"
             }
          ],
@@ -194,9 +200,11 @@
          "numHiddenNodes" : 2,
          "numHiddenOutputs" : 1,
          "numInputs" : 2,
-         "outBase" : 0.5,
-         "outRange" : 0.5,
+         "outBase" : 2,
+         "outRange" : 2,
          "whichInputs" : [ 0, 1 ]
       }
    ]
+}
+
 }
