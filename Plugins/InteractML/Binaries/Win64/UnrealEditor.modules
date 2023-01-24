@@ -1,0 +1,9 @@
+{
+	"BuildId": "19505902",
+	"Modules": 
+	{
+		"InteractML": "UnrealEditor-InteractML.dll",
+		"InteractMLEditor": "UnrealEditor-InteractMLEditor.dll",
+		"InteractMLScripting": "UnrealEditor-InteractMLScripting.dll"
+	}
+}
