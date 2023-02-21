@@ -23,3 +23,10 @@
 extern bool IsValid( UObject* p );
 extern bool IsValidChecked( UObject* p );
 #endif
+
+//style lookup changes
+#if UE_VERSION_AT_LEAST(5,1,0)
+# define INTERACTML_STYLE FAppStyle::Get()
+#else
+# define INTERACTML_STYLE FEditorStyle::Get()
+#endif

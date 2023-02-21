@@ -13,6 +13,7 @@
 
 //module
 #include "InteractMLLabelTable.h"
+#include "InteractMLVersioning.h"
 
 //module editor
 
@@ -53,7 +54,7 @@ uint32 FInteractMLLabelTableActions::GetCategories()
 }
 
 // open an explicit editor for this asset instead of the default details panel
-// NOTE: copied from FAssetTypeActions_Struct::OpenAssetEditor as we want the same functionality but we can't derive (private)
+// NOTE: copied from FAssetTypeActions_DataTable::OpenAssetEditor as we want the same functionality but we can't derive (private)
 //
 void FInteractMLLabelTableActions::OpenAssetEditor( const TArray<UObject*>& InObjects, TSharedPtr<IToolkitHost> EditWithinLevelEditor )
 {
@@ -82,8 +83,14 @@ void FInteractMLLabelTableActions::OpenAssetEditor( const TArray<UObject*>& InOb
 		DataTablesListText.Indent();
 		for (UDataTable* Table : InvalidDataTables)
 		{
+#if UE_VERSION_AT_LEAST(5,1,0)
+			const FTopLevelAssetPath ResolvedRowStructName = Table->GetRowStructPathName();
+			FText row_name_text = FText::FromString( ResolvedRowStructName.ToString() );
+#else
 			const FName ResolvedRowStructName = Table->GetRowStructName();
-			DataTablesListText.AppendLineFormat(LOCTEXT("DataTable_MissingRowStructListEntry", "* {0} (Row Structure: {1})"), FText::FromString(Table->GetName()), FText::FromName(ResolvedRowStructName));
+			FText row_name_text = FText::FromName( ResolvedRowStructName );
+#endif
+			DataTablesListText.AppendLineFormat(LOCTEXT("DataTable_MissingRowStructListEntry", "* {0} (Row Structure: {1})"), FText::FromString(Table->GetName()), row_name_text );
 		}
 		
 		FText Title = LOCTEXT("DataTable_MissingRowStructTitle", "Continue?");

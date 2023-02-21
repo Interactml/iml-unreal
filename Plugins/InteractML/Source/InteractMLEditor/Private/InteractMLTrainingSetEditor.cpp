@@ -24,6 +24,7 @@
 #include "InteractMLTrainingSet.h"
 #include "InteractMLEditor.h"
 #include "InteractMLLabel.h"
+#include "InteractMLVersioning.h"
 
 #define LOCTEXT_NAMESPACE "InteractML"
 
@@ -652,21 +653,21 @@ TSharedRef<SDockTab> FTrainingSetEditor::SpawnTab_TrainingSetHierarchy( const FS
 	}
 
 	TSharedRef<SDockTab> tab = SNew(SDockTab)
-		//.Icon( FEditorStyle::GetBrush("GenericEditor.Tabs.Properties") )
+		//.Icon( INTERACTML_STYLE.GetBrush("GenericEditor.Tabs.Properties") )
 		.Label( LOCTEXT("TrainingSetHierarcyTitle", "Examples") )
 		.TabColorScale( GetTabColorScale() )
 		//.OnTabActivated( this, &FTrainingSetEditor::OnHierarchyTabActivated )	//this doesn't appear to work, see below
 		[
 			SNew(SBorder)
 			.Padding(2)
-			.BorderImage( FEditorStyle::GetBrush( "ToolPanel.GroupBorder" ) )
+			.BorderImage( INTERACTML_STYLE.GetBrush( "ToolPanel.GroupBorder" ) )
 			[
 				TrainingSetHierarchyTabWidget.ToSharedRef()
 			]
 		];
 
 	//set explicitly for now to avoid warning (supposed to be handled by spawner)
-	tab->SetTabIcon( FEditorStyle::GetBrush( "LevelEditor.Tabs.ContentBrowser" ) );
+	tab->SetTabIcon( INTERACTML_STYLE.GetBrush( "LevelEditor.Tabs.ContentBrowser" ) );
 
 	//BUG?: the imperitive event setter above doesn't appear to work, direct setter does however
 	tab->SetOnTabActivated( SDockTab::FOnTabActivatedCallback::CreateSP( this, &FTrainingSetEditor::OnHierarchyTabActivated ) );
@@ -800,7 +801,7 @@ TSharedRef<SVerticalBox> FTrainingSetEditor::CreateTrainingSetHierarchyUI()
 		[
 			SNew(SBorder)
 			.Padding(FMargin(3))
-			.BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
+			.BorderImage( INTERACTML_STYLE.GetBrush("ToolPanel.DarkGroupBorder"))
 			[
 				//(icon) Training Set Name
 				SNew(SVerticalBox)
@@ -1229,7 +1230,7 @@ void STrainingSetTreeRow::Construct( const FArguments& InArgs, const TSharedRef<
 	TrainingSetEditorWeak = InArgs._TrainingSetEditor;
 
 	auto Args = FSuperRowType::FArguments()
-		.Style(&FEditorStyle::Get().GetWidgetStyle<FTableRowStyle>("SceneOutliner.TableViewRow"));
+		.Style(&INTERACTML_STYLE.GetWidgetStyle<FTableRowStyle>("SceneOutliner.TableViewRow"));
 	Args.OnDragDetected( this, &STrainingSetTreeRow::OnDragDetected );
 	
 	SMultiColumnTableRow< TSharedPtr<FTrainingSetTreeItem>>::Construct(Args, TreeView);

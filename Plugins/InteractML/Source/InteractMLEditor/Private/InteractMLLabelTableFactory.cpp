@@ -16,6 +16,7 @@
 //module
 #include "InteractMLLabel.h"
 #include "InteractMLLabelTable.h"
+#include "InteractMLVersioning.h"
 
 //module editor
 
@@ -62,9 +63,14 @@ bool UInteractMLLabelTableFactory::ConfigureProperties()
 			}
 			return valid;
 		}
-		
+
+#if UE_VERSION_AT_LEAST(5,1,0)
+		virtual bool IsUnloadedStructAllowed( const FStructViewerInitializationOptions& InInitOptions, const FSoftObjectPath& InStructPath, TSharedRef<FStructViewerFilterFuncs> InFilterFuncs ) override
+		{
+#else			
 		virtual bool IsUnloadedStructAllowed(const FStructViewerInitializationOptions& InInitOptions, const FName InStructPath, TSharedRef<FStructViewerFilterFuncs> InFilterFuncs) override
 		{
+#endif
 			// Unloaded structs are always User Defined Structs, and User Defined Structs are always allowed
 			// They will be re-validated by IsStructAllowed once loaded during the pick
 			
@@ -138,7 +144,7 @@ bool UInteractMLLabelTableFactory::ConfigureProperties()
 				[
 				SNew(SBorder)
 				.Padding(4)
-				.BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
+				.BorderImage( INTERACTML_STYLE.GetBrush("ToolPanel.GroupBorder"))
 				[
 				StructViewerModule.CreateStructViewer(Options, FOnStructPicked::CreateSP(this, &FDataTableFactoryUI::OnPickedStruct))
 				]
@@ -163,7 +169,7 @@ bool UInteractMLLabelTableFactory::ConfigureProperties()
 				.SupportsMaximize(false)
 				[
 				SNew(SBorder)
-				.BorderImage(FEditorStyle::GetBrush("Menu.Background"))
+				.BorderImage( INTERACTML_STYLE.GetBrush("Menu.Background"))
 				.Padding(10)
 				[
 				SNew(SVerticalBox)
