@@ -14,6 +14,8 @@
 #include "HAL/PlatformFile.h"
 #include "Async/Async.h"
 #include "Framework/Threading.h"
+#include "UObject/UObjectGlobals.h"
+#include "UObject/Package.h"
 
 //module
 #include "InteractMLStorage.h"

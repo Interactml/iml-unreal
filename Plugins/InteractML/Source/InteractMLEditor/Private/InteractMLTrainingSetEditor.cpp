@@ -8,7 +8,7 @@
 #include "InteractMLTrainingSetEditor.h"
 
 //unreal
-#include "Core.h"
+#include "CoreMinimal.h"
 #include "Editor.h"
 //unreal:ui
 #include "Widgets/Input/SSearchBox.h"

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "AssetTypeActions_Base.h"
+#include "Misc/EngineVersionComparison.h"
 
 
 ////////////////////////////// CLASSIFICATION MODEL /////////////////////////////
@@ -21,7 +22,9 @@ public:
 	FInteractMLClassificationModelActions(uint32 InAssetCategory)
 		: RegisteredCategoryHandle(InAssetCategory)
 	{
-		SetSupported(true);
+#if UE_VERSION_OLDER_THAN(5,2,0) //nolonger needed, something somthing IAssetTools::IsAssetClassSupported
+		SetSupported( true );
+#endif
 	}
 	
 	// IAssetTypeActions Implementation
@@ -46,7 +49,9 @@ public:
 	FInteractMLRegressionModelActions(uint32 InAssetCategory)
 	: RegisteredCategoryHandle(InAssetCategory)
 	{
-		SetSupported(true);
+#if UE_VERSION_OLDER_THAN(5,2,0) //nolonger needed, something somthing IAssetTools::IsAssetClassSupported
+		SetSupported( true );
+#endif
 	}
 	
 	// IAssetTypeActions Implementation
@@ -71,7 +76,9 @@ public:
 	FInteractMLDynamicTimewarpModelActions(uint32 InAssetCategory)
 	: RegisteredCategoryHandle(InAssetCategory)
 	{
-		SetSupported(true);
+#if UE_VERSION_OLDER_THAN(5,2,0) //nolonger needed, something somthing IAssetTools::IsAssetClassSupported
+		SetSupported( true );
+#endif
 	}
 	
 	// IAssetTypeActions Implementation
