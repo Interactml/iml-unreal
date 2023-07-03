@@ -1,9 +1,0 @@
-{
-	"BuildId": "14830424",
-	"Modules": 
-	{
-		"InteractML": "UE4Editor-InteractML.dll",
-		"InteractMLEditor": "UE4Editor-InteractMLEditor.dll",
-		"InteractMLScripting": "UE4Editor-InteractMLScripting.dll"
-	}
-}
