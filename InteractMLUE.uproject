@@ -3,7 +3,33 @@
 	"EngineAssociation": "5.2",
 	"Category": "",
 	"Description": "",
+	"Plugins": [
+		{
+			"Name": "InteractML",
+			"Enabled": true,
+			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/1217f5d62b7442f3bbdf2ed07bd71a60"
+		},
+		{
+			"Name": "OpenXR",
+			"Enabled": true,
+			"SupportedTargetPlatforms": [
+				"Win64",
+				"Linux",
+				"Android",
+				"HoloLens"
+			]
+		},
+		{
+			"Name": "OculusVR",
+			"Enabled": true,
+			"SupportedTargetPlatforms": [
+				"Win64",
+				"Android"
+			]
+		}
+	],
 	"TargetPlatforms": [
-		"WindowsNoEditor"
+		"WindowsNoEditor",
+		"HoloLens"
 	]
 }
