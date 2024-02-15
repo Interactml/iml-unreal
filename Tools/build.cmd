@@ -6,7 +6,7 @@ set TOOLS_DIR=%BRANCH_DIR%\Tools
 REM ---- EDIT PLUGIN VERSION HERE ----
 REM increment IML version for each new release of the plugin to Marketplace
 REM (not for for re-submission cycle, only for feature changes and fixes)
-set IML_VERSION=4
+set IML_VERSION=5
 REM ----------------------------------
 
 REM GOTO test_skip
