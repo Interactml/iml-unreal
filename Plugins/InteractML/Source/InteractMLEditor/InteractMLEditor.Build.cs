@@ -10,8 +10,10 @@ using System.IO;
 public class InteractMLEditor : ModuleRules
 {
 	public InteractMLEditor(ReadOnlyTargetRules Target) : base(Target)
-	{
-		//normal
+    {
+        IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
+        
+        //normal
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		PrivateIncludePaths.AddRange(
