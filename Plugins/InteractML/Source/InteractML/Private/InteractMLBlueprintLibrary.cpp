@@ -139,6 +139,80 @@ void UInteractMLBlueprintLibrary::AddColourParameter( FInteractMLParameters Para
 	}
 }
 
+// Parameter Collection custom node: call to add a array of parameters
+//
+void UInteractMLBlueprintLibrary::AddIntegerArrayParameter(FInteractMLParameters Parameters, const TArray<int>& Value)
+{
+	if (Parameters.Ptr.IsValid())
+	{
+		for (int i = 0; i < Value.Num(); i++)
+		{
+			Parameters.Ptr->Add( Value[i] );
+		}
+	}
+}
+void UInteractMLBlueprintLibrary::AddFloatArrayParameter( FInteractMLParameters Parameters, const TArray<float>& Value )
+{
+	if(Parameters.Ptr.IsValid())
+	{
+		for (int i = 0; i < Value.Num(); i++)
+		{
+			Parameters.Ptr->Add( Value[i] );
+		}
+	}
+}
+void UInteractMLBlueprintLibrary::AddBooleanArrayParameter( FInteractMLParameters Parameters, const TArray<bool>& Value )
+{
+	if(Parameters.Ptr.IsValid())
+	{
+		for (int i = 0; i < Value.Num(); i++)
+		{
+			Parameters.Ptr->Add( Value[i] );
+		}
+	}
+}
+void UInteractMLBlueprintLibrary::AddVector2ArrayParameter( FInteractMLParameters Parameters, const TArray<FVector2D>& Value )
+{
+	if(Parameters.Ptr.IsValid())
+	{
+		for (int i = 0; i < Value.Num(); i++)
+		{
+			Parameters.Ptr->Add( Value[i] );
+		}
+	}
+}
+void UInteractMLBlueprintLibrary::AddVector3ArrayParameter( FInteractMLParameters Parameters, const TArray<FVector>& Value )
+{
+	if(Parameters.Ptr.IsValid())
+	{
+		for (int i = 0; i < Value.Num(); i++)
+		{
+			Parameters.Ptr->Add( Value[i] );
+		}
+	}
+}
+void UInteractMLBlueprintLibrary::AddQuaternionArrayParameter( FInteractMLParameters Parameters, const TArray<FQuat>& Value )
+{
+	if(Parameters.Ptr.IsValid())
+	{
+		for (int i = 0; i < Value.Num(); i++)
+		{
+			Parameters.Ptr->Add( Value[i] );
+		}
+	}
+}
+void UInteractMLBlueprintLibrary::AddColourArrayParameter( FInteractMLParameters Parameters, const TArray<FLinearColor>& Value )
+{
+	if(Parameters.Ptr.IsValid())
+	{
+		for (int i = 0; i < Value.Num(); i++)
+		{
+			Parameters.Ptr->Add( Value[i] );
+		}
+	}
+}
+
+
 ///////////////////// TRAINING SET //////////////////////
 
 // Training set access

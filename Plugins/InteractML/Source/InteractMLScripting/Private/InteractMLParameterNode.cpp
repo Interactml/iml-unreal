@@ -44,13 +44,15 @@ struct FInputParameterInfo
 	UScriptStruct* Struct;
 	int NumFloats;
 	FName ParamAddFunctionName;
+	FName ArrayAddFunctionName;
 
-	FInputParameterInfo(FText name, FName type, FName add_fn, UScriptStruct* struct_type, int num_floats)
+	FInputParameterInfo(FText name, FName type, FName add_fn, FName add_array_fn, UScriptStruct* struct_type, int num_floats)
 		: DisplayName(name)
 		, Type(type)
 		, Struct(struct_type)
 		, NumFloats(num_floats)
 		, ParamAddFunctionName(add_fn)
+		, ArrayAddFunctionName(add_array_fn)
 	{}
 	static FInputParameterInfo None;
 };
@@ -62,20 +64,20 @@ static TArray<FInputParameterInfo>& GetInputParameterInfoList()
 	static TArray<FInputParameterInfo> list;
 	if(list.Num()==0)
 	{
-		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameInt","Integer"),        UEdGraphSchema_K2::PC_Int,     GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddIntegerParameter),    nullptr,                             1));
-		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameFloat","Float"),        UEdGraphSchema_K2::PC_Float,   GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddFloatParameter),      nullptr,                             1));
+		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameInt","Integer"),        UEdGraphSchema_K2::PC_Int,     GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddIntegerParameter),    GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddIntegerArrayParameter),    nullptr,                             1));
+		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameFloat","Float"),        UEdGraphSchema_K2::PC_Float,   GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddFloatParameter),      GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddFloatArrayParameter),      nullptr,                             1));
 #if UE_VERSION_AT_LEAST(5,0,0)
-		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameDouble","Double"),      UEdGraphSchema_K2::PC_Double,  GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddFloatParameter),      nullptr,                             1));
+		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameDouble","Double"),      UEdGraphSchema_K2::PC_Double,  GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddFloatParameter),      GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddFloatArrayParameter),      nullptr,                             1));
 #endif
-		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameBool","Boolean"),       UEdGraphSchema_K2::PC_Boolean, GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddBooleanParameter),    nullptr,                             1));
-		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameVector2D","2D Vector"), UEdGraphSchema_K2::PC_Struct,  GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddVector2Parameter),    TBaseStructure<FVector2D>::Get(),    2));
-		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameVector","3D Vector"),   UEdGraphSchema_K2::PC_Struct,  GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddVector3Parameter),    TBaseStructure<FVector>::Get(),      3));
-		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameQuat","Rotation"),      UEdGraphSchema_K2::PC_Struct,  GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddQuaternionParameter), TBaseStructure<FQuat>::Get(),        4));
-		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameColor","Colour"),       UEdGraphSchema_K2::PC_Struct,  GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddColourParameter),     TBaseStructure<FLinearColor>::Get(), 3));
+		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameBool","Boolean"),       UEdGraphSchema_K2::PC_Boolean, GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddBooleanParameter),    GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddBooleanArrayParameter),    nullptr,                             1));
+		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameVector2D","2D Vector"), UEdGraphSchema_K2::PC_Struct,  GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddVector2Parameter),    GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddVector2ArrayParameter),    TBaseStructure<FVector2D>::Get(),    2));
+		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameVector","3D Vector"),   UEdGraphSchema_K2::PC_Struct,  GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddVector3Parameter),    GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddVector3ArrayParameter),    TBaseStructure<FVector>::Get(),      3));
+		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameQuat","Rotation"),      UEdGraphSchema_K2::PC_Struct,  GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddQuaternionParameter), GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddQuaternionArrayParameter), TBaseStructure<FQuat>::Get(),        4));
+		list.Add( FInputParameterInfo( LOCTEXT("ParameterNodeTypeNameColor","Colour"),       UEdGraphSchema_K2::PC_Struct,  GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddColourParameter),     GET_FUNCTION_NAME_CHECKED(UInteractMLBlueprintLibrary, AddColourArrayParameter),     TBaseStructure<FLinearColor>::Get(), 3));
 	};
 	return list;
 }
-FInputParameterInfo FInputParameterInfo::None( FText::FromString(TEXT("Unknown")), UEdGraphSchema_K2::PC_Wildcard, NAME_None, nullptr, 0 );
+FInputParameterInfo FInputParameterInfo::None( FText::FromString(TEXT("Unknown")), UEdGraphSchema_K2::PC_Wildcard, NAME_None, NAME_None, nullptr, 0 );
 
 // is this pin type supported for parameter collection?
 //
@@ -85,7 +87,8 @@ static bool IsCompatibleInputParameterType(FEdGraphPinType type)
 	for (int i = 0; i < list.Num(); i++)
 	{
 		if (list[i].Type == type.PinCategory
-			&& (list[i].Struct==nullptr || list[i].Struct==type.PinSubCategoryObject ))
+			&& (list[i].Struct==nullptr || list[i].Struct==type.PinSubCategoryObject )
+			&& (!type.IsContainer() || type.IsArray()))	//single value or array only
 		{
 			return true;
 		}
@@ -93,7 +96,8 @@ static bool IsCompatibleInputParameterType(FEdGraphPinType type)
 #if UE_VERSION_AT_LEAST(5,0,0)
 		//handle 'real' type
 		if(type.PinCategory == UEdGraphSchema_K2::PC_Real
-			&& list[i].Type == type.PinSubCategory)
+			&& list[i].Type == type.PinSubCategory
+			&& (!type.IsContainer() || type.IsArray()))	//single value or array only
 		{
 			return true;
 		}
@@ -110,7 +114,8 @@ static FInputParameterInfo& GetInputParameterInfo(FEdGraphPinType type)
 	for (int i = 0; i < list.Num(); i++)
 	{
 		if (list[i].Type == type.PinCategory
-		 && (list[i].Struct==nullptr || list[i].Struct==type.PinSubCategoryObject ))
+			&& (list[i].Struct==nullptr || list[i].Struct==type.PinSubCategoryObject )
+			&& (!type.IsContainer() || type.IsArray()))	//single value or array only
 		{
 			return list[i];
 		}
@@ -118,7 +123,8 @@ static FInputParameterInfo& GetInputParameterInfo(FEdGraphPinType type)
 #if UE_VERSION_AT_LEAST(5,0,0)
 		//handle 'real' type
 		if(type.PinCategory == UEdGraphSchema_K2::PC_Real
-			&& list[i].Type == type.PinSubCategory)
+			&& list[i].Type == type.PinSubCategory
+			&& (!type.IsContainer() || type.IsArray()))	//single value or array only
 		{
 			return list[i];
 		}
@@ -159,6 +165,9 @@ static FString GetInputParameterTypesDescription()
 			}
 			types.Append( type );
 		}
+		types.Append( TEXT(" (") );
+		types.Append( LOCTEXT("ParamInTypesSuffix", "or an Array of these types").ToString() );
+		types.Append( TEXT(").") );
 	}
 	return types;
 }
@@ -268,13 +277,17 @@ void FParameterSpec::ApplyPinTooltip( UEdGraphPin* pin ) const
 		//assigned type
 		auto& param_type_info = GetInputParameterInfo(pin->PinType);
 		FText format;
-		if (param_type_info.NumFloats == 1) //singular vs plural
+		if(pin->PinType.IsArray()) //variable
+		{
+			format = LOCTEXT("ParameterNodeInputAssignedTooltipAr", "{0} Array input parameter, contributing a variable multiple of {1} values to the collection{2}");
+		}
+		else if (param_type_info.NumFloats == 1) //singular vs plural
 		{
 			format = LOCTEXT("ParameterNodeInputAssignedTooltip", "{0} input parameter, contributing {1} distinct value to the collection{2}");
 		}
 		else
 		{
-			format = LOCTEXT("ParameterNodeInputAssignedTooltip", "{0} input parameter, contributing {1} distinct values to the collection{2}");
+			format = LOCTEXT("ParameterNodeInputAssignedTooltipPl", "{0} input parameter, contributing {1} distinct values to the collection{2}");
 		}
 		tt = FText::Format(format, {param_type_info.DisplayName, param_type_info.NumFloats, warning});
 	}
@@ -297,11 +310,20 @@ FText UInteractMLParameterNode::GetNodeTitle(ENodeTitleType::Type TitleType) con
 		{
 			FString title = node_name.ToString();
 			int param_count = CountParameters();
-			int float_count = CountFloats();
+			bool is_variable;
+			int float_count = CountFloats( is_variable/*out*/);
 			title.Append(TEXT("\n"));
 			if(param_count > 0)
 			{
-				title.Append( FText::Format( LOCTEXT( "ParameterNodeSubTitleCount", "{0} parameter(s) so far ({1} values)" ), param_count, float_count ).ToString() );
+				if(is_variable)
+				{
+					//for paramters that contain Array inputs we can only predict the minimum number of actual values
+					title.Append(FText::Format(LOCTEXT("ParameterNodeSubTitleCount", "{0} parameter(s) so far; at least {1} values"), param_count, float_count).ToString());
+				}
+				else
+				{
+					title.Append(FText::Format(LOCTEXT("ParameterNodeSubTitleCount", "{0} parameter(s) so far; {1} values"), param_count, float_count).ToString());
+				}
 			}
 			else
 			{
@@ -345,12 +367,22 @@ int UInteractMLParameterNode::CountParameters() const
 
 // how many floats does this collection of parameters equate to?
 //
-int UInteractMLParameterNode::CountFloats() const
+int UInteractMLParameterNode::CountFloats( bool& out_is_variable ) const
 {
+	out_is_variable = false;
 	int count = 0;
 	for (int i = 0; i < InputParameters.Num(); i++)
 	{
-		count += GetInputParameterInfo( InputParameters[i].Type ).NumFloats;
+		const FEdGraphPinType& pin_type = InputParameters[i].Type;
+		auto& param_type_info = GetInputParameterInfo( pin_type );
+		if (!pin_type.IsContainer())
+		{
+			count += param_type_info.NumFloats;
+		}
+		else if(pin_type.IsArray())
+		{
+			out_is_variable = true;
+		}
 	}
 	return count;
 }
@@ -724,6 +756,12 @@ UFunction* UInteractMLParameterNode::FindParameterAddFunctionByType(FEdGraphPinT
 
 	//function to use
 	FName param_set_fn_name = param_info.ParamAddFunctionName;
+
+	//arrays need to use different method
+	if(pin_type->IsArray())
+	{
+		param_set_fn_name = param_info.ArrayAddFunctionName;
+	}
 
 	//library lookup of fn
 	UClass* LibraryClass = UInteractMLBlueprintLibrary::StaticClass();

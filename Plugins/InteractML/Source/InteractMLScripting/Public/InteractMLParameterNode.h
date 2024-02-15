@@ -100,7 +100,7 @@ protected:
 	
 private:
 	int CountParameters() const; //only valid ones
-	int CountFloats() const; //only valid ones
+	int CountFloats( bool& out_is_variable ) const; //only valid ones
 
 	//pin spec
 	const FParameterSpec* FindPinSpec(const UEdGraphPin* pin) const;

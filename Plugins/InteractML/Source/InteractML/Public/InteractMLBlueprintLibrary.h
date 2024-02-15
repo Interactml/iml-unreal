@@ -68,7 +68,21 @@ public:
 	static void AddQuaternionParameter( FInteractMLParameters Parameters, FQuat Value );
 	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
 	static void AddColourParameter( FInteractMLParameters Parameters, FLinearColor Value );
-
+	// array parameter accumulation
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static void AddIntegerArrayParameter(FInteractMLParameters Parameters, const TArray<int>& Value);
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static void AddFloatArrayParameter(FInteractMLParameters Parameters, const TArray<float>& Value);
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static void AddBooleanArrayParameter(FInteractMLParameters Parameters, const TArray<bool>& Value);
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static void AddVector2ArrayParameter(FInteractMLParameters Parameters, const TArray<FVector2D>& Value);
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static void AddVector3ArrayParameter(FInteractMLParameters Parameters, const TArray<FVector>& Value);
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static void AddQuaternionArrayParameter(FInteractMLParameters Parameters, const TArray<FQuat>& Value);
+	UFUNCTION(BlueprintCallable, BlueprintInternalUseOnly)
+	static void AddColourArrayParameter(FInteractMLParameters Parameters, const TArray<FLinearColor>& Value);
 
 	///////////////////// TRAINING SET //////////////////////
 	
