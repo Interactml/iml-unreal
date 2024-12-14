@@ -11,8 +11,9 @@ public class InteractMLEditor : ModuleRules
 {
 	public InteractMLEditor(ReadOnlyTargetRules Target) : base(Target)
     {
-        IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
-        
+#if UE_5_1_OR_LATER
+		IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
+#endif        
         //normal
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 

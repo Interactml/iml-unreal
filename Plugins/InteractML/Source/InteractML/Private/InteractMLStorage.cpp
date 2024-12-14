@@ -11,6 +11,7 @@
 #if UE_VERSION_AT_LEAST(5,0,0)
 #include "UObject/ObjectSaveContext.h"
 #endif
+#include "HAL/PlatformFilemanager.h"
 
 //module
 #include "InteractML.h"

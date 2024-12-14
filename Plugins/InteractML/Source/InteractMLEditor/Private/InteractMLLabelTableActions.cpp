@@ -97,7 +97,11 @@ void FInteractMLLabelTableActions::OpenAssetEditor( const TArray<UObject*>& InOb
 		const EAppReturnType::Type DlgResult = FMessageDialog::Open(
 			EAppMsgType::YesNoCancel, 
 			FText::Format(LOCTEXT("DataTable_MissingRowStructMsg", "The following Data Tables are missing their row structure and will not be editable.\n\n{0}\n\nDo you want to open these data tables?"), DataTablesListText.ToText()), 
+#if UE_VERSION_AT_LEAST(5,4,0)
+			Title
+#else
 			&Title
+#endif
 		);
 		
 		switch(DlgResult)

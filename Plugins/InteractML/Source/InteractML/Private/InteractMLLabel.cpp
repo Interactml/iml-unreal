@@ -7,6 +7,7 @@
 #include "InteractMLLabel.h"
 
 //unreal
+#include "UObject/TextProperty.h"
 
 //module
 #include "InteractML.h"
