@@ -8,7 +8,12 @@
 
 //unreal
 #include "CoreMinimal.h"
-#include "Engine/UserDefinedStruct.h"
+#include "Misc/EngineVersionComparison.h"
+#if UE_VERSION_OLDER_THAN(5,5,0)
+# include "Engine/UserDefinedStruct.h"
+#else
+# include "StructUtils/UserDefinedStruct.h"
+#endif
 
 //module
 #include "InteractMLHelpers.h"

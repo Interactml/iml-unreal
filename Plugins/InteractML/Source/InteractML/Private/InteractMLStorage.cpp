@@ -575,7 +575,11 @@ bool UInteractMLStorage::FindJsonSubObject( const FString json_string, const FSt
 			if(stack.Num() > 0 && stack.Last() == TCHAR('\"'))
 			{
 				//found end of string
+#if UE_VERSION_AT_LEAST(5,6,0)
+				stack.Pop( EAllowShrinking::No );
+#else
 				stack.Pop( false );
+#endif
 			}
 			else
 			{
@@ -593,7 +597,11 @@ bool UInteractMLStorage::FindJsonSubObject( const FString json_string, const FSt
 			if(stack.Num() > 0 && stack.Last() == c)
 			{
 				//closed properly
+#if UE_VERSION_AT_LEAST(5,6,0)
+				stack.Pop( EAllowShrinking::No );
+#else
 				stack.Pop( false );
+#endif
 			}
 			else
 			{

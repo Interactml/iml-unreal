@@ -114,7 +114,7 @@ public:
 	virtual void PostRename(UObject* OldOuter, const FName OldName) override;
 	virtual void PostEditImport() override;
 	//save hook
-#if UE_VERSION_AT_LEAST(5,0,0)
+#if !UE_VERSION_OLDER_THAN(5,0,0)
 	virtual void PreSave( FObjectPreSaveContext SaveContext ) override;
 #else //4.27 and older
 	virtual void PreSave(const class ITargetPlatform* TargetPlatform) override;

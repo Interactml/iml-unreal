@@ -58,7 +58,6 @@ set UE_PATH_UAT=Engine\Binaries\DotNET\AutomationTool\AutomationTool.exe
 call %TOOLS_DIR%\package_plugin.cmd
 if ERRORLEVEL 1 goto error
 
-:test_skip
 REM ---- 5.4 ----
 set UE_VERSION=5.4
 set UE_PATH_UE=5.4
@@ -73,6 +72,15 @@ set UE_PATH_UAT=Engine\Binaries\DotNET\AutomationTool\AutomationTool.exe
 call %TOOLS_DIR%\package_plugin.cmd
 if ERRORLEVEL 1 goto error
 
+:test_skip
+REM ---- 5.6 ----
+set UE_VERSION=5.6
+set UE_PATH_UE=5.6
+set UE_PATH_UAT=Engine\Binaries\DotNET\AutomationTool\AutomationTool.exe
+call %TOOLS_DIR%\package_plugin.cmd
+if ERRORLEVEL 1 goto error
+
+:early_out
 REM ----------------------------------
 REM Built versions can be found in the Builds directory
 explorer.exe %BUILDS_DIR%
